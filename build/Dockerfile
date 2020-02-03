@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1-328
 
 ENV OPERATOR=/usr/local/bin/ibm-cert-manager-operator \
     USER_UID=1001 \

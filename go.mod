@@ -6,6 +6,7 @@ require (
 	github.com/operator-framework/operator-sdk v0.13.0
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/pflag v1.0.5
+	golang.org/x/tools v0.0.0-20200203193511-33212cd6a08a // indirect
 	k8s.io/api v0.0.0
 	k8s.io/apiextensions-apiserver v0.0.0
 	k8s.io/apimachinery v0.0.0
