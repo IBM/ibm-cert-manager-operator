@@ -57,7 +57,12 @@ func Add(mgr manager.Manager) error {
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	apiextclient, _ := apiextensionclientset.NewForConfig(mgr.GetConfig())
 	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
-	return &ReconcileCertManager{client: mgr.GetClient(), kubeclient: kubeclient, apiextclient: apiextclient, scheme: mgr.GetScheme(), recorder: mgr.GetEventRecorderFor("ibm-cert-manager-operator")}
+	return &ReconcileCertManager{
+		client:       mgr.GetClient(),
+		kubeclient:   kubeclient,
+		apiextclient: apiextclient,
+		scheme:       mgr.GetScheme(),
+		recorder:     mgr.GetEventRecorderFor("ibm-cert-manager-operator")}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -151,7 +156,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	} else {
 		// Object scheduled to be deleted
 		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			if err := r.deleteExternalResources(instance); err != nil {
+			if err := r.deleteExternalResources(); err != nil {
 				log.Error(err, "Error deleting resources created by this operator")
 
 				return reconcile.Result{}, err
@@ -208,7 +213,7 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 		return err
 	}
 
-	if (&instance.Spec.Webhook != nil && instance.Spec.Webhook) || &instance.Spec.Webhook == nil {
+	if instance.Spec.Webhook {
 		// Deploy webhook and cainjector
 		if err := cainjectorDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
 			return err
@@ -216,7 +221,7 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 		if err := webhookDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
 			return err
 		}
-	} else if &instance.Spec.Webhook != nil && !instance.Spec.Webhook {
+	} else {
 		// Specified to not deploy the webhook, remove them if they exist
 		webhook := removeDeploy(r.kubeclient, res.CertManagerWebhookName, res.DeployNamespace)
 		cainjector := removeDeploy(r.kubeclient, res.CertManagerCainjectorName, res.DeployNamespace)
@@ -234,7 +239,7 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 
 // Removes some of the resources created by this controller for the CR including
 // The clusterrolebinding, clusterrole, serviceaccount, and the cert-manager deployment
-func (r *ReconcileCertManager) deleteExternalResources(instance *operatorv1alpha1.CertManager) error {
+func (r *ReconcileCertManager) deleteExternalResources() error {
 	// Remove RBAC
 	if err := removeRbac(r.client); err != nil {
 		return err

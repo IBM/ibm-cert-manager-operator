@@ -71,7 +71,9 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 		}
 	}
 
-	controllerutil.SetControllerReference(instance, &deployment, scheme)
+	if err := controllerutil.SetControllerReference(instance, &deployment, scheme); err != nil {
+		return err
+	}
 	if create {
 		if err := client.Create(context.TODO(), &deployment); err != nil {
 			return err
@@ -109,7 +111,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 
 	tag := res.ImageVersion
 	if instance.Spec.ImagePostFix != "" {
-		tag = tag + instance.Spec.ImagePostFix
+		tag += instance.Spec.ImagePostFix
 	}
 
 	if instance.Spec.ImageRegistry != "" { // Set the image registry to the one specified
@@ -145,14 +147,16 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 	log.V(2).Info("Finding preexisting deployments", "deployment name", name)
 	listOpt := metav1.ListOptions{LabelSelector: labels}
 	var allDeploys []appsv1.Deployment
-	var allDeploysMap map[string]appsv1.Deployment = make(map[string]appsv1.Deployment)
+	var allDeploysMap = make(map[string]appsv1.Deployment)
 	deployList, err := client.AppsV1().Deployments("").List(listOpt)
 	// Find deployment by its labels
 	if err != nil {
 		log.Info("error", "Error retrieving deployments", err)
 	} else {
 		for _, deploy := range deployList.Items { // These will need to be removed
-			log.V(3).Info("Found deployment by labels", "name", deploy.ObjectMeta.Name, "namespace", deploy.ObjectMeta.Namespace, "labels", fmt.Sprintf("%v", deploy.ObjectMeta.Labels))
+			log.V(3).Info("Found deployment by labels",
+				"name", deploy.ObjectMeta.Name, "namespace",
+				deploy.ObjectMeta.Namespace, "labels", fmt.Sprintf("%v", deploy.ObjectMeta.Labels))
 			ns := deploy.Name + "/" + deploy.Namespace
 			if _, ok := allDeploysMap[ns]; !ok {
 				log.V(4).Info("adding to map", "name", deploy.Name, "namespace", deploy.Namespace)
@@ -170,7 +174,9 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 	} else {
 		for _, deploy := range deployList.Items { // These will need to be removed
 			if strings.Contains(deploy.Spec.Template.Spec.Containers[0].Image, name) { // Deploys the same image
-				log.V(3).Info("Found deployment by image name", "name", deploy.ObjectMeta.Name, "namespace", deploy.ObjectMeta.Namespace, "image name", deploy.Spec.Template.Spec.Containers[0].Image)
+				log.V(3).Info("Found deployment by image name",
+					"name", deploy.ObjectMeta.Name, "namespace", deploy.ObjectMeta.Namespace,
+					"image name", deploy.Spec.Template.Spec.Containers[0].Image)
 				ns := deploy.Name + "/" + deploy.Namespace
 				if _, ok := allDeploysMap[ns]; !ok {
 					log.V(4).Info("adding to map")
@@ -189,34 +195,44 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 func equalDeploys(first, second appsv1.Deployment) bool {
 	statusLog := log.V(1)
 	if !reflect.DeepEqual(first.ObjectMeta.Labels, second.ObjectMeta.Labels) {
-		statusLog.Info("labels not equal", "first", fmt.Sprintf("%v", first.ObjectMeta.Labels), "second", fmt.Sprintf("%v", second.ObjectMeta.Labels))
+		statusLog.Info("Labels not equal",
+			"first", fmt.Sprintf("%v", first.ObjectMeta.Labels),
+			"second", fmt.Sprintf("%v", second.ObjectMeta.Labels))
 		return false
 	}
 
 	if !reflect.DeepEqual(first.Spec.Replicas, second.Spec.Replicas) {
-		statusLog.Info("replicas not equal", "first", first.Spec.Replicas, "second", second.Spec.Replicas)
+		statusLog.Info("Replicas not equal", "first", first.Spec.Replicas, "second", second.Spec.Replicas)
 		return false
 	}
 
 	firstPodTemplate := first.Spec.Template
 	secondPodTemplate := second.Spec.Template
 	if !reflect.DeepEqual(firstPodTemplate.ObjectMeta.Labels, secondPodTemplate.ObjectMeta.Labels) {
-		statusLog.Info("pod labels not equal", "first", fmt.Sprintf("%v", firstPodTemplate.ObjectMeta.Labels), "second", fmt.Sprintf("%v", secondPodTemplate.ObjectMeta.Labels))
+		statusLog.Info("Pod labels not equal",
+			"first", fmt.Sprintf("%v", firstPodTemplate.ObjectMeta.Labels),
+			"second", fmt.Sprintf("%v", secondPodTemplate.ObjectMeta.Labels))
 		return false
 	}
 
 	if !reflect.DeepEqual(firstPodTemplate.Spec.ImagePullSecrets, secondPodTemplate.Spec.ImagePullSecrets) {
-		statusLog.Info("image pull secrets not equal", "first", fmt.Sprintf("%v", firstPodTemplate.Spec.ImagePullSecrets), "second", fmt.Sprintf("%v", secondPodTemplate.Spec.ImagePullSecrets))
+		statusLog.Info("Image pull secrets not equal",
+			"first", fmt.Sprintf("%v", firstPodTemplate.Spec.ImagePullSecrets),
+			"second", fmt.Sprintf("%v", secondPodTemplate.Spec.ImagePullSecrets))
 		return false
 	}
 
 	if !reflect.DeepEqual(firstPodTemplate.Spec.ServiceAccountName, secondPodTemplate.Spec.ServiceAccountName) {
-		statusLog.Info("service account names not equal", "first", firstPodTemplate.Spec.ServiceAccountName, "second", secondPodTemplate.Spec.ServiceAccountName)
+		statusLog.Info("Service account names not equal",
+			"first", firstPodTemplate.Spec.ServiceAccountName,
+			"second", secondPodTemplate.Spec.ServiceAccountName)
 		return false
 	}
 
 	if !reflect.DeepEqual(firstPodTemplate.Spec.SecurityContext, secondPodTemplate.Spec.SecurityContext) {
-		statusLog.Info("Security context not equal", "first", fmt.Sprintf("%v", firstPodTemplate.Spec.SecurityContext), "second", fmt.Sprintf("%v", secondPodTemplate.Spec.SecurityContext))
+		statusLog.Info("Security context not equal",
+			"first", fmt.Sprintf("%v", firstPodTemplate.Spec.SecurityContext),
+			"second", fmt.Sprintf("%v", secondPodTemplate.Spec.SecurityContext))
 		return false
 	}
 	fVol := firstPodTemplate.Spec.Volumes
@@ -225,22 +241,24 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 		if len(fVol) > 0 {
 			for i := range fVol {
 				if !reflect.DeepEqual(fVol[i].Name, sVol[i].Name) {
-					statusLog.Info("pod vol name not equal", "vol num", i, "first", fVol[i].Name, "second", sVol[i].Name)
+					statusLog.Info("Pod volume names not equal", "volume num", i,
+						"first", fVol[i].Name, "second", sVol[i].Name)
 					return false
 				}
 				if fVol[i].VolumeSource.Secret != nil && sVol[i].VolumeSource.Secret != nil {
 					if !reflect.DeepEqual(fVol[i].VolumeSource.Secret.SecretName, sVol[i].VolumeSource.Secret.SecretName) {
-						statusLog.Info("Vol source secret name not equal", "vol num", i, "first", fVol[i].VolumeSource.Secret.SecretName, "second", sVol[i].VolumeSource.Secret.SecretName)
+						statusLog.Info("Volume source secret name not equal", "volume num", i,
+							"first", fVol[i].VolumeSource.Secret.SecretName, "second", sVol[i].VolumeSource.Secret.SecretName)
 						return false
 					}
 				} else if !(fVol[i].VolumeSource.Secret == nil && sVol[i].VolumeSource.Secret == nil) {
-					statusLog.Info("One of the vol sources secrets is nil")
+					statusLog.Info("One of the volume sources secrets is nil")
 					return false
 				}
 			}
 		}
 	} else {
-		statusLog.Info("vol lengths not equal")
+		statusLog.Info("Volume lengths not equal")
 		return false
 	}
 
@@ -248,38 +266,43 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	firstContainers := firstPodTemplate.Spec.Containers
 	secondContainers := secondPodTemplate.Spec.Containers
 	if len(firstContainers) != len(secondContainers) {
-		statusLog.Info("number of containers not equal", "first", len(firstContainers), "second", len(secondContainers))
+		statusLog.Info("Number of containers not equal",
+			"first", len(firstContainers), "second", len(secondContainers))
 		return false
 	}
 
 	fContainer := firstContainers[0]
 	sContainer := secondContainers[0]
 	if !reflect.DeepEqual(fContainer.Name, sContainer.Name) {
-		statusLog.Info("container names not equal", "first", fContainer.Name, "second", sContainer.Name)
+		statusLog.Info("Container names not equal", "first", fContainer.Name, "second", sContainer.Name)
 		return false
 	}
 
 	if !reflect.DeepEqual(fContainer.Image, sContainer.Image) {
-		statusLog.Info("container images not equal", "first", fContainer.Image, "second", sContainer.Image)
+		statusLog.Info("Container images not equal", "first", fContainer.Image, "second", sContainer.Image)
 		return false
 	}
 
 	if !reflect.DeepEqual(fContainer.ImagePullPolicy, sContainer.ImagePullPolicy) {
-		statusLog.Info("pull policies not equal", "first", fContainer.ImagePullPolicy, "second", sContainer.ImagePullPolicy)
+		statusLog.Info("Image pull policies not equal",
+			"first", fContainer.ImagePullPolicy, "second", sContainer.ImagePullPolicy)
 		return false
 	}
 
 	if fContainer.Args != nil && sContainer.Args != nil {
 		if !reflect.DeepEqual(len(fContainer.Args), len(sContainer.Args)) {
-			statusLog.Info("Args length not equal", "first", len(fContainer.Args), "second", len(sContainer.Args))
+			statusLog.Info("Args length not equal",
+				"first", len(fContainer.Args), "second", len(sContainer.Args))
 			return false
 		}
 		if !reflect.DeepEqual(fContainer.Args, sContainer.Args) {
-			statusLog.Info("args not equal", "first", fmt.Sprintf("%v", fContainer.Args), "second", fmt.Sprintf("%v", sContainer.Args))
+			statusLog.Info("Args not equal",
+				"first", fmt.Sprintf("%v", fContainer.Args), "second", fmt.Sprintf("%v", sContainer.Args))
 			return false
 		}
 	} else if !(fContainer.Args == nil && sContainer.Args == nil) {
-		statusLog.Info("one of the args is nil", "first", fmt.Sprintf("%v", fContainer.Args), "second", fmt.Sprintf("%v", sContainer.Args))
+		statusLog.Info("One of the args is nil",
+			"first", fmt.Sprintf("%v", fContainer.Args), "second", fmt.Sprintf("%v", sContainer.Args))
 		return false
 	}
 
@@ -288,21 +311,25 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 
 	if fLive != nil && sLive != nil {
 		if !reflect.DeepEqual(fLive.Handler.Exec.Command, sLive.Handler.Exec.Command) {
-			statusLog.Info("exec command in liveness probes not equal", "first", fLive.Handler.Exec.Command, "second", sLive.Handler.Exec.Command)
+			statusLog.Info("Exec command in liveness probes not equal",
+				"first", fLive.Handler.Exec.Command, "second", sLive.Handler.Exec.Command)
 			return false
 		}
 
 		if !reflect.DeepEqual(fLive.InitialDelaySeconds, sLive.InitialDelaySeconds) {
-			statusLog.Info("initial delay in liveness probes not equal", "first", fLive.InitialDelaySeconds, "second", sLive.InitialDelaySeconds)
+			statusLog.Info("Initial delay seconds in liveness probes not equal",
+				"first", fLive.InitialDelaySeconds, "second", sLive.InitialDelaySeconds)
 			return false
 		}
 
 		if !reflect.DeepEqual(fLive.TimeoutSeconds, sLive.TimeoutSeconds) {
-			statusLog.Info("timeout seconds in liveness probes not equal", "first", fLive.TimeoutSeconds, "second", sLive.TimeoutSeconds)
+			statusLog.Info("Timeout seconds in liveness probes not equal",
+				"first", fLive.TimeoutSeconds, "second", sLive.TimeoutSeconds)
 			return false
 		}
 	} else if !(fLive == nil && sLive == nil) {
-		statusLog.Info("one liveness probe is nil", "first", fmt.Sprintf("%v", fLive), "second", fmt.Sprintf("%v", sLive))
+		statusLog.Info("One liveness probe is nil",
+			"first", fmt.Sprintf("%v", fLive), "second", fmt.Sprintf("%v", sLive))
 		return false
 	}
 
@@ -310,21 +337,25 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	sReady := sContainer.ReadinessProbe
 	if fReady != nil && sReady != nil {
 		if !reflect.DeepEqual(fReady.Handler.Exec.Command, sReady.Handler.Exec.Command) {
-			statusLog.Info("exec command in liveness probes not equal", "first", fReady.Handler.Exec.Command, "second", sReady.Handler.Exec.Command)
+			statusLog.Info("Exec command in readiness probes not equal",
+				"first", fReady.Handler.Exec.Command, "second", sReady.Handler.Exec.Command)
 			return false
 		}
 
 		if !reflect.DeepEqual(fReady.InitialDelaySeconds, sReady.InitialDelaySeconds) {
-			statusLog.Info("initial delay in liveness probes not equal", "first", fReady.InitialDelaySeconds, "second", sReady.InitialDelaySeconds)
+			statusLog.Info("Initial delay seconds in readiness probes not equal",
+				"first", fReady.InitialDelaySeconds, "second", sReady.InitialDelaySeconds)
 			return false
 		}
 
 		if !reflect.DeepEqual(fReady.TimeoutSeconds, sReady.TimeoutSeconds) {
-			statusLog.Info("timeout seconds in liveness probes not equal", "first", fReady.TimeoutSeconds, "second", sReady.TimeoutSeconds)
+			statusLog.Info("Timeout seconds in readiness probes not equal",
+				"first", fReady.TimeoutSeconds, "second", sReady.TimeoutSeconds)
 			return false
 		}
 	} else if !(fReady == nil && sReady == nil) {
-		statusLog.Info("one of the readiness probes is nil", "first", fmt.Sprintf("%v", fReady), "second", fmt.Sprintf("%v", sReady))
+		statusLog.Info("One of the readiness probes is nil",
+			"first", fmt.Sprintf("%v", fReady), "second", fmt.Sprintf("%v", sReady))
 		return false
 	}
 
@@ -334,65 +365,71 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	if fSecCont != nil && sSecCont != nil {
 		if fSecCont.RunAsNonRoot != nil && sSecCont.RunAsNonRoot != nil {
 			if !reflect.DeepEqual(fSecCont.RunAsNonRoot, sSecCont.RunAsNonRoot) {
-				statusLog.Info("cont sec cont run as non root not equal", "first", fSecCont.RunAsNonRoot, "second", sSecCont.RunAsNonRoot)
+				statusLog.Info("Container security context run as non root not equal",
+					"first", fSecCont.RunAsNonRoot, "second", sSecCont.RunAsNonRoot)
 				return false
 			}
 		} else if !(fSecCont.RunAsNonRoot == nil && sSecCont.RunAsNonRoot == nil) {
-			statusLog.Info("one sec cont run as non root is nil")
+			statusLog.Info("One security context run as non root is nil")
 			return false
 		}
 
 		if fSecCont.RunAsUser != nil && sSecCont.RunAsUser != nil {
 			if !reflect.DeepEqual(fSecCont.RunAsUser, sSecCont.RunAsUser) {
-				statusLog.Info("cont sec cont run as user not equal", "first", fSecCont.RunAsUser, "second", sSecCont.RunAsUser)
+				statusLog.Info("Container security context run as user not equal",
+					"first", fSecCont.RunAsUser, "second", sSecCont.RunAsUser)
 				return false
 			}
 		} else if !(fSecCont.RunAsUser == nil && sSecCont.RunAsUser == nil) {
-			statusLog.Info("one sec cont run as user is nil")
+			statusLog.Info("One security context run as user is nil")
 			return false
 		}
 
 		if fSecCont.AllowPrivilegeEscalation != nil && sSecCont.AllowPrivilegeEscalation != nil {
 			if !reflect.DeepEqual(fSecCont.AllowPrivilegeEscalation, sSecCont.AllowPrivilegeEscalation) {
-				statusLog.Info("cont sec cont AllowPrivilegeEscalation not equal", "first", fSecCont.AllowPrivilegeEscalation, "second", sSecCont.AllowPrivilegeEscalation)
+				statusLog.Info("Container security context AllowPrivilegeEscalation not equal",
+					"first", fSecCont.AllowPrivilegeEscalation, "second", sSecCont.AllowPrivilegeEscalation)
 				return false
 			}
 		} else if !(fSecCont.AllowPrivilegeEscalation == nil && sSecCont.AllowPrivilegeEscalation == nil) {
-			statusLog.Info("one sec cont AllowPrivilegeEscalation is nil")
+			statusLog.Info("One security context AllowPrivilegeEscalation is nil")
 			return false
 		}
 
 		if fSecCont.ReadOnlyRootFilesystem != nil && sSecCont.ReadOnlyRootFilesystem != nil {
 			if !reflect.DeepEqual(fSecCont.ReadOnlyRootFilesystem, sSecCont.ReadOnlyRootFilesystem) {
-				statusLog.Info("cont sec cont ReadOnlyRootFilesystem not equal", "first", fSecCont.ReadOnlyRootFilesystem, "second", sSecCont.ReadOnlyRootFilesystem)
+				statusLog.Info("Container security context ReadOnlyRootFilesystem not equal",
+					"first", fSecCont.ReadOnlyRootFilesystem, "second", sSecCont.ReadOnlyRootFilesystem)
 				return false
 			}
 		} else if !(fSecCont.ReadOnlyRootFilesystem == nil && sSecCont.ReadOnlyRootFilesystem == nil) {
-			statusLog.Info("one sec cont ReadOnlyRootFilesystem is nil")
+			statusLog.Info("One security context ReadOnlyRootFilesystem is nil")
 			return false
 		}
 
 		if fSecCont.Privileged != nil && sSecCont.Privileged != nil {
 			if !reflect.DeepEqual(fSecCont.Privileged, sSecCont.Privileged) {
-				statusLog.Info("cont sec cont Privileged not equal", "first", fSecCont.Privileged, "second", sSecCont.Privileged)
+				statusLog.Info("Container security context Privileged not equal",
+					"first", fSecCont.Privileged, "second", sSecCont.Privileged)
 				return false
 			}
 		} else if !(fSecCont.Privileged == nil && sSecCont.Privileged == nil) {
-			statusLog.Info("one sec cont Privileged is nil")
+			statusLog.Info("One security context Privileged is nil")
 			return false
 		}
 
 		if fSecCont.Capabilities != nil && sSecCont.Capabilities != nil {
 			if !reflect.DeepEqual(fSecCont.Capabilities, sSecCont.Capabilities) {
-				statusLog.Info("cont sec cont Capabilities not equal", "first", fSecCont.Capabilities, "second", sSecCont.Capabilities)
+				statusLog.Info("Container security context Capabilities not equal",
+					"first", fSecCont.Capabilities, "second", sSecCont.Capabilities)
 				return false
 			}
 		} else if !(fSecCont.Capabilities == nil && sSecCont.Capabilities == nil) {
-			statusLog.Info("one sec cont Capabilities is nil")
+			statusLog.Info("One security context Capabilities is nil")
 			return false
 		}
 	} else if !(fSecCont == nil && sSecCont == nil) {
-		statusLog.Info("one sec context is nil")
+		statusLog.Info("One security context is nil")
 		return false
 	}
 
@@ -400,29 +437,33 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	sRes := sContainer.Resources
 
 	if !reflect.DeepEqual(fRes.Limits[corev1.ResourceCPU], sRes.Limits[corev1.ResourceCPU]) {
-		statusLog.Info("Resource limit cpu not equal", "first", fRes.Limits[corev1.ResourceCPU], "second", sRes.Limits[corev1.ResourceCPU])
+		statusLog.Info("Resource limit cpu not equal",
+			"first", fRes.Limits[corev1.ResourceCPU], "second", sRes.Limits[corev1.ResourceCPU])
 		return false
 	}
 
 	if !reflect.DeepEqual(fRes.Limits[corev1.ResourceMemory], sRes.Limits[corev1.ResourceMemory]) {
-		statusLog.Info("Resource limit memory not equal", "first", fRes.Limits[corev1.ResourceMemory], "second", sRes.Limits[corev1.ResourceMemory])
+		statusLog.Info("Resource limit memory not equal",
+			"first", fRes.Limits[corev1.ResourceMemory], "second", sRes.Limits[corev1.ResourceMemory])
 		return false
 	}
 
 	if !reflect.DeepEqual(fRes.Requests[corev1.ResourceCPU], sRes.Requests[corev1.ResourceCPU]) {
-		statusLog.Info("Resource requests cpu not equal", "first", fRes.Requests[corev1.ResourceCPU], "second", sRes.Requests[corev1.ResourceCPU])
+		statusLog.Info("Resource requests cpu not equal",
+			"first", fRes.Requests[corev1.ResourceCPU], "second", sRes.Requests[corev1.ResourceCPU])
 		return false
 	}
 
 	if !reflect.DeepEqual(fRes.Requests[corev1.ResourceMemory], sRes.Requests[corev1.ResourceMemory]) {
-		statusLog.Info("Resource requests memory not equal", "first", fRes.Requests[corev1.ResourceMemory], "second", sRes.Requests[corev1.ResourceMemory])
+		statusLog.Info("Resource requests memory not equal",
+			"first", fRes.Requests[corev1.ResourceMemory], "second", sRes.Requests[corev1.ResourceMemory])
 		return false
 	}
 
 	fEnv := fContainer.Env
 	sEnv := sContainer.Env
 	if !reflect.DeepEqual(len(fEnv), len(sEnv)) {
-		statusLog.Info("Env var length not equal")
+		statusLog.Info("Environment var length not equal")
 		return false
 	} else if len(fEnv) > 0 {
 		for i := range fEnv {
@@ -441,18 +482,19 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 				sFieldRef := sEnv[i].ValueFrom.FieldRef
 				if fFieldRef != nil && sFieldRef != nil {
 					if !reflect.DeepEqual(fEnv[i].ValueFrom.FieldRef.FieldPath, sEnv[i].ValueFrom.FieldRef.FieldPath) {
-						statusLog.Info("field path in env not equal", "first", fEnv[i].ValueFrom.FieldRef.FieldPath, "second", sEnv[i].ValueFrom.FieldRef.FieldPath)
+						statusLog.Info("Field path in env not equal",
+							"first", fEnv[i].ValueFrom.FieldRef.FieldPath, "second", sEnv[i].ValueFrom.FieldRef.FieldPath)
 						return false
 					}
 				} else if !(fFieldRef == nil && sFieldRef == nil) {
 					statusLog.Info("Container number", "first", i)
-					statusLog.Info("one of the env's field ref is nil")
+					statusLog.Info("One of the env's field ref is nil")
 					return false
 				}
 
 			} else if !(fEnv[i].ValueFrom == nil && sEnv[i].ValueFrom == nil) {
 				statusLog.Info("Container number", "first", i)
-				statusLog.Info("one of the env's value from is nil")
+				statusLog.Info("One of the env's value from is nil")
 				return false
 			}
 		}
@@ -463,17 +505,17 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 		if len(fVolMnt) > 0 {
 			for i := range fVolMnt {
 				if !reflect.DeepEqual(fVolMnt[i], sVolMnt[i]) {
-					statusLog.Info("vol mnts not equal", "num", i, "first", fmt.Sprintf("%v", fVolMnt[i]), "second", fmt.Sprintf("%v", sVolMnt[i]))
+					statusLog.Info("Volume mounts not equal", "num", i,
+						"first", fmt.Sprintf("%v", fVolMnt[i]), "second", fmt.Sprintf("%v", sVolMnt[i]))
 					return false
 				}
 			}
 		}
 	} else {
-		statusLog.Info("vol mnt lengths not equal")
+		statusLog.Info("Volume mount lengths not equal")
 		return false
 	}
 
 	log.V(2).Info("Finished checking for differences between the deployments and found none.", "deployment name", first.Name)
-	//TODO: finish checking the rest of container - see webhook pod/container updates
 	return true
 }

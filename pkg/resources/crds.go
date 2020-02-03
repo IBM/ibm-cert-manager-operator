@@ -21,7 +21,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var CRDMap = map[string]*apiextensionv1beta1.CustomResourceDefinition{"certificates": certificateCRD, "issuers": issuerCRD, "clusterissuers": clusterIssuerCRD, "orders": orderCRD, "challenges": challengeCRD}
+// CRDMap a map from the crd name to the definition of that crd
+var CRDMap = map[string]*apiextensionv1beta1.CustomResourceDefinition{
+	"certificates":   certificateCRD,
+	"issuers":        issuerCRD,
+	"clusterissuers": clusterIssuerCRD,
+	"orders":         orderCRD,
+	"challenges":     challengeCRD,
+}
 
 var certificateCRD = &apiextensionv1beta1.CustomResourceDefinition{
 	ObjectMeta: metav1.ObjectMeta{Name: "certificates.certmanager.k8s.io", Labels: ControllerLabelMap},

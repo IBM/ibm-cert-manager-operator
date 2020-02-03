@@ -18,10 +18,11 @@ package resources
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/api/rbac/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// DefaultServiceAccount is the service account used by cert-manager service
 var DefaultServiceAccount = &corev1.ServiceAccount{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:      ServiceAccount,
@@ -29,11 +30,12 @@ var DefaultServiceAccount = &corev1.ServiceAccount{
 	},
 }
 
-var DefaultClusterRole = &v1.ClusterRole{
+// DefaultClusterRole is the cluster role used by cert-manager service
+var DefaultClusterRole = &rbacv1.ClusterRole{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: ClusterRoleName,
 	},
-	Rules: []v1.PolicyRule{
+	Rules: []rbacv1.PolicyRule{
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "update", "delete"},
 			APIGroups: []string{""},
@@ -47,7 +49,18 @@ var DefaultClusterRole = &v1.ClusterRole{
 		{
 			Verbs:     []string{"update"},
 			APIGroups: []string{"certmanager.k8s.io"},
-			Resources: []string{"certificates/status", "certificaterequests/status", "challenges/status", "clusterissuers/status", "issuers/status", "orders/status", "certificates/finalizers", "challenges/finalizers", "ingresses/finalizers", "orders/finalizers"},
+			Resources: []string{
+				"certificates/status",
+				"certificaterequests/status",
+				"challenges/status",
+				"clusterissuers/status",
+				"issuers/status",
+				"orders/status",
+				"certificates/finalizers",
+				"challenges/finalizers",
+				"ingresses/finalizers",
+				"orders/finalizers",
+			},
 		},
 		{
 			Verbs:     []string{"create", "patch"},
@@ -72,11 +85,12 @@ var DefaultClusterRole = &v1.ClusterRole{
 	},
 }
 
-var DefaultClusterRoleBinding = &v1.ClusterRoleBinding{
+// DefaultClusterRoleBinding the clusterrolebinding used by cert-manager service
+var DefaultClusterRoleBinding = &rbacv1.ClusterRoleBinding{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: ClusterRoleName,
 	},
-	Subjects: []v1.Subject{
+	Subjects: []rbacv1.Subject{
 		{
 			Kind:      "ServiceAccount",
 			APIGroup:  "",
@@ -84,7 +98,7 @@ var DefaultClusterRoleBinding = &v1.ClusterRoleBinding{
 			Namespace: DeployNamespace,
 		},
 	},
-	RoleRef: v1.RoleRef{
+	RoleRef: rbacv1.RoleRef{
 		APIGroup: "rbac.authorization.k8s.io",
 		Kind:     "ClusterRole",
 		Name:     ClusterRoleName,

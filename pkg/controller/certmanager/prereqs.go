@@ -32,7 +32,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
+	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -74,7 +74,8 @@ func imagePullSecret(scheme *runtime.Scheme, client client.Client, instance *ope
 	if instance.Spec.PullSecret.Namespace != "" {
 		err := client.Get(context.Background(), types.NamespacedName{Name: name, Namespace: instance.Spec.PullSecret.Namespace}, copyPullSecret)
 		if err != nil && apiErrors.IsNotFound(err) {
-			log.V(2).Info("Image pull secret not found in specified namespace", "pull secret name", name, "pull secret namespace", instance.Spec.PullSecret.Namespace)
+			log.V(2).Info("Image pull secret not found in specified namespace",
+				"pull secret name", name, "pull secret namespace", instance.Spec.PullSecret.Namespace)
 		} else {
 			copyPullSecretExists = true
 		}
@@ -91,19 +92,25 @@ func imagePullSecret(scheme *runtime.Scheme, client client.Client, instance *ope
 	}
 
 	if pullSecretExists && copyPullSecretExists { // Perform update to existing pull secret
+		if err = controllerutil.SetControllerReference(instance, secret, scheme); err != nil {
+			return err
+		}
 		if err = client.Update(context.Background(), secret); err != nil {
 			return err
 		}
 		log.V(2).Info("Updated image pull secret")
-		controllerutil.SetControllerReference(instance, secret, scheme)
 	} else if copyPullSecretExists && !pullSecretExists { // Copy it over using create
+		if err = controllerutil.SetControllerReference(instance, secret, scheme); err != nil {
+			return err
+		}
 		if err = client.Create(context.Background(), secret); err != nil {
 			return err
 		}
 		log.V(2).Info("Created image pull secret")
-		controllerutil.SetControllerReference(instance, secret, scheme)
 	} else if !copyPullSecretExists && !pullSecretExists { // Secret not found at all, throw an error
-		errorMsg := apiErrors.NewNotFound(corev1.Resource("secrets"), fmt.Sprintf("The image pull secret %s does not exist in the deploy namespace %s and there was no copy pull secret found in the %s namespace", name, namespace, instance.Spec.PullSecret.Namespace))
+		errorMsg := apiErrors.NewNotFound(corev1.Resource("secrets"),
+			fmt.Sprintf("The image pull secret %s does not exist in the deploy namespace %s and there was no copy pull secret found in the %s namespace",
+				name, namespace, instance.Spec.PullSecret.Namespace))
 		log.Error(errorMsg, "Neither pull secret exist")
 		return errorMsg
 	}
@@ -162,7 +169,7 @@ func createServiceAccount(client client.Client) error {
 }
 
 // Checks to ensure the namespace we're deploying the service in exists
-func checkNamespace(client v1.NamespaceInterface) error {
+func checkNamespace(client typedCorev1.NamespaceInterface) error {
 	getOpt := metav1.GetOptions{}
 
 	if _, err := client.Get(res.DeployNamespace, getOpt); err != nil && apiErrors.IsNotFound(err) {
@@ -216,7 +223,8 @@ func removeRoles(client client.Client) error {
 	// Delete the clusterrolebinding
 	clusterRoleBinding := &rbacv1.ClusterRoleBinding{}
 
-	if err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRoleBinding); err != nil && apiErrors.IsNotFound(err) {
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRoleBinding)
+	if err != nil && apiErrors.IsNotFound(err) {
 		log.V(1).Info("Error getting cluster role binding", "msg", err)
 		return nil
 	} else if err == nil {
@@ -229,7 +237,8 @@ func removeRoles(client client.Client) error {
 	}
 	// Delete the clusterrole
 	clusterRole := &rbacv1.ClusterRole{}
-	if err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRole); err != nil && apiErrors.IsNotFound(err) {
+	err = client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRole)
+	if err != nil && apiErrors.IsNotFound(err) {
 		log.V(1).Info("Error getting cluster role", "msg", err)
 		return nil
 	} else if err == nil {
@@ -248,7 +257,8 @@ func removeRoles(client client.Client) error {
 func removeRbac(client client.Client) error {
 	// Delete the pull secret
 	pullSecret := &corev1.Secret{}
-	if err := client.Get(context.Background(), types.NamespacedName{Name: res.ImagePullSecret, Namespace: res.DeployNamespace}, pullSecret); err != nil && apiErrors.IsNotFound(err) {
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.ImagePullSecret, Namespace: res.DeployNamespace}, pullSecret)
+	if err != nil && apiErrors.IsNotFound(err) {
 		log.V(1).Info("Error getting pull secret", "msg", err)
 		return nil
 	} else if err == nil {
@@ -261,12 +271,13 @@ func removeRbac(client client.Client) error {
 	}
 
 	// Delete the clusterrolebinding & clusterrole
-	if err := removeRoles(client); err != nil {
+	if err = removeRoles(client); err != nil {
 		return err
 	}
 	// Delete the service account - maybe we shouldn't remove this?
 	serviceAccount := &corev1.ServiceAccount{}
-	if err := client.Get(context.Background(), types.NamespacedName{Name: res.ServiceAccount, Namespace: res.DeployNamespace}, serviceAccount); err != nil && apiErrors.IsNotFound(err) {
+	err = client.Get(context.Background(), types.NamespacedName{Name: res.ServiceAccount, Namespace: res.DeployNamespace}, serviceAccount)
+	if err != nil && apiErrors.IsNotFound(err) {
 		log.V(1).Info("Error getting service account", "msg", err)
 		return nil
 	} else if err == nil {
