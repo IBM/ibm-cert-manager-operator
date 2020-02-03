@@ -1,0 +1,9 @@
+apiVersion: operator.ibm.com/v1alpha1
+kind: CertManager
+metadata:
+  name: example-certmanager
+spec:
+  enableWebhook: true
+  imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom
+  pullSecret:
+    name: pull-secret-2
