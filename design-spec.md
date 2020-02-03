@@ -69,7 +69,6 @@
     - Basic status such as 
 1. Level 1 logging
     - Errors that are not critical such as missing deployment for deletion
-    - 
 2. Level 2 logging
     - Status logging seeing where we are in the process of things such as "finished checking crds", etc
 3. Debugging information

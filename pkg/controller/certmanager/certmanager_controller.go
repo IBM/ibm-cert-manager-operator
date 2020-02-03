@@ -74,7 +74,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource Deployments and requeue the owner CertManager
 	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
@@ -117,8 +116,6 @@ type ReconcileCertManager struct {
 
 // Reconcile reads that state of the cluster for a CertManager object and makes changes based on the state read
 // and what is in the CertManager.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
@@ -140,7 +137,6 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	// Credit: kubebuilder book
 	finalizerName := "certmanager.operators.ibm.com"
 	// Determine if the certmanager crd is going to be deleted
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
@@ -260,10 +256,3 @@ func (r *ReconcileCertManager) deleteExternalResources(instance *operatorv1alpha
 func (r *ReconcileCertManager) updateStatus(instance *operatorv1alpha1.CertManager, message, event, reason string) {
 	r.recorder.Event(instance, event, reason, message)
 }
-
-//TODO:
-// - status struct
-// - update status
-// - additional printer columns
-// - labels and annotations to use
-// - test delete certmanager object

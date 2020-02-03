@@ -4,6 +4,6 @@ metadata:
   name: example-certmanager
 spec:
   enableWebhook: true
-  imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom
+  imageRegistry: quay.io
   pullSecret:
-    name: pull-secret-2
+    name: my-pull-secret
