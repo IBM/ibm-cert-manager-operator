@@ -60,7 +60,7 @@ var controllerContainer = corev1.Container{
 	Name:            CertManagerControllerName,
 	Image:           controllerImage,
 	ImagePullPolicy: pullPolicy,
-	Args:            []string{resourceNS, leaderElectNS, acmeSolver, webhookNS, webhookCASecret, webhookServingSecret, webhookDNSNames},
+	Args:            []string{resourceNS, leaderElectNS, acmeSolver, webhookNS, webhookCASecret, webhookServingSecretArg, webhookDNSNames},
 	Env: []corev1.EnvVar{
 		{
 			Name: "POD_NAMESPACE",

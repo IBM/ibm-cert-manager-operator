@@ -110,6 +110,31 @@ rules:
   - patch
   - update
   - delete
+- apiGroups: 
+  - apiregistration.k8s.io
+  resources:
+  - apiservices
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - patch
+  - update
+  - delete
+- apiGroups: 
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - patch
+  - update
+  - delete
 # In order for cert-manager clusterroles to get these permissions, the operator must have these permissions
 - apiGroups: ["certmanager.k8s.io"]
   resources: ["certificates", "certificaterequests", "orders", "challenges", "clusterissuers", "issuers"]
@@ -143,4 +168,3 @@ rules:
 - apiGroups: [""]
   resources: ["configmaps"]
   verbs: ["get", "create", "update", "patch"]
-

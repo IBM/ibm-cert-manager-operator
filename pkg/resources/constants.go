@@ -20,7 +20,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // TrueVar the variable representing the boolean value true
@@ -165,7 +164,8 @@ const leaderElectNS = "--leader-election-namespace=cert-manager"
 const acmeSolver = "--acme-http01-solver-image=" + acmesolverImage
 const webhookNS = "--webhook-namespace=cert-manager"
 const webhookCASecret = "--webhook-ca-secret=cert-manager-webhook-ca"
-const webhookServingSecret = "--webhook-serving-secret=cert-manager-webhook-tls"
+const webhookServingSecret = "cert-manager-webhook-tls"
+const webhookServingSecretArg = "--webhook-serving-secret=" + webhookServingSecret
 const webhookDNSNames = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc"
 
 // DefaultArgs are the default arguments use for cert-manager-controller
@@ -184,6 +184,9 @@ const CRDVersion = "v1alpha1"
 var NamespaceDef = &v1.Namespace{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: DeployNamespace,
+		Labels: map[string]string{
+			"certmanager.k8s.io/disable-validation": "true",
+		},
 	},
 	Spec: v1.NamespaceSpec{
 		Finalizers: []v1.FinalizerName{"kubernetes"},
@@ -192,23 +195,3 @@ var NamespaceDef = &v1.Namespace{
 
 // Services
 // TODO - create prereqs for webhook
-var webhookSvc = &v1.Service{
-	ObjectMeta: metav1.ObjectMeta{
-		Name:      "ibm-cert-manager-webhook-svc",
-		Namespace: DeployNamespace,
-		Labels:    WebhookLabelMap,
-	},
-	Spec: v1.ServiceSpec{
-		Ports: []v1.ServicePort{
-			{
-				Name: "https",
-				Port: 443,
-				TargetPort: intstr.IntOrString{
-					IntVal: 1443,
-				},
-			},
-		},
-		Selector: WebhookLabelMap,
-		Type:     v1.ServiceTypeClusterIP,
-	},
-}

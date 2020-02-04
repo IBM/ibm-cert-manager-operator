@@ -229,6 +229,10 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 	}
 
 	if instance.Spec.Webhook {
+		// Check webhook prerequisites
+		if err := webhookPrereqs(instance, r.scheme, r.client); err != nil {
+			return err
+		}
 		// Deploy webhook and cainjector
 		if err := cainjectorDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
 			return err
@@ -247,6 +251,10 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 		if !errors.IsNotFound(cainjector) {
 			log.Error(cainjector, "error removing webhook")
 			return cainjector
+		}
+		// Remove webhook prerequisites
+		if err := removeWebhookPrereqs(r.client); err != nil {
+			return err
 		}
 	}
 	return nil
