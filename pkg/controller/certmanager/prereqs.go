@@ -42,7 +42,7 @@ func checkRbac(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, c
 	if imagePullSecretError := imagePullSecret(scheme, client, instance); imagePullSecretError != nil {
 		return imagePullSecretError
 	}
-	if rolesError := roles(client); rolesError != nil {
+	if rolesError := roles(instance, scheme, client); rolesError != nil {
 		return rolesError
 	}
 	return nil
@@ -90,19 +90,16 @@ func imagePullSecret(scheme *runtime.Scheme, client client.Client, instance *ope
 		StringData: copyPullSecret.StringData,
 		Type:       copyPullSecret.Type,
 	}
+	if err := controllerutil.SetControllerReference(instance, secret, scheme); err != nil {
+		log.Error(err, "Error setting controller reference on image pull secret")
+	}
 
 	if pullSecretExists && copyPullSecretExists { // Perform update to existing pull secret
-		if err = controllerutil.SetControllerReference(instance, secret, scheme); err != nil {
-			return err
-		}
 		if err = client.Update(context.Background(), secret); err != nil {
 			return err
 		}
 		log.V(2).Info("Updated image pull secret")
 	} else if copyPullSecretExists && !pullSecretExists { // Copy it over using create
-		if err = controllerutil.SetControllerReference(instance, secret, scheme); err != nil {
-			return err
-		}
 		if err = client.Create(context.Background(), secret); err != nil {
 			return err
 		}
@@ -119,46 +116,62 @@ func imagePullSecret(scheme *runtime.Scheme, client client.Client, instance *ope
 	return nil
 }
 
-func roles(client client.Client) error {
-	// Remove any roles that exist already and create them fresh
-	if err := removeRoles(client); err != nil {
-		return err
-	}
-	if clusterRoleErr := createClusterRole(client); clusterRoleErr != nil {
+func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+
+	if clusterRoleErr := createClusterRole(instance, scheme, client); clusterRoleErr != nil {
 		return clusterRoleErr
 	}
-	if clusterRoleBindingErr := createClusterRoleBinding(client); clusterRoleBindingErr != nil {
+	if clusterRoleBindingErr := createClusterRoleBinding(instance, scheme, client); clusterRoleBindingErr != nil {
 		return clusterRoleBindingErr
 	}
-	if serviceAccountErr := createServiceAccount(client); serviceAccountErr != nil {
+	if serviceAccountErr := createServiceAccount(instance, scheme, client); serviceAccountErr != nil {
 		return serviceAccountErr
 	}
 	return nil
 }
 
-func createClusterRole(client client.Client) error {
+func createClusterRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	log.V(2).Info("Creating cluster role")
-	res.DefaultClusterRole.ResourceVersion = ""
-	err := client.Create(context.Background(), res.DefaultClusterRole)
-	if err != nil {
-		return err
+	clusterRole := &rbacv1.ClusterRole{}
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRole)
+	if err != nil && apiErrors.IsNotFound(err) {
+		res.DefaultClusterRole.ResourceVersion = ""
+		if err := controllerutil.SetControllerReference(instance, res.DefaultClusterRole, scheme); err != nil {
+			log.Error(err, "Error setting controller reference on clusterrole")
+		}
+		err := client.Create(context.Background(), res.DefaultClusterRole)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func createClusterRoleBinding(client client.Client) error {
+func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	log.V(2).Info("Creating cluster role binding")
-	res.DefaultClusterRoleBinding.ResourceVersion = ""
-	err := client.Create(context.Background(), res.DefaultClusterRoleBinding)
-	if err != nil {
-		return err
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{}
+
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRoleBinding)
+	if err != nil && apiErrors.IsNotFound(err) {
+		res.DefaultClusterRoleBinding.ResourceVersion = ""
+		if err := controllerutil.SetControllerReference(instance, res.DefaultClusterRoleBinding, scheme); err != nil {
+			log.Error(err, "Error setting controller reference on clusterrolebinding")
+		}
+		err := client.Create(context.Background(), res.DefaultClusterRoleBinding)
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
-func createServiceAccount(client client.Client) error {
+func createServiceAccount(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	log.V(2).Info("Creating service account")
 	err := client.Create(context.Background(), res.DefaultServiceAccount)
+	if err := controllerutil.SetControllerReference(instance, res.DefaultServiceAccount, scheme); err != nil {
+		log.Error(err, "Error setting controller reference on service account")
+	}
 	if err != nil {
 		if !apiErrors.IsAlreadyExists(err) {
 			return err
@@ -184,7 +197,7 @@ func checkNamespace(client typedCorev1.NamespaceInterface) error {
 
 // Checks for the existence of all certmanager CRDs
 // Takes action to create them if they do not exist
-func checkCrds(client apiextensionclientsetv1beta1.CustomResourceDefinitionInterface, name, namespace string) error {
+func checkCrds(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client apiextensionclientsetv1beta1.CustomResourceDefinitionInterface, name, namespace string) error {
 	var allErrors []string
 	listOptions := metav1.ListOptions{LabelSelector: res.ControllerLabels}
 	customResourcesList, err := client.List(listOptions)
@@ -203,9 +216,10 @@ func checkCrds(client apiextensionclientsetv1beta1.CustomResourceDefinitionInter
 		if _, ok := existingResources[crName]; !ok { // CRD wasn't found, create it
 			log.V(1).Info("Did not find custom resource, creating it now", "resource", item)
 			crd := res.CRDMap[item]
-			crd.ObjectMeta.Labels["instance-name"] = name
-			crd.ObjectMeta.Labels["instance-namespace"] = namespace
 
+			if err := controllerutil.SetControllerReference(instance, crd, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on crd")
+			}
 			if _, err = client.Create(crd); err != nil {
 				allErrors = append(allErrors, err.Error())
 			}
@@ -244,45 +258,6 @@ func removeRoles(client client.Client) error {
 	} else if err == nil {
 		if err = client.Delete(context.Background(), clusterRole); err != nil {
 			log.V(1).Info("Error deleting cluster role", "name", clusterRole.Name, "error message", err)
-			return err
-		}
-	} else {
-		return err
-	}
-	return nil
-}
-
-// Removes all RBAC resources created by this operator
-// Includes: image pull secret, clusterrole, clusterrolebinding, and service account
-func removeRbac(client client.Client) error {
-	// Delete the pull secret
-	pullSecret := &corev1.Secret{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.ImagePullSecret, Namespace: res.DeployNamespace}, pullSecret)
-	if err != nil && apiErrors.IsNotFound(err) {
-		log.V(1).Info("Error getting pull secret", "msg", err)
-		return nil
-	} else if err == nil {
-		if err = client.Delete(context.Background(), pullSecret); err != nil {
-			log.V(1).Info("Error deleting pull secret", "name", pullSecret.Name, "error message", err)
-			return err
-		}
-	} else {
-		return err
-	}
-
-	// Delete the clusterrolebinding & clusterrole
-	if err = removeRoles(client); err != nil {
-		return err
-	}
-	// Delete the service account - maybe we shouldn't remove this?
-	serviceAccount := &corev1.ServiceAccount{}
-	err = client.Get(context.Background(), types.NamespacedName{Name: res.ServiceAccount, Namespace: res.DeployNamespace}, serviceAccount)
-	if err != nil && apiErrors.IsNotFound(err) {
-		log.V(1).Info("Error getting service account", "msg", err)
-		return nil
-	} else if err == nil {
-		if err = client.Delete(context.Background(), serviceAccount); err != nil {
-			log.V(1).Info("Error deleting service account", "name", serviceAccount.Name, "error message", err)
 			return err
 		}
 	} else {

@@ -25,11 +25,11 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	apiextensionsAPIv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -88,16 +88,37 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// Watch for changes to secondary resource ClusterRoles and requeue the owner CertManager
+	err = c.Watch(&source.Kind{Type: &rbacv1.ClusterRole{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch for changes to secondary resource ClusterRoleBindings and requeue the owner CertManager
+	err = c.Watch(&source.Kind{Type: &rbacv1.ClusterRoleBinding{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch for changes to secondary resource ServiceAccounts and requeue the owner CertManager
+	err = c.Watch(&source.Kind{Type: &corev1.ServiceAccount{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
+	})
+	if err != nil {
+		return err
+	}
+
 	// Watch changes to custom resource defintions that are owned by this operator - in case of deletion or changes
-	err = c.Watch(&source.Kind{Type: &apiextensionsAPIv1beta1.CustomResourceDefinition{}}, &handler.EnqueueRequestsFromMapFunc{
-		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			return []reconcile.Request{
-				{NamespacedName: types.NamespacedName{
-					Name:      a.Meta.GetLabels()["instance-name"],
-					Namespace: a.Meta.GetLabels()["instance-namespace"],
-				}},
-			}
-		}),
+	err = c.Watch(&source.Kind{Type: &apiextensionsAPIv1beta1.CustomResourceDefinition{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
 	})
 	if err != nil {
 		return err
@@ -156,12 +177,6 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	} else {
 		// Object scheduled to be deleted
 		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			if err := r.deleteExternalResources(); err != nil {
-				log.Error(err, "Error deleting resources created by this operator")
-
-				return reconcile.Result{}, err
-			}
-
 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
 			if err := r.client.Update(context.Background(), instance); err != nil {
 				log.Error(err, "Error updating the CR to remove the finalizer")
@@ -193,7 +208,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 }
 
 func (r *ReconcileCertManager) PreReqs(instance *operatorv1alpha1.CertManager) error {
-	if err := checkCrds(r.apiextclient.ApiextensionsV1beta1().CustomResourceDefinitions(), instance.Name, instance.Namespace); err != nil {
+	if err := checkCrds(instance, r.scheme, r.apiextclient.ApiextensionsV1beta1().CustomResourceDefinitions(), instance.Name, instance.Namespace); err != nil {
 		log.V(2).Info("Checking CRDs failed")
 		return err
 	}
@@ -233,27 +248,6 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 			log.Error(cainjector, "error removing webhook")
 			return cainjector
 		}
-	}
-	return nil
-}
-
-// Removes some of the resources created by this controller for the CR including
-// The clusterrolebinding, clusterrole, serviceaccount, and the cert-manager deployment
-func (r *ReconcileCertManager) deleteExternalResources() error {
-	// Remove RBAC
-	if err := removeRbac(r.client); err != nil {
-		return err
-	}
-	// Remove cainjector and webhook
-	if err := removeDeploy(r.kubeclient, res.CertManagerWebhookName, res.DeployNamespace); err != nil {
-		return err
-	}
-	if err := removeDeploy(r.kubeclient, res.CertManagerCainjectorName, res.DeployNamespace); err != nil {
-		return err
-	}
-	// Remove the cert-manager-controller deployment
-	if err := removeDeploy(r.kubeclient, res.CertManagerControllerName, res.DeployNamespace); err != nil {
-		return err
 	}
 	return nil
 }

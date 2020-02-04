@@ -22,13 +22,11 @@ spec:
           command:
           - ibm-cert-manager-operator
           args:
-          - --zap-level=0
+          - --zap-level=1
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+              value: ""
             - name: POD_NAME
               valueFrom:
                 fieldRef:
