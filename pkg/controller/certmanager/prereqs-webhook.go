@@ -60,7 +60,7 @@ func removeWebhookPrereqs(client client.Client) error {
 
 func apiService(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	apiSvc := &apiRegv1.APIService{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.ApiSvcName, Namespace: ""}, apiSvc)
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.APISvcName, Namespace: ""}, apiSvc)
 	if err != nil && apiErrors.IsNotFound(err) {
 		// Create the apiservice spec
 		res.APIService.ResourceVersion = ""
@@ -77,7 +77,7 @@ func apiService(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, 
 
 func removeAPIService(client client.Client) error {
 	apiSvc := &apiRegv1.APIService{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.ApiSvcName, Namespace: ""}, apiSvc)
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.APISvcName, Namespace: ""}, apiSvc)
 	if err != nil {
 		if !apiErrors.IsNotFound(err) {
 			return err

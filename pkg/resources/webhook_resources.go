@@ -79,13 +79,13 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 
 const injectSecretCA = DeployNamespace + "/" + webhookServingSecret
 
-// ApiSvcName is the name used for cert-manager-webhooks' apiservice definition
-const ApiSvcName = "v1beta1.webhook.certmanager.k8s.io"
+// APISvcName is the name used for cert-manager-webhooks' apiservice definition
+const APISvcName = "v1beta1.webhook.certmanager.k8s.io"
 
 // APIService is the apiservice for cert-manager-webhook
 var APIService = &apiRegv1.APIService{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:   ApiSvcName,
+		Name:   APISvcName,
 		Labels: WebhookLabelMap,
 		Annotations: map[string]string{
 			"certmanager.k8s.io/inject-ca-from-secret": injectSecretCA,
