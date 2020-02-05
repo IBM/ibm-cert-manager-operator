@@ -23,6 +23,7 @@ import (
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 	"k8s.io/client-go/kubernetes"
 
+	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -31,6 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
+	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -117,6 +119,39 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch changes to custom resource defintions that are owned by this operator - in case of deletion or changes
 	err = c.Watch(&source.Kind{Type: &apiextensionsAPIv1beta1.CustomResourceDefinition{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch changes to mutating webhook configuration that are owned by this operator - in case of deletion or changes
+	err = c.Watch(&source.Kind{Type: &admRegv1beta1.MutatingWebhookConfiguration{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
+	})
+	if err != nil {
+		return err
+	}
+	// Watch changes to validating webhook configuration that are owned by this operator - in case of deletion or changes
+	err = c.Watch(&source.Kind{Type: &admRegv1beta1.ValidatingWebhookConfiguration{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
+	})
+	if err != nil {
+		return err
+	}
+	// Watch changes to apiservice that are owned by this operator - in case of deletion or changes
+	err = c.Watch(&source.Kind{Type: &apiRegv1.APIService{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorv1alpha1.CertManager{},
+	})
+	if err != nil {
+		return err
+	}
+	// Watch changes to service that are owned by this operator - in case of deletion or changes
+	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &operatorv1alpha1.CertManager{},
 	})
