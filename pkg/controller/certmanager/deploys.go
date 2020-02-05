@@ -197,7 +197,7 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 	return allDeploys
 }
 
-// Deep comparision between the two deployments passed in
+// Deep comparison between the two deployments passed in
 // Checks labels, replicas, pod template labels, pull secrets, service account names,
 // volumes, liveness, readiness, image name, args, env, and security contexts (pod & container)
 // of both deployments. If there are any discrepencies between them, this returns false. Returns

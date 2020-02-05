@@ -196,6 +196,7 @@ issues:
     - Potential hardcoded credentials
     - is unused
     - line is 161 characters
+    - line is 174 characters
     - line is 181 characters
     - line is 210 characters
     - cyclomatic complexity 96 
