@@ -36,7 +36,6 @@ var cpu500 = resource.NewMilliQuantity(500, resource.DecimalSI) // 500m
 var memory300 = resource.NewQuantity(300*1024*1024, resource.BinarySI) // 300Mi
 var memory500 = resource.NewQuantity(500*1024*1024, resource.BinarySI) // 500Mi
 
-//
 var replicaCount int32 = 1
 
 const certManagerComponentName = "cert-manager"
@@ -59,6 +58,7 @@ var WebhookLabelMap = map[string]string{
 	"app.kubernetes.io/managed-by": "operator",
 	"app.kubernetes.io/instance":   certManagerComponentName,
 	"release":                      certManagerComponentName,
+	"watcher.ibm.com/opt-in":       "true",
 }
 
 // CainjectorLabelMap is a map of all the labels used by the cert-manager-cainjector
@@ -71,6 +71,23 @@ var CainjectorLabelMap = map[string]string{
 	"release":                      certManagerComponentName,
 }
 
+// ConfigmapWatcherLabelMap is the labels for the configmap watcher in map format
+var ConfigmapWatcherLabelMap = map[string]string{
+	"app.kubernetes.io/name":       ConfigmapWatcherName,
+	"app.kubernetes.io/component":  certManagerComponentName,
+	"app.kubernetes.io/managed-by": "operator",
+	"app.kubernetes.io/instance":   ConfigmapWatcherName,
+	"release":                      certManagerComponentName,
+}
+
+var securityAnnotation = map[string]string{
+	"seccomp.security.alpha.kubernetes.io/pod": "docker/default",
+}
+
+var webhookAnnotation = map[string]string{
+	"watcher.ibm.com/configmap-resource": "kube-system/extension-apiserver-authentication",
+}
+
 // ControllerLabels is a string of the cert-manager-controller's labels
 const ControllerLabels = "app=ibm-cert-manager-controller"
 
@@ -79,6 +96,9 @@ const WebhookLabels = "app=ibm-cert-manager-webhook"
 
 // CainjectorLabels is a string of the cert-manager-cainjector's labels
 const CainjectorLabels = "app=ibm-cert-manager-cainjector"
+
+// ConfigmapWatcherLabels is a string of the configmap-watcher's labels
+const ConfigmapWatcherLabels = "app.kubernetes.io/name=configmap-watcher"
 
 // DeployNamespace is the namespace the cert-manager services will be deployed in
 const DeployNamespace = "cert-manager"
@@ -96,11 +116,20 @@ const CertManagerCainjectorName = "cert-manager-cainjector"
 // CertManagerWebhookName is the name of the container/pod/deployment for cert-manager-webhook
 const CertManagerWebhookName = "cert-manager-webhook"
 
+// ConfigmapWatcherName is the name of the container/pod/deployment for the configmap-watcher
+const ConfigmapWatcherName = "configmap-watcher"
+
 // Default Image Values
 const imageRegistry = "quay.io"
 
-// ImageVersion is the image version used for the cert-manager services
-const ImageVersion = "0.10.0"
+// ControllerImageVersion is the image version used for the cert-manager-controller
+const ControllerImageVersion = "0.10.0"
+
+// WebhookImageVersion is the image version used for the cert-manager-webhook
+const WebhookImageVersion = "0.10.1"
+
+// ConfigmapWatcherVersion is the image version used for the configmap-watcher
+const ConfigmapWatcherVersion = "3.3.0"
 
 // ControllerImageName is the image name of the cert-manager-controller
 const ControllerImageName = "icp-cert-manager-controller"
@@ -114,10 +143,14 @@ const CainjectorImageName = "icp-cert-manager-cainjector"
 // WebhookImageName is the image name of the cert-manager-webhook
 const WebhookImageName = "icp-cert-manager-webhook"
 
-const controllerImage = imageRegistry + "/" + ControllerImageName + ":" + ImageVersion
-const acmesolverImage = imageRegistry + "/" + AcmesolverImageName + ":" + ImageVersion
-const cainjectorImage = imageRegistry + "/" + CainjectorImageName + ":" + ImageVersion
-const webhookImage = imageRegistry + "/" + WebhookImageName + ":" + ImageVersion
+// ConfigmapWatcherImageName is the name of the configmap watcher image
+const ConfigmapWatcherImageName = "icp-configmap-watcher"
+
+const controllerImage = imageRegistry + "/" + ControllerImageName + ":" + ControllerImageVersion
+const acmesolverImage = imageRegistry + "/" + AcmesolverImageName + ":" + ControllerImageVersion
+const cainjectorImage = imageRegistry + "/" + CainjectorImageName + ":" + ControllerImageVersion
+const webhookImage = imageRegistry + "/" + WebhookImageName + ":" + WebhookImageVersion
+const configmapWatcherImage = imageRegistry + "/" + ConfigmapWatcherImageName + ":" + ConfigmapWatcherVersion
 
 // ImagePullSecret is the default image pull secret name
 const ImagePullSecret = "image-pull-secret"
@@ -145,6 +178,9 @@ var livenessExecActionCainjector = v1.ExecAction{
 var livenessExecActionWebhook = v1.ExecAction{
 	Command: []string{"sh", "-c", "pgrep webhook -l"},
 }
+var livenessExecActionConfigmapWatcher = v1.ExecAction{
+	Command: []string{"sh", "-c", "pgrep watcher -l"},
+}
 
 var initialDelaySecondsReadiness int32 = 10
 var timeoutSecondsReadiness int32 = 2
@@ -157,19 +193,23 @@ var readinessExecActionCainjector = v1.ExecAction{
 var readinessExecActionWebhook = v1.ExecAction{
 	Command: []string{"sh", "-c", "exec echo start cert-manager webhook"},
 }
+var readinessExecActionConfigmapWatcher = v1.ExecAction{
+	Command: []string{"sh", "-c", "exec echo start configmap-watcher"},
+}
 
 // Cert-manager args
+const webhookServingSecret = "cert-manager-webhook-tls"
+
 const resourceNS = "--cluster-resource-namespace=kube-system"
 const leaderElectNS = "--leader-election-namespace=cert-manager"
-const acmeSolver = "--acme-http01-solver-image=" + acmesolverImage
-const webhookNS = "--webhook-namespace=cert-manager"
-const webhookCASecret = "--webhook-ca-secret=cert-manager-webhook-ca"
-const webhookServingSecret = "cert-manager-webhook-tls"
+const acmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
+const webhookNSArg = "--webhook-namespace=" + DeployNamespace
+const webhookCASecretArg = "--webhook-ca-secret=cert-manager-webhook-ca"
 const webhookServingSecretArg = "--webhook-serving-secret=" + webhookServingSecret
-const webhookDNSNames = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc"
+const webhookDNSNamesArg = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc"
 
 // DefaultArgs are the default arguments use for cert-manager-controller
-var DefaultArgs = []string{resourceNS, leaderElectNS, webhookNS, webhookCASecret, webhookServingSecret, webhookDNSNames}
+var DefaultArgs = []string{resourceNS, leaderElectNS, webhookNSArg, webhookCASecretArg, webhookServingSecretArg, webhookDNSNamesArg}
 
 // CRDs is the list of crds created/used by cert-manager in this version
 var CRDs = [5]string{"certificates", "issuers", "clusterissuers", "orders", "challenges"}
@@ -192,6 +232,3 @@ var NamespaceDef = &v1.Namespace{
 		Finalizers: []v1.FinalizerName{"kubernetes"},
 	},
 }
-
-// Services
-// TODO - create prereqs for webhook

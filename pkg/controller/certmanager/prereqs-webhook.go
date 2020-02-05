@@ -24,6 +24,7 @@ import (
 
 	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -33,6 +34,9 @@ import (
 )
 
 func webhookPrereqs(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+	if err := createRoleBinding(instance, scheme, client); err != nil {
+		return err
+	}
 	if err := service(instance, scheme, client); err != nil {
 		return err
 	}
@@ -53,6 +57,9 @@ func removeWebhookPrereqs(client client.Client) error {
 		return err
 	}
 	if err := removeWebhooks(client); err != nil {
+		return err
+	}
+	if err := removeRoleBinding(client); err != nil {
 		return err
 	}
 	return nil
@@ -94,7 +101,6 @@ func webhooks(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, cl
 	mutating := &admRegv1beta1.MutatingWebhookConfiguration{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, mutating)
 	if err != nil && apiErrors.IsNotFound(err) {
-		log.Error(err, "mutating webhook is not found")
 		// Create the mutating webhook spec
 		res.MutatingWebhook.ResourceVersion = ""
 		if err := controllerutil.SetControllerReference(instance, res.MutatingWebhook, scheme); err != nil {
@@ -109,7 +115,6 @@ func webhooks(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, cl
 	validating := &admRegv1beta1.ValidatingWebhookConfiguration{}
 	err = client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, validating)
 	if err != nil && apiErrors.IsNotFound(err) {
-		log.Error(err, "mutating webhook is not found")
 		// Create the validating webhook spec
 		res.ValidatingWebhook.ResourceVersion = ""
 		if err := controllerutil.SetControllerReference(instance, res.ValidatingWebhook, scheme); err != nil {
@@ -178,6 +183,38 @@ func removeSvc(client client.Client) error {
 		}
 	} else {
 		if err := client.Delete(context.Background(), svc); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func createRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+	log.V(2).Info("Creating role binding")
+	roleBinding := &rbacv1.RoleBinding{}
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: "kube-system"}, roleBinding)
+	if err != nil && apiErrors.IsNotFound(err) {
+		res.WebhookRoleBinding.ResourceVersion = ""
+		if err := controllerutil.SetControllerReference(instance, res.WebhookRoleBinding, scheme); err != nil {
+			log.Error(err, "Error setting controller reference on rolebinding")
+		}
+		err := client.Create(context.Background(), res.WebhookRoleBinding)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func removeRoleBinding(client client.Client) error {
+	roleBinding := &rbacv1.RoleBinding{}
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: "kube-system"}, roleBinding)
+	if err != nil {
+		if !apiErrors.IsNotFound(err) {
+			return err
+		}
+	} else {
+		if err := client.Delete(context.Background(), roleBinding); err != nil {
 			return err
 		}
 	}

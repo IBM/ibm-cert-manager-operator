@@ -228,6 +228,10 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 		return err
 	}
 
+	if err := configmapWatcherDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
+		return err
+	}
+
 	if instance.Spec.Webhook {
 		// Check webhook prerequisites
 		if err := webhookPrereqs(instance, r.scheme, r.client); err != nil {

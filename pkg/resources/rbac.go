@@ -82,6 +82,16 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 			APIGroups: []string{"apps"},
 			Resources: []string{"deployments", "statefulsets", "daemonsets"},
 		},
+		{
+			Verbs:     []string{"*"},
+			APIGroups: []string{"apiextensions.k8s.io"},
+			Resources: []string{"customresourcedefinitions"},
+		},
+		{
+			Verbs:     []string{"*"},
+			APIGroups: []string{"admission.certmanager.k8s.io"},
+			Resources: []string{"certificates", "clusterissuers", "issuers", "certificaterequests"},
+		},
 	},
 }
 
@@ -102,5 +112,26 @@ var DefaultClusterRoleBinding = &rbacv1.ClusterRoleBinding{
 		APIGroup: "rbac.authorization.k8s.io",
 		Kind:     "ClusterRole",
 		Name:     ClusterRoleName,
+	},
+}
+
+// WebhookRoleBinding is the rolebinding used for the cert-manager-webhook's ability to read the extension-apiserver-authentication
+var WebhookRoleBinding = &rbacv1.RoleBinding{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      CertManagerWebhookName,
+		Namespace: "kube-system",
+	},
+	Subjects: []rbacv1.Subject{
+		{
+			Kind:      "ServiceAccount",
+			APIGroup:  "",
+			Name:      ServiceAccount,
+			Namespace: DeployNamespace,
+		},
+	},
+	RoleRef: rbacv1.RoleRef{
+		APIGroup: "rbac.authorization.k8s.io",
+		Kind:     "Role",
+		Name:     "extension-apiserver-authentication-reader",
 	},
 }

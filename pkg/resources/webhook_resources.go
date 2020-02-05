@@ -85,8 +85,10 @@ const APISvcName = "v1beta1.webhook.certmanager.k8s.io"
 // APIService is the apiservice for cert-manager-webhook
 var APIService = &apiRegv1.APIService{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:   APISvcName,
-		Labels: WebhookLabelMap,
+		Name: APISvcName,
+		Labels: map[string]string{
+			"app": "ibm-cert-manager-webhook",
+		},
 		Annotations: map[string]string{
 			"certmanager.k8s.io/inject-ca-from-secret": injectSecretCA,
 		},
@@ -108,7 +110,9 @@ var WebhookSvc = &corev1.Service{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:      CertManagerWebhookName,
 		Namespace: DeployNamespace,
-		Labels:    WebhookLabelMap,
+		Labels: map[string]string{
+			"app": "ibm-cert-manager-webhook",
+		},
 	},
 	Spec: corev1.ServiceSpec{
 		Ports: []corev1.ServicePort{
@@ -120,8 +124,10 @@ var WebhookSvc = &corev1.Service{
 				},
 			},
 		},
-		Selector: WebhookLabelMap,
-		Type:     corev1.ServiceTypeClusterIP,
+		Selector: map[string]string{
+			"app": "ibm-cert-manager-webhook",
+		},
+		Type: corev1.ServiceTypeClusterIP,
 	},
 }
 

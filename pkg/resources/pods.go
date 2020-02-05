@@ -26,7 +26,7 @@ var podSecurity = &corev1.PodSecurityContext{
 	FSGroup:      &fsgroup,
 }
 
-var certManagerControllerPod = corev1.PodSpec{ //missing: hostipc, hostpid, priorityclass, nodeselector, affinity, tolerations, dnspolicy, dnsconfig
+var certManagerControllerPod = corev1.PodSpec{
 	ImagePullSecrets: []corev1.LocalObjectReference{{
 		Name: ImagePullSecret,
 	}},
@@ -41,6 +41,7 @@ var certManagerWebhookPod = corev1.PodSpec{
 	ImagePullSecrets: []corev1.LocalObjectReference{{
 		Name: ImagePullSecret,
 	}},
+	HostNetwork:        TrueVar,
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
@@ -66,5 +67,16 @@ var certManagerCainjectorPod = corev1.PodSpec{
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
 		cainjectorContainer,
+	},
+}
+
+var configmapWatcherPod = corev1.PodSpec{
+	ImagePullSecrets: []corev1.LocalObjectReference{{
+		Name: ImagePullSecret,
+	}},
+	ServiceAccountName: ServiceAccount,
+	SecurityContext:    podSecurity,
+	Containers: []corev1.Container{
+		configmapWatcherContainer,
 	},
 }
