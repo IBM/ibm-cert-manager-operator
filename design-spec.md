@@ -28,12 +28,14 @@
             - If neither the pull secret in the cert-manager namespace or the CopyPullSecret exist, throw an error and requeue
             - If the CopyPullSecret does not exist, but the image pull secret exists in the cert-manager namespace, do nothing and continue
         - Check roles
-            - Remove preexisting clusterrole and clusterrolebinding
-                - if they don't exist, ignore the error
-            - Recreate clusterrole from default spec
-                - if there's an error creating it, requeue and try again
-            - Recreate clusterrolebinding from default spec
-                - if there's an error creating it, requeue and try again
+            - Clusterrole
+                - if it exists, continue
+                - if it doesn't exist, create it from default spec
+                    - if there's an error creating it, requeue and try again
+            - ClusterRoleBinding
+                - if it exists, continue
+                - if it doesn't exist, create it from default spec
+                    - if there's an error creating it, requeue and try again
             - Create the service account ignoring errors if it already exists
                 - if there's an error that's not related to it already existing, requeue and try again
     1. Check the deployment
@@ -41,7 +43,22 @@
             - if it does, check if anything differs from the template
                 - if it does send an update using the template
             - if it does not exist, create it
+        - If the configmap-watcher deployment exists
+            - if it does, check if anything differs from the template
+                - if it does send an update using the template
+            - if it does not exist, create it
         - If webhook is enabled
+            - Check the prerequisites
+                - if the service exists, do nothing, otherwise create it
+                    - if there's an error creating it, requeue and try again
+                - if the apiservice exists, do nothing, otherwise create it
+                    - if there's an error creating it, requeue and try again
+                - if the mutatingwebhookconfiguration exists, do nothing, otherwise create it
+                    - if there's an error creating it, requeue and try again
+                - if the validatingwebhookconfiguration exists, do nothing, otherwise create it
+                    - if there's an error creating it, requeue and try again
+                - if the webhook rolebinding exists, do nothing, otherwise create it
+                    - if there's an error creating it, requeue and try again
             - If cainjector deploy exists
                 - if it does, check if anything differs from the template
                     - if it does send an update using the template
@@ -53,15 +70,24 @@
         - If webhook is not enabled
             - Delete cainjector deploy if it exists
             - Delete webhook deploy if it exists
+            - Delete webhook prerequisites if they exist
 1. If the CR is deleted
-    1. If there is a finalizer on the CR, delete all resources created by this operator
-        - Delete the RBAC
+    1. If there is a finalizer on the CR, all resources created by this operator are deleted automatically
+        - RBAC
             - Removes clusterrolebinding
             - Removes the clusterrole
-            - Removes the imagepullsecret
-        - Delete webhook deploy
-        - Delete cainjector deploy
-        - Delete controller deploy
+            - Removes the imagepullsecret - if it was copied over by this operator
+            - Removes webhook rolebinding
+        - Deployments
+            - webhook deploy
+            - cainjector deploy
+            - controller deploy
+            - configmap-watcher deploy
+        - Validating Webhook Configuration
+        - Mutating Webhook Configuration
+        - Service
+        - API Service
+        - NOTE: the finalizer automatically removes resources created by this operator. If any of these were not created by operator and were already present in the system then the operator will not remove them upon CR removal.
     1. Remove the finalizer from list of finalizers on CR
 
 ## Log levels
