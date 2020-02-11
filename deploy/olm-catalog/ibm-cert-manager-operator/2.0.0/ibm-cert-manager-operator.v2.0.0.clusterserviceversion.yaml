@@ -1,0 +1,314 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "CertManager",
+          "metadata": {
+            "name": "example-certmanager"
+          },
+          "spec": {
+            "enableWebhook": true,
+            "imageRegistry": "quay.io",
+            "pullSecret": {
+              "name": "my-pull-secret"
+            }
+          }
+        }
+      ]
+    capabilities: Basic Install
+  name: ibm-cert-manager-operator.v2.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: CertManager is the Schema for the certmanagers API
+      kind: CertManager
+      name: certmanagers.operator.ibm.com
+      version: v1alpha1
+  description: Placeholder description
+  displayName: Ibm Cert Manager Operator
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - certmanagers
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - services/finalizers
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          - serviceaccounts
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - cert-manager-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          - deployments
+          verbs:
+          - get
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - '*'
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - customresourcedefinitions
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - clusterroles
+          - clusterrolebindings
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        - apiGroups:
+          - apiregistration.k8s.io
+          resources:
+          - apiservices
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        - apiGroups:
+          - admissionregistration.k8s.io
+          resources:
+          - mutatingwebhookconfigurations
+          - validatingwebhookconfigurations
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - certificates
+          - certificaterequests
+          - orders
+          - challenges
+          - clusterissuers
+          - issuers
+          verbs:
+          - '*'
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - certificates/status
+          - certificaterequests/status
+          - challenges/status
+          - clusterissuers/status
+          - issuers/status
+          - orders/status
+          verbs:
+          - update
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - certificates/finalizers
+          - challenges/finalizers
+          - ingresses/finalizers
+          - orders/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - secrets
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - events
+          verbs:
+          - create
+          - patch
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - delete
+        - apiGroups:
+          - extensions
+          resources:
+          - ingresses
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - delete
+          - update
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - statefulsets
+          - daemonsets
+          verbs:
+          - '*'
+        - apiGroups:
+          - route.openshift.io
+          resources:
+          - routes/custom-host
+          verbs:
+          - create
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - get
+          - create
+          - update
+          - patch
+        serviceAccountName: ibm-cert-manager-operator
+      deployments:
+      - name: ibm-cert-manager-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: ibm-cert-manager-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: ibm-cert-manager-operator
+            spec:
+              containers:
+              - args:
+                - --zap-level=1
+                command:
+                - ibm-cert-manager-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: ibm-cert-manager-operator
+                image: IMAGE_NAME
+                imagePullPolicy: Always
+                name: ibm-cert-manager-operator
+                resources: {}
+              imagePullSecrets:
+              - name: pull-secret-1
+              serviceAccountName: ibm-cert-manager-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  provider: {}
+  replaces: ibm-cert-manager-operator.v0.0.0
+  version: 2.0.0
