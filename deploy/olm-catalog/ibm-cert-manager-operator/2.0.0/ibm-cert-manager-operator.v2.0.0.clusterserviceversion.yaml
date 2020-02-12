@@ -20,6 +20,12 @@ metadata:
         }
       ]
     capabilities: Basic Install
+    description: Operator for managing deployment of cert-manager service. 
+    categories: Security
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
+    createdAt: "2020-01-14T10:16:16Z"
+    support: IBM
+    certified: "false"
   name: ibm-cert-manager-operator.v2.0.0
   namespace: placeholder
 spec:
@@ -30,7 +36,7 @@ spec:
       kind: CertManager
       name: certmanagers.operator.ibm.com
       version: v1alpha1
-  description: Placeholder description
+  description: Operator for managing deployment of cert-manager service.
   displayName: Ibm Cert Manager Operator
   install:
     spec:
@@ -291,7 +297,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: IMAGE_NAME
+                image: quay.io./opencloudio/ibm-cert-manager-operator
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
@@ -309,6 +315,7 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
-  provider: {}
+  provider:
+    name: IBM
   replaces: ibm-cert-manager-operator.v0.0.0
   version: 2.0.0
