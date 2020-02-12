@@ -26,7 +26,7 @@ metadata:
     createdAt: "2020-01-14T10:16:16Z"
     support: IBM
     certified: "false"
-  name: ibm-cert-manager-operator.v2.0.0
+  name: ibm-cert-manager-operator.v3.5.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -297,7 +297,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io./opencloudio/ibm-cert-manager-operator
+                image: quay.io./opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
@@ -318,4 +318,4 @@ spec:
   provider:
     name: IBM
   replaces: ibm-cert-manager-operator.v0.0.0
-  version: 2.0.0
+  version: 3.5.0
