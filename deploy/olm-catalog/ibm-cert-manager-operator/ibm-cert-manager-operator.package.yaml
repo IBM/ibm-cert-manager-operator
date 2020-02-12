@@ -1,5 +1,5 @@
 channels:
-- currentCSV: ibm-cert-manager-operator.v2.0.0
+- currentCSV: ibm-cert-manager-operator.v3.5.0
   name: alpha
 defaultChannel: alpha
 packageName: ibm-cert-manager-operator
