@@ -201,7 +201,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	if request.Name != "default" {
 		msg := "Only one CR named default is allowed"
 		log.Info(msg, "request name", request.Name)
-		r.updateStatus(instance, "msg", corev1.EventTypeWarning, "Not Allowed")
+		r.updateStatus(instance, msg, corev1.EventTypeWarning, "Not Allowed")
 		return reconcile.Result{}, nil
 	}
 
