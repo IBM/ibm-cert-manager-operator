@@ -198,6 +198,13 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
+	if request.Name != "default" {
+		msg := "Only one CR named default is allowed"
+		log.Info(msg, "request name", request.Name)
+		r.updateStatus(instance, msg, corev1.EventTypeWarning, "Not Allowed")
+		return reconcile.Result{}, nil
+	}
+
 	finalizerName := "certmanager.operators.ibm.com"
 	// Determine if the certmanager crd is going to be deleted
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {

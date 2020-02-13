@@ -2,6 +2,7 @@
 
 1. User creates `CertManager` CR
 1. Operator picks up the CR spec
+1. If the CR is not named "default", it is not allowed to pass through
 1. Operator performs reconcile loop for cert manager service
     1. Checks the instance of the CertManager CR exists
         - if it doesn't, exit

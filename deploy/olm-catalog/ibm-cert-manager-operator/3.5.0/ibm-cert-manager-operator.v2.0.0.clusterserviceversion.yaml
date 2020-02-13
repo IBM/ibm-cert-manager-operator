@@ -128,18 +128,14 @@ spec:
           resources:
           - customresourcedefinitions
           verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
+          - '*'
         - apiGroups:
           - rbac.authorization.k8s.io
           resources:
           - clusterroles
           - clusterrolebindings
+          - roles
+          - rolebindings
           verbs:
           - create
           - get
@@ -148,7 +144,7 @@ spec:
           - patch
           - update
           - delete
-        - apiGroups:
+        - apiGroups: 
           - apiregistration.k8s.io
           resources:
           - apiservices
@@ -160,7 +156,7 @@ spec:
           - patch
           - update
           - delete
-        - apiGroups:
+        - apiGroups: 
           - admissionregistration.k8s.io
           resources:
           - mutatingwebhookconfigurations
@@ -190,14 +186,9 @@ spec:
           - certificates/status
           - certificaterequests/status
           - challenges/status
-          - clusterissuers/status
-          - issuers/status
           - orders/status
-          verbs:
-          - update
-        - apiGroups:
-          - certmanager.k8s.io
-          resources:
+          - issuers/status
+          - clusterissuers/status
           - certificates/finalizers
           - challenges/finalizers
           - ingresses/finalizers
@@ -267,6 +258,15 @@ spec:
           - create
           - update
           - patch
+        - apiGroups:
+          - admission.certmanager.k8s.io
+          resources:
+          - certificates
+          - clusterissuers
+          - issuers
+          - certificaterequests
+          verbs:
+          - '*'
         serviceAccountName: ibm-cert-manager-operator
       deployments:
       - name: ibm-cert-manager-operator

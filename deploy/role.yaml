@@ -88,20 +88,16 @@ rules:
 - apiGroups:
   - apiextensions.k8s.io
   resources:
-  - 'customresourcedefinitions'
+  - customresourcedefinitions
   verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
+  - '*'
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - clusterroles
   - clusterrolebindings
+  - roles
+  - rolebindings
   verbs:
   - create
   - get
@@ -136,35 +132,102 @@ rules:
   - update
   - delete
 # In order for cert-manager clusterroles to get these permissions, the operator must have these permissions
-- apiGroups: ["certmanager.k8s.io"]
-  resources: ["certificates", "certificaterequests", "orders", "challenges", "clusterissuers", "issuers"]
-  verbs: ["*"]
-- apiGroups: ["certmanager.k8s.io"]
-  resources: ["certificates/status", "certificaterequests/status", "challenges/status", "clusterissuers/status", "issuers/status", "orders/status"]
-  verbs: ["update"]
-- apiGroups: ["certmanager.k8s.io"]
-  resources: ["certificates/finalizers", "challenges/finalizers", "ingresses/finalizers", "orders/finalizers"]
-  verbs: ["update"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "watch", "create", "update", "delete"]
-
-- apiGroups: [""]
-  resources: ["events"]
-  verbs: ["create", "patch"]
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - certificates
+  - certificaterequests
+  - orders
+  - challenges
+  - clusterissuers
+  - issuers
+  verbs:
+  - '*'
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - certificates/status
+  - certificaterequests/status
+  - challenges/status
+  - orders/status
+  - issuers/status
+  - clusterissuers/status
+  - certificates/finalizers
+  - challenges/finalizers
+  - ingresses/finalizers
+  - orders/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
 # HTTP01 rules
-- apiGroups: [""]
-  resources: ["pods", "services"]
-  verbs: ["get", "list", "watch", "create", "delete"]
-- apiGroups: ["extensions"]
-  resources: ["ingresses"]
-  verbs: ["get", "list", "watch", "create", "delete", "update"]
-- apiGroups: ["apps"]
-  resources: ["deployments", "statefulsets", "daemonsets"]
-  verbs: ["*"]
-- apiGroups: ["route.openshift.io"]
-  resources: ["routes/custom-host"]
-  verbs: ["create"]
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["get", "create", "update", "patch"]
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - statefulsets
+  - daemonsets
+  verbs:
+  - '*'
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes/custom-host
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - create
+  - update
+  - patch
+- apiGroups:
+  - admission.certmanager.k8s.io
+  resources:
+  - certificates
+  - clusterissuers
+  - issuers
+  - certificaterequests
+  verbs:
+  - '*'
