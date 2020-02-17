@@ -358,7 +358,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io./opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
