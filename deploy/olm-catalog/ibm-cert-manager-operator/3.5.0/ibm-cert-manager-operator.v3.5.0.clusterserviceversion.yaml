@@ -25,7 +25,7 @@ metadata:
     containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
     createdAt: "2020-01-14T10:16:16Z"
     support: IBM
-    certified: "false" 
+    certified: "false"
   name: ibm-cert-manager-operator.v3.5.0
   namespace: placeholder
 spec:
