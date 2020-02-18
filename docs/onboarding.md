@@ -89,7 +89,7 @@ There are two ways to create cert-manager resources like in the background now t
 
     ````
 
-`. Add in your code to create your cert-manager resource:
+1. Add in your code to create your cert-manager resource:
     - Certificate example:
 
         ````
