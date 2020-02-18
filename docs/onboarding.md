@@ -44,13 +44,15 @@ There are two ways to create cert-manager resources like in the background now t
             k8s.io/apiextensions-apiserver v0.0.0
             k8s.io/apimachinery v0.0.0
         ````
-    to 
+        to
+
         ````
         require (
             k8s.io/api v0.17.0
             k8s.io/apiextensions-apiserver v0.17.0
             k8s.io/apimachinery v0.17.0
         ````
+
 3. In the `replace` section of your operator's go.mod file add:
     ````
     replace (
