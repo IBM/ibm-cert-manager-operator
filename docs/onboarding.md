@@ -8,12 +8,14 @@ Previously, when all the services were deployed as helm charts, it was easy to u
 
 There are two ways to create cert-manager resources like in the background now that we've switched to operators:
 1. [As Go code](#go)
-2. [As yaml](#yaml)
+1. [As yaml](#yaml)
 
 ## Prerequisites
+
 {: #pre}
 
 1. You may need to add the following additional permissions in your operator's `Role` in `deploy/role.yaml`
+
     ````
     ...
     rules:
@@ -27,23 +29,27 @@ There are two ways to create cert-manager resources like in the background now t
     ````
 
 ## Go Code
+
 {: #go}
 
 1. Complete the [prerequisites](#pre)
-2. In the `require` section of your operator's go.mod file 
+1. In the `require` section of your operator's go.mod file
     - add:
+
         ````
         require (
             github.com/jetstack/cert-manager v0.10.0
         ````
 
     - Change
+
         ````
         require (
             k8s.io/api v0.0.0
             k8s.io/apiextensions-apiserver v0.0.0
             k8s.io/apimachinery v0.0.0
         ````
+
         to
 
         ````
@@ -53,14 +59,16 @@ There are two ways to create cert-manager resources like in the background now t
             k8s.io/apimachinery v0.17.0
         ````
 
-3. In the `replace` section of your operator's go.mod file add:
+1. In the `replace` section of your operator's go.mod file add:
+
     ````
     replace (
         github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.4-0.20200207053602-7439e774c9e9+incompatible
     ````
 
-4. Run `go mod tidy`
-5. Add in cmd/manager/main.go
+1. Run `go mod tidy`
+1. Add in cmd/manager/main.go
+
     ````
     import (
         certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
@@ -80,8 +88,10 @@ There are two ways to create cert-manager resources like in the background now t
     ...
 
     ````
-6. Add in your code to create your cert-manager resource:
+
+`. Add in your code to create your cert-manager resource:
     - Certificate example:
+
         ````
         import (
             certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
@@ -92,18 +102,18 @@ There are two ways to create cert-manager resources like in the background now t
         func (r *ReconcileCertManager) CreateCertificate(request reconcile.Request) error {
             log.Info("Creating cert manager certificate")
             crt := &certmgr.Certificate{
-            ObjectMeta: metav1.ObjectMeta{
-                Name:      "test-certificate",
-                Namespace: "default",
-            },
-            Spec: certmgr.CertificateSpec{
-                SecretName: "test-secret",
-                IssuerRef: certmgr.ObjectReference{
-                    Name: "icp-ca-issuer",
-                    Kind: "ClusterIssuer",
+                ObjectMeta: metav1.ObjectMeta{
+                    Name:      "test-certificate",
+                    Namespace: "default",
                 },
-                CommonName: "test",
-            },
+                Spec: certmgr.CertificateSpec{
+                    SecretName: "test-secret",
+                    IssuerRef: certmgr.ObjectReference{
+                        Name: "icp-ca-issuer",
+                        Kind: "ClusterIssuer",
+                    },
+                    CommonName: "test",
+                },
             }
 
             if err := r.client.Create(context.TODO(), crt); err != nil {
@@ -115,6 +125,7 @@ There are two ways to create cert-manager resources like in the background now t
         ````
 
     - Issuer example:
+
         ````
         import (
             certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
@@ -134,7 +145,7 @@ There are two ways to create cert-manager resources like in the background now t
                             CA: &certmgr.CAIssuer{
                                 SecretName: "my-ca-secret",
                             },
-                        },	
+                        },
                     },
             }
 
@@ -146,19 +157,21 @@ There are two ways to create cert-manager resources like in the background now t
         }
         ````
 
-### Live Example:
+### Live Example
 
-Live example can be found in: http://github.com/Crystal-Chun/ibm-cert-manager-operator/tree/test-certmanager
+Can be found in [ibm-cert-manager-operator](http://github.com/Crystal-Chun/ibm-cert-manager-operator/tree/test-certmanager)
 
 ## Yaml
+
 {: #yaml}
 
 This way will be most similar to how it's done in the helm chart.
 Credits to @chenzhiwei for coming up with this.
 
 1. Complete the [prerequisites](#pre)
-2. In a go file, define your cert-manager resource yaml spec
+1. In a go file, define your cert-manager resource yaml spec
     - Example certificate in `pkg/controller/certManagerResource/resource.go`:
+
         ````
         package certManagerResource
 
@@ -177,7 +190,9 @@ Credits to @chenzhiwei for coming up with this.
         - foo1.bar1
         `
         ````
+
     - Example issuer in `pkg/controller/certManagerResource/resource.go`:
+
         ````
         package certManagerResource
 
@@ -191,14 +206,16 @@ Credits to @chenzhiwei for coming up with this.
         selfSigned: {}
         `
         ````
-3. In a go function, create it:
+
+1. In a go function, create it:
+
     ````
     import (
         "context"
 
         "github.com/ghodss/yaml"
-    	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-    	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+        "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+        "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
         operatorv1alpha1 "github.com/IBM/ibm-operator/pkg/apis/operator/v1alpha1"
     )
@@ -208,43 +225,54 @@ Credits to @chenzhiwei for coming up with this.
     // client is your Reconciler's client (r.client)
     func (r *ReconcileOperandCRD) create(instance *operatorv1alpha1.OperandCRD, yamlSpec []byte) error{
     ````
+
     1. Converting from YAML to JSON
+
         ````
         json, err := yaml.YAMLTOJSON(yamlSpec)
         if err != nil {
             return err
         }
         ````
-    2. Unmarshalling from JSON
+
+    1. Unmarshalling from JSON
+
         ````
         obj := &unstructured.Unstructured{}
         if err = obj.UnmarshalJSON(json) ; err != nil {
             return err
         }
         ````
-    3. Set the controller reference using the `controllerutil`
+
+    1. Set the controller reference using the `controllerutil`
+
         ````
         if err = controllerutil.SetControllerReference(instance, obj, r.scheme) ; err != nil {
             return err
         }
         ````
-    4. Creating it
+
+    1. Creating it
+
         ````
         if err = r.client.Create(context.TODO(), obj) ; err != nil && !errors.IsAlreadyExists(err) {
             return err
         }
         ````
+
     ````
         return nil
     }
     ````
-4. In your `Reconcile` function or another go function, use your `create` function to create your cert-manager resources:
+
+1. In your `Reconcile` function or another go function, use your `create` function to create your cert-manager resources:
+
     ````
     import (
         certMgrRes "pkg/controller/certManagerResource"
 
         "sigs.k8s.io/controller-runtime/pkg/reconcile"
-    	"sigs.k8s.io/controller-runtime/pkg/log"
+        "sigs.k8s.io/controller-runtime/pkg/log"
 
     ...
 
@@ -262,10 +290,10 @@ Credits to @chenzhiwei for coming up with this.
     }
     ````
 
-### Live Example:
+### Example
 
-Live example courtesy of @chenzhiwei: https://github.com/IBM/ibm-mongodb-operator/pull/28/files
+Courtesy of @chenzhiwei: [ibm-mongodb-operator](https://github.com/IBM/ibm-mongodb-operator/pull/28/files)
 
+## Resources
 
-# Resources
 1. [Knowledge Center Documents]()
