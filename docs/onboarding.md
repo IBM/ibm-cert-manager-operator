@@ -20,12 +20,12 @@ There are two ways to create cert-manager resources like in the background now t
     ...
     rules:
     - apiGroups:
-    - certmanager.k8s.io
-    resources:
-    - certificates
-    - issuers
-    verbs:
-    - create
+      - certmanager.k8s.io
+      resources:
+      - certificates
+      - issuers
+      verbs:
+      - create
     ````
 
 ## Go Code
