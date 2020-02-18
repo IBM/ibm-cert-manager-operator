@@ -8,14 +8,11 @@ metadata:
           "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "CertManager",
           "metadata": {
-            "name": "example-certmanager"
+            "name": "default"
           },
           "spec": {
             "enableWebhook": true,
             "imageRegistry": "quay.io",
-            "pullSecret": {
-              "name": "my-pull-secret"
-            }
           }
         }
       ]
@@ -36,6 +33,67 @@ spec:
       kind: CertManager
       name: certmanagers.operator.ibm.com
       version: v1alpha1
+      displayName: CertManager
+      resources:
+      - kind: Deployment
+        name: ''
+        version: v1
+      - kind: ClusterRole
+        name: clusterroles.rbac.authorization.k8s.io
+        version: v1
+      - kind: ClusterRoleBinding
+        name: clusterrolebindings.rbac.authorization.k8s.io
+        version: v1
+      - kind: CustomResourceDefinition
+        name: customresourcedefinitions.apiextensions.k8s.io
+        version: v1beta1
+      - kind: ServiceAccount
+        name: ''
+        version: v1
+      - kind: ValidatingWebhookConfiguration
+        name: validatingwebhookconfigurations.admissionregistration.k8s.io
+        version: v1beta1
+      - kind: MutatingWebhookConfiguration
+        name: mutatingwebhookconfigurations.admissionregistration.k8s.io
+        version: v1beta1
+      - kind: Service
+        name: ''
+        version: v1
+      - kind: APIService
+        name: apiservices.apiregistration.k8s.io
+        version: v1
+      specDescriptors:
+      - description: Enables the webhook component of cert-manager when set to true
+        displayName: EnableWebhook
+        path: enableWebhook
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Appends the text to the image tag when it deploys cert-manager
+        displayName: ImagePostFix
+        path: imagePostFix
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Sets the image registry to this when deploying cert-manager
+        displayName: ImageRegistry
+        path: imageRegistry
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Uses this pull secret name to pull the cert-manager images when specified
+        displayName: Pull Secret Name
+        path: pullSecret.name
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Copies the pull secret name from this namespace to pull the cert-manager images when specified
+        displayName: Pull Secret Namespace
+        path: pullSecret.namespace
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      statusDescriptors:
+      - description: The status of deploying cert-manager
+        displayName: Status
+        path: CertManagerStatus
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
   description: Operator for managing deployment of cert-manager service.
   displayName: Ibm Cert Manager Operator
   install:
@@ -297,12 +355,10 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io./opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
-              imagePullSecrets:
-              - name: pull-secret-1
               serviceAccountName: ibm-cert-manager-operator
     strategy: deployment
   installModes:

@@ -12,8 +12,6 @@ spec:
       labels:
         name: ibm-cert-manager-operator
     spec:
-      imagePullSecrets:
-      - name: pull-secret-1
       serviceAccountName: ibm-cert-manager-operator
       containers:
         - name: ibm-cert-manager-operator

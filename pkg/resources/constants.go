@@ -152,9 +152,6 @@ const cainjectorImage = imageRegistry + "/" + CainjectorImageName + ":" + Contro
 const webhookImage = imageRegistry + "/" + WebhookImageName + ":" + WebhookImageVersion
 const configmapWatcherImage = imageRegistry + "/" + ConfigmapWatcherImageName + ":" + ConfigmapWatcherVersion
 
-// ImagePullSecret is the default image pull secret name
-const ImagePullSecret = "image-pull-secret"
-
 // ServiceAccount is the name of the default service account to be used by cert-manager services
 const ServiceAccount = "default"
 

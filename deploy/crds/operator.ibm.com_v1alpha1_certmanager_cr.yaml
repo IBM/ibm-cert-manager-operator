@@ -1,9 +1,7 @@
 apiVersion: operator.ibm.com/v1alpha1
 kind: CertManager
 metadata:
-  name: example-certmanager
+  name: default
 spec:
   enableWebhook: true
   imageRegistry: quay.io
-  pullSecret:
-    name: my-pull-secret

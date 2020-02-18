@@ -27,9 +27,6 @@ var podSecurity = &corev1.PodSecurityContext{
 }
 
 var certManagerControllerPod = corev1.PodSpec{
-	ImagePullSecrets: []corev1.LocalObjectReference{{
-		Name: ImagePullSecret,
-	}},
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
@@ -38,9 +35,6 @@ var certManagerControllerPod = corev1.PodSpec{
 }
 
 var certManagerWebhookPod = corev1.PodSpec{
-	ImagePullSecrets: []corev1.LocalObjectReference{{
-		Name: ImagePullSecret,
-	}},
 	HostNetwork:        TrueVar,
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
@@ -60,9 +54,6 @@ var certManagerWebhookPod = corev1.PodSpec{
 }
 
 var certManagerCainjectorPod = corev1.PodSpec{
-	ImagePullSecrets: []corev1.LocalObjectReference{{
-		Name: ImagePullSecret,
-	}},
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
@@ -71,9 +62,6 @@ var certManagerCainjectorPod = corev1.PodSpec{
 }
 
 var configmapWatcherPod = corev1.PodSpec{
-	ImagePullSecrets: []corev1.LocalObjectReference{{
-		Name: ImagePullSecret,
-	}},
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
