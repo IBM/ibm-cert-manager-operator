@@ -18,14 +18,12 @@ package certmanager
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 
 	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	apiextensionclientsetv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -39,80 +37,9 @@ import (
 
 // Check all RBAC is ready for cert-manager
 func checkRbac(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
-	if imagePullSecretError := imagePullSecret(scheme, client, instance); imagePullSecretError != nil {
-		return imagePullSecretError
-	}
 	if rolesError := roles(instance, scheme, client); rolesError != nil {
 		return rolesError
 	}
-	return nil
-}
-
-// Check that the image pull secret exists in the deploy namespace (cert-manager)
-// returns nil if it does, an error otherwise
-// We never create the image pull secret since it contains credentials. We only copy it or use the one provided.
-func imagePullSecret(scheme *runtime.Scheme, client client.Client, instance *operatorv1alpha1.CertManager) error {
-	pullSecret := &corev1.Secret{}
-	copyPullSecret := &corev1.Secret{}
-
-	name := res.ImagePullSecret
-	namespace := res.DeployNamespace
-
-	pullSecretExists := true
-	copyPullSecretExists := false
-
-	if instance.Spec.PullSecret.Name != "" {
-		name = instance.Spec.PullSecret.Name
-	}
-
-	err := client.Get(context.Background(), types.NamespacedName{Name: name, Namespace: namespace}, pullSecret)
-	if err != nil && apiErrors.IsNotFound(err) { // Pull secret does not already exist in namespace
-		pullSecretExists = false
-	}
-
-	// Get secret from the namespace in the spec and copy it over to the cert-manager namespace
-	if instance.Spec.PullSecret.Namespace != "" {
-		err := client.Get(context.Background(), types.NamespacedName{Name: name, Namespace: instance.Spec.PullSecret.Namespace}, copyPullSecret)
-		if err != nil && apiErrors.IsNotFound(err) {
-			log.V(2).Info("Image pull secret not found in specified namespace",
-				"pull secret name", name, "pull secret namespace", instance.Spec.PullSecret.Namespace)
-		} else {
-			copyPullSecretExists = true
-		}
-	}
-
-	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Data:       copyPullSecret.Data,
-		StringData: copyPullSecret.StringData,
-		Type:       copyPullSecret.Type,
-	}
-	if err := controllerutil.SetControllerReference(instance, secret, scheme); err != nil {
-		log.Error(err, "Error setting controller reference on image pull secret")
-	}
-
-	if pullSecretExists && copyPullSecretExists { // Perform update to existing pull secret
-		if err = client.Update(context.Background(), secret); err != nil {
-			return err
-		}
-		log.V(2).Info("Updated image pull secret")
-	} else if copyPullSecretExists && !pullSecretExists { // Copy it over using create
-		if err = client.Create(context.Background(), secret); err != nil {
-			return err
-		}
-		log.V(2).Info("Created image pull secret")
-	} else if !copyPullSecretExists && !pullSecretExists { // Secret not found at all, throw an error
-		errorMsg := apiErrors.NewNotFound(corev1.Resource("secrets"),
-			fmt.Sprintf("The image pull secret %s does not exist in the deploy namespace %s and there was no copy pull secret found in the %s namespace",
-				name, namespace, instance.Spec.PullSecret.Namespace))
-		log.Error(errorMsg, "Neither pull secret exist")
-		return errorMsg
-	}
-	// Pull secret exists and there's no copy pull secret
-	log.V(2).Info("Pull secret exists")
 	return nil
 }
 
