@@ -8,14 +8,11 @@ metadata:
           "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "CertManager",
           "metadata": {
-            "name": "example-certmanager"
+            "name": "default"
           },
           "spec": {
             "enableWebhook": true,
             "imageRegistry": "quay.io",
-            "pullSecret": {
-              "name": "my-pull-secret"
-            }
           }
         }
       ]
@@ -362,8 +359,6 @@ spec:
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
-              imagePullSecrets:
-              - name: pull-secret-1
               serviceAccountName: ibm-cert-manager-operator
     strategy: deployment
   installModes:
