@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: ibm-cert-manager-operator
-  namespace: cert-manager
+  namespace: ibm-cert-manager-operator
 roleRef:
   kind: ClusterRole
   name: ibm-cert-manager-operator
