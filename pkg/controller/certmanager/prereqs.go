@@ -126,7 +126,7 @@ func checkNamespace(client typedCorev1.NamespaceInterface) error {
 // Takes action to create them if they do not exist
 func checkCrds(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client apiextensionclientsetv1beta1.CustomResourceDefinitionInterface, name, namespace string) error {
 	var allErrors []string
-	listOptions := metav1.ListOptions{LabelSelector: res.ControllerLabels}
+	listOptions := metav1.ListOptions{}
 	customResourcesList, err := client.List(listOptions)
 	if err != nil {
 		return err
@@ -134,7 +134,9 @@ func checkCrds(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, c
 
 	existingResources := make(map[string]bool)
 	for _, item := range customResourcesList.Items {
-		existingResources[item.Name] = false
+		if strings.Contains(item.Name, res.GroupVersion) {
+			existingResources[item.Name] = false
+		}
 	}
 
 	// Check that the CRDs we need match the ones we got from the cluster
