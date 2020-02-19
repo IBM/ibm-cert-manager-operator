@@ -95,6 +95,7 @@ func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *ru
 
 func createServiceAccount(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	log.V(2).Info("Creating service account")
+	res.DefaultServiceAccount.ResourceVersion = ""
 	err := client.Create(context.Background(), res.DefaultServiceAccount)
 	if err := controllerutil.SetControllerReference(instance, res.DefaultServiceAccount, scheme); err != nil {
 		log.Error(err, "Error setting controller reference on service account")
@@ -117,6 +118,8 @@ func checkNamespace(client typedCorev1.NamespaceInterface) error {
 		if _, err = client.Create(res.NamespaceDef); err != nil {
 			return err
 		}
+	} else if err != nil {
+		return err
 	}
 	log.V(2).Info("cert-manager namespace exists")
 	return nil
