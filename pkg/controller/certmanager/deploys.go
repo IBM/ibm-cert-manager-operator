@@ -160,7 +160,7 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 	if err != nil {
 		log.Error(err, "Error retrieving deployments by label")
 	} else {
-		for _, deploy := range deployList.Items { // These will need to be removed
+		for _, deploy := range deployList.Items {
 			log.V(3).Info("Found deployment by labels",
 				"name", deploy.ObjectMeta.Name, "namespace",
 				deploy.ObjectMeta.Namespace, "labels", fmt.Sprintf("%v", deploy.ObjectMeta.Labels))
@@ -179,7 +179,7 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 	if err != nil {
 		log.Error(err, "Error retrieving deployments")
 	} else {
-		for _, deploy := range deployList.Items { // These will need to be removed
+		for _, deploy := range deployList.Items {
 			if strings.Contains(deploy.Spec.Template.Spec.Containers[0].Image, name) { // Deploys the same image
 				log.V(3).Info("Found deployment by image name",
 					"name", deploy.ObjectMeta.Name, "namespace", deploy.ObjectMeta.Namespace,
