@@ -123,10 +123,10 @@ const ConfigmapWatcherName = "configmap-watcher"
 const imageRegistry = "quay.io"
 
 // ControllerImageVersion is the image version used for the cert-manager-controller
-const ControllerImageVersion = "0.10.0"
+const ControllerImageVersion = "0.10.3"
 
 // WebhookImageVersion is the image version used for the cert-manager-webhook
-const WebhookImageVersion = "0.10.1"
+const WebhookImageVersion = "0.10.3"
 
 // ConfigmapWatcherVersion is the image version used for the configmap-watcher
 const ConfigmapWatcherVersion = "3.3.0"
