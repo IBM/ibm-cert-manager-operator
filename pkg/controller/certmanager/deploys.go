@@ -63,8 +63,10 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 	log.V(4).Info("The similar deploys", "all of them", fmt.Sprintf("%v", similarDeploys))
 
 	for _, deploy := range similarDeploys {
-		if !(deploy.Name == name && deploy.Namespace == res.DeployNamespace) { // If there's more than one, and it's not the correct one, return an error with a warning
-			errMsg := fmt.Sprintf("The service %s is already deployed as %s/%s. Please remove it if you want this version of %s to be deployed.", name, deploy.Namespace, deploy.Name, name)
+		if !(deploy.Name == name && deploy.Namespace == res.DeployNamespace) {
+			// If there's more than one, and it's not the correct one, return an error with a warning
+			errMsg := fmt.Sprintf("The service %s is already deployed as %s/%s. Please remove it if you want this version of %s to be deployed.",
+				name, deploy.Namespace, deploy.Name, name)
 			log.V(4).Info(errMsg)
 			err := errors.New(errMsg)
 			return err
