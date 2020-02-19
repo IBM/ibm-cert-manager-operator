@@ -16,18 +16,6 @@
         - if it does not exist, create it
             - if there's an error creating it, requeue and try again
     1. Check RBAC is in place for cert-manager
-        - Check image pull secret
-            - Check if the secret is already in the cert-manager namespace
-            - Check if the pull secret is in the namespace specified on the CR aka CopyPullSecret
-                - if no namespace is specified, skip
-            - Define a new pull secret using
-                - the name of the image pull secret if specified
-                - the cert-manager namespace
-                - the data of the pull secret in the namespace of the CR (CopyPullSecret) if it exists
-            - If both the pull secret exists and the CopyPullSecret exists, update the existing pull secret so it gets the data of the CopyPullSecret
-            - if the CopyPullSecret exists but the pull secret is not already in the cert-manager namespace, create it (effectively copying it over from one namespace to the cert-manager namespace)
-            - If neither the pull secret in the cert-manager namespace or the CopyPullSecret exist, throw an error and requeue
-            - If the CopyPullSecret does not exist, but the image pull secret exists in the cert-manager namespace, do nothing and continue
         - Check roles
             - Clusterrole
                 - if it exists, continue
