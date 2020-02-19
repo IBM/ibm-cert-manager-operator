@@ -18,6 +18,7 @@ package certmanager
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -27,7 +28,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -63,16 +63,16 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 	log.V(4).Info("The similar deploys", "all of them", fmt.Sprintf("%v", similarDeploys))
 
 	for _, deploy := range similarDeploys {
-		if !(deploy.Name == name && deploy.Namespace == res.DeployNamespace) { // If there's more than one, and it's not the correct one, remove it
-			log.V(4).Info("removing", "name", deploy.Name, "namespace", deploy.Namespace)
-			if err := removeDeploy(kubeclient, deploy.Name, deploy.Namespace); err != nil && !errors.IsNotFound(err) {
-				return err
-			}
-		} else { // Otherwise one exists so we update it
-			log.V(3).Info("Create false, this matches name and namespace", "deploy name", deploy.Name, "name", name)
-			create = false
-			existingDeploy = deploy
+		if !(deploy.Name == name && deploy.Namespace == res.DeployNamespace) { // If there's more than one, and it's not the correct one, return an error with a warning
+			errMsg := fmt.Sprintf("The service %s is already deployed as %s/%s. Please remove it if you want this version of %s to be deployed.", name, deploy.Namespace, deploy.Name, name)
+			log.V(4).Info(errMsg)
+			err := errors.New(errMsg)
+			return err
 		}
+		// Otherwise one exists so we update it
+		log.V(3).Info("Create false, this matches name and namespace", "deploy name", deploy.Name, "name", name)
+		create = false
+		existingDeploy = deploy
 	}
 
 	if err := controllerutil.SetControllerReference(instance, &deployment, scheme); err != nil {
