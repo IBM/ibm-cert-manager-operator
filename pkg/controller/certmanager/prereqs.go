@@ -95,6 +95,7 @@ func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *ru
 
 func createServiceAccount(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	log.V(2).Info("Creating service account")
+	res.DefaultServiceAccount.ResourceVersion = ""
 	err := client.Create(context.Background(), res.DefaultServiceAccount)
 	if err := controllerutil.SetControllerReference(instance, res.DefaultServiceAccount, scheme); err != nil {
 		log.Error(err, "Error setting controller reference on service account")
@@ -117,6 +118,8 @@ func checkNamespace(client typedCorev1.NamespaceInterface) error {
 		if _, err = client.Create(res.NamespaceDef); err != nil {
 			return err
 		}
+	} else if err != nil {
+		return err
 	}
 	log.V(2).Info("cert-manager namespace exists")
 	return nil
@@ -126,7 +129,7 @@ func checkNamespace(client typedCorev1.NamespaceInterface) error {
 // Takes action to create them if they do not exist
 func checkCrds(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client apiextensionclientsetv1beta1.CustomResourceDefinitionInterface, name, namespace string) error {
 	var allErrors []string
-	listOptions := metav1.ListOptions{LabelSelector: res.ControllerLabels}
+	listOptions := metav1.ListOptions{}
 	customResourcesList, err := client.List(listOptions)
 	if err != nil {
 		return err
@@ -134,7 +137,9 @@ func checkCrds(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, c
 
 	existingResources := make(map[string]bool)
 	for _, item := range customResourcesList.Items {
-		existingResources[item.Name] = false
+		if strings.Contains(item.Name, res.GroupVersion) {
+			existingResources[item.Name] = false
+		}
 	}
 
 	// Check that the CRDs we need match the ones we got from the cluster
