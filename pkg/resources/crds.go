@@ -109,7 +109,7 @@ var orderCRD = &apiextensionv1beta1.CustomResourceDefinition{
 	Spec: apiextensionv1beta1.CustomResourceDefinitionSpec{
 		Group:   GroupVersion,
 		Version: CRDVersion,
-		Scope:   apiextensionv1beta1.ClusterScoped,
+		Scope:   apiextensionv1beta1.NamespaceScoped,
 		Names: apiextensionv1beta1.CustomResourceDefinitionNames{
 			Plural: "orders",
 			Kind:   "Order",
@@ -122,7 +122,7 @@ var challengeCRD = &apiextensionv1beta1.CustomResourceDefinition{
 	Spec: apiextensionv1beta1.CustomResourceDefinitionSpec{
 		Group:   GroupVersion,
 		Version: CRDVersion,
-		Scope:   apiextensionv1beta1.ClusterScoped,
+		Scope:   apiextensionv1beta1.NamespaceScoped,
 		Names: apiextensionv1beta1.CustomResourceDefinitionNames{
 			Plural: "challenges",
 			Kind:   "Challenge",
