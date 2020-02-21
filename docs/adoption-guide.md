@@ -1,38 +1,28 @@
-# Onboarding to cert-manager
+# Cert-manager Adoption Guide for Operators
+
+- [Background](#back)
+- [How to use cert-manager generally](#how)
+- [Guidance with the CA](#ca)
+- [Resources and Additional Links](#res)
 
 ## Background
+
+{: #back}
 
 Previously, when all the services were deployed as helm charts, it was easy to use cert-manager by specifying a yaml file with your cert-manager resource in your chart. When your chart was installed, the cert-manager resources were created.
 
 ## How to do it
 
-There are two ways to create cert-manager resources like in the background now that we've switched to operators:
+There are two ways to create cert-manager resources in your operator:
 1. [As Go code](#go)
 1. [As yaml](#yaml)
 
-## Prerequisites
-
-{: #pre}
-
-1. You may need to add the following additional permissions in your operator's `Role` in `deploy/role.yaml`
-
-    ````
-    ...
-    rules:
-    - apiGroups:
-      - certmanager.k8s.io
-      resources:
-      - certificates
-      - issuers
-      verbs:
-      - create
-    ````
+**NOTE**: There's RBAC that is required to create/read/upate/delete the cert-manager custom resources such as Certificates and Issuers. This permission will be created automatically for common services by cert-manager in 1Q and added to every service account in the common services namespace that our operators are deployed in.
 
 ## Go Code
 
 {: #go}
 
-1. Complete the [prerequisites](#pre)
 1. In the `require` section of your operator's go.mod file
     - add:
 
@@ -168,7 +158,6 @@ Can be found in [ibm-cert-manager-operator](http://github.com/Crystal-Chun/ibm-c
 This way will be most similar to how it's done in the helm chart.
 Credits to @chenzhiwei for coming up with this.
 
-1. Complete the [prerequisites](#pre)
 1. In a go file, define your cert-manager resource yaml spec
     - Example certificate in `pkg/controller/certManagerResource/resource.go`:
 
@@ -294,6 +283,116 @@ Credits to @chenzhiwei for coming up with this.
 
 Courtesy of @chenzhiwei: [ibm-mongodb-operator](https://github.com/IBM/ibm-mongodb-operator/pull/28/files)
 
+## Guidance with the CA
+
+{: #ca}
+
+- [Background](#ca-back)
+- [The Problem](#problem)
+- [Proposed Solution](#proposal)
+- [Your Steps to Adopt](#steps)
+
+### Background
+
+{: #ca-back}
+
+Previously in ICP and common services 4Q 2019 release, the icp-inception installer created a Root CA (self-signed CA certificate) that was used to create the ClusterIssuer `icp-ca-issuer`. From there, all the services were able to create Certificate yaml specs in their helm charts that were issued by the `icp-ca-issuer`.
+
+This scenario was fine because:
+1. The icp inception installer created the Root CA certificate
+1. The icp inception installer also installed all of the helm charts and had ClusterAdmin permissions to do so
+
+### The Problem
+
+{: #problem}
+
+Now with moving to operators:
+1. The meta-operator doesn't create this Root CA certificate anymore
+1. Even if we do still create a shared ClusterIssuer, each operator needs to have permission to use it which requires cluster-scoped permissions since ClusterIssuers 
+
+### Proposed Solution
+
+{: #proposal}
+
+We've thought of multiple ways to handle the problems faced above and this is our proposed solution to it.
+
+1. We (cert-manager) will take responsibility of creating the Root CA certificate which will be available in a Secret (K8s resource) to be used.
+    - This is generated DIFFERENTLY than how the icp-inception installer created it
+        - Essentially, we will create a self-signed Issuer (cert-manager resource), create a Certificate (cert-manager resource) that is a CA certificate with a well-known Secret name.
+    - The result is similar to how the `cluster-ca-cert` was the secret backing the ClusterIssuer `icp-ca-issuer`
+    - The exact secret name is still to be determined -> Suggestion is `common-services-ca-secret`
+    - This has some benefits such as 
+        - Support from cert-manager for automatic refreshing of the CA certificate when it expires
+        - The ability to manually refresh it easily by deleting the secret.
+        - The ability to BYO CA by replacing this secret and deleting the cert-manager Certificate
+    - This mitigates the first problem
+1. Each operator will need to create their own CA Issuer (cert-manager resource) to sign their Certificates based off of the Secret (containing the generated CA certificate) in the first point.
+    - Notice this is NOT a ClusterIssuer
+    - There's a potential problem here if every common service is creating their own Issuer if the name of that Issuer clash, that could be a problem
+    - This is part one of figuring out a way for operators to use a shared ClusterIssuer while being namespace scoped (problem two above).
+1. We (cert-manager) will take the responsibility of tying the service accounts in the common services namespace to a role that allows the services to create/read/update/delete cert-manager resources (Certificates and Issuers). This is limited to the first quarter release of 2020 and will no longer apply once we move to our own namespaces.
+    - This is part two of figuring out a way for operators to use a shared ClusterIssuer while being namespace scoped (problem two above).
+
+### Steps
+
+{: #steps}
+
+To adopt the solution, each operator must:
+
+1. Create a CA Issuer (cert-manager resource) referencing the well-known CA certificate Secret's name. 
+    - Example go code (see yaml example above if you wish to do it that way):
+        ````
+            log.Info("Creating cert manager issuer")
+            issuer := &certmgr.Issuer{
+            ObjectMeta: metav1.ObjectMeta{
+                Name:      "my-ca-issuer",
+                Namespace: "ibm-common-services",
+            },
+            Spec: certmgr.IssuerSpec{
+                        IssuerConfig: certmgr.IssuerConfig{
+                            CA: &certmgr.CAIssuer{
+                                SecretName: "common-services-ca-secret",
+                            },
+                        },
+                    },
+            }
+
+            if err := r.client.Create(context.TODO(), issuer); err != nil {
+                    log.Error(err, "Error creating cert-manager issuer")
+                    return err
+            }
+            return nil
+        ````
+            - Notice how the `SecretName` is `common-services-ca-secret` -> This name will be provided by us, and this is the proposed name. This can change within the next two weeks.
+            - Notice the `Name` of your Issuer. It should not clash with the Issuer name of others in the same namespace.
+1. Create your Certificate (cert-manager resource) using the Issuer you created in step 1 as its issuerRef.
+    - Example go code (see yaml example above if you wish to do it that way)"
+        ````
+            crt := &certmgr.Certificate{
+                ObjectMeta: metav1.ObjectMeta{
+                    Name:      "my-certificate",
+                    Namespace: "ibm-common-services",
+                },
+                Spec: certmgr.CertificateSpec{
+                    SecretName: "my-secret",
+                    IssuerRef: certmgr.ObjectReference{
+                        Name: "my-ca-issuer",
+                        Kind: "Issuer",
+                    },
+                    CommonName: "my-service-name",
+                },
+            }
+
+            if err := r.client.Create(context.TODO(), crt); err != nil {
+                    log.Error(err, "Error creating cert-manager certificate")
+                    return err
+            }
+            return nil
+        ````
+        - Notice the `Name` of the Spec.IssuerRef.Name matches the Issuer I defined in step 1.
+
 ## Resources
 
-1. [Knowledge Center Documents]()
+{: #res}
+
+1. [Cert-Manager Knowledge Center Documents](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.2.1/manage_applications/cert_manager.html?pos=2)
