@@ -199,6 +199,7 @@ issues:
     - line is 174 characters
     - line is 181 characters
     - line is 210 characters
+    - line is 316 characters
     - cyclomatic complexity 96 
 
   exclude-rules:
