@@ -99,8 +99,8 @@ There are two ways to create cert-manager resources in your operator:
                 Spec: certmgr.CertificateSpec{
                     SecretName: "test-secret",
                     IssuerRef: certmgr.ObjectReference{
-                        Name: "icp-ca-issuer",
-                        Kind: "ClusterIssuer",
+                        Name: "test-issuer",
+                        Kind: "Issuer",
                     },
                     CommonName: "test",
                 },
@@ -283,7 +283,7 @@ Credits to @chenzhiwei for coming up with this.
 
 Courtesy of @chenzhiwei: [ibm-mongodb-operator](https://github.com/IBM/ibm-mongodb-operator/pull/28/files)
 
-## Guidance with the CA
+## Guidance for Common Services Adopters requiring common CA
 
 {: #ca}
 
@@ -292,7 +292,7 @@ Courtesy of @chenzhiwei: [ibm-mongodb-operator](https://github.com/IBM/ibm-mongo
 - [Proposed Solution](#proposal)
 - [Your Steps to Adopt](#steps)
 
-### Background
+### CA Background
 
 {: #ca-back}
 
@@ -308,7 +308,7 @@ This scenario was fine because:
 
 Now with moving to operators:
 1. The meta-operator doesn't create this Root CA certificate anymore
-1. Even if we do still create a shared ClusterIssuer, each operator needs to have permission to use it which requires cluster-scoped permissions since ClusterIssuers 
+1. Even if we do still create a shared ClusterIssuer, each operator needs to have permission to use it which requires cluster-scoped permissions
 
 ### Proposed Solution
 
@@ -321,7 +321,7 @@ We've thought of multiple ways to handle the problems faced above and this is ou
         - Essentially, we will create a self-signed Issuer (cert-manager resource), create a Certificate (cert-manager resource) that is a CA certificate with a well-known Secret name.
     - The result is similar to how the `cluster-ca-cert` was the secret backing the ClusterIssuer `icp-ca-issuer`
     - The exact secret name is still to be determined -> Suggestion is `common-services-ca-secret`
-    - This has some benefits such as 
+    - This has some benefits such as
         - Support from cert-manager for automatic refreshing of the CA certificate when it expires
         - The ability to manually refresh it easily by deleting the secret.
         - The ability to BYO CA by replacing this secret and deleting the cert-manager Certificate
@@ -329,9 +329,7 @@ We've thought of multiple ways to handle the problems faced above and this is ou
 1. Each operator will need to create their own CA Issuer (cert-manager resource) to sign their Certificates based off of the Secret (containing the generated CA certificate) in the first point.
     - Notice this is NOT a ClusterIssuer
     - There's a potential problem here if every common service is creating their own Issuer if the name of that Issuer clash, that could be a problem
-    - This is part one of figuring out a way for operators to use a shared ClusterIssuer while being namespace scoped (problem two above).
-1. We (cert-manager) will take the responsibility of tying the service accounts in the common services namespace to a role that allows the services to create/read/update/delete cert-manager resources (Certificates and Issuers). This is limited to the first quarter release of 2020 and will no longer apply once we move to our own namespaces.
-    - This is part two of figuring out a way for operators to use a shared ClusterIssuer while being namespace scoped (problem two above).
+1. We (cert-manager) will take the responsibility of tying the service accounts in the common services namespace to a role that allows the services to create/read/update/delete cert-manager resources (Certificates and Issuers).
 
 ### Steps
 
@@ -339,8 +337,9 @@ We've thought of multiple ways to handle the problems faced above and this is ou
 
 To adopt the solution, each operator must:
 
-1. Create a CA Issuer (cert-manager resource) referencing the well-known CA certificate Secret's name. 
+1. Create a CA Issuer (cert-manager resource) referencing the well-known CA certificate Secret's name.
     - Example go code (see yaml example above if you wish to do it that way):
+
         ````
             log.Info("Creating cert manager issuer")
             issuer := &certmgr.Issuer{
@@ -363,10 +362,12 @@ To adopt the solution, each operator must:
             }
             return nil
         ````
+
             - Notice how the `SecretName` is `common-services-ca-secret` -> This name will be provided by us, and this is the proposed name. This can change within the next two weeks.
             - Notice the `Name` of your Issuer. It should not clash with the Issuer name of others in the same namespace.
 1. Create your Certificate (cert-manager resource) using the Issuer you created in step 1 as its issuerRef.
-    - Example go code (see yaml example above if you wish to do it that way)"
+    - Example go code (see yaml example above if you wish to do it that way):
+
         ````
             crt := &certmgr.Certificate{
                 ObjectMeta: metav1.ObjectMeta{
@@ -389,6 +390,7 @@ To adopt the solution, each operator must:
             }
             return nil
         ````
+
         - Notice the `Name` of the Spec.IssuerRef.Name matches the Issuer I defined in step 1.
 
 ## Resources
