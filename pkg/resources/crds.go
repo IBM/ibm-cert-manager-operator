@@ -40,6 +40,41 @@ var certificateCRD = &apiextensionv1beta1.CustomResourceDefinition{
 			Plural: "certificates",
 			Kind:   "Certificate",
 		},
+		AdditionalPrinterColumns: []apiextensionv1beta1.CustomResourceColumnDefinition{
+			{
+				JSONPath: `.status.conditions[?(@.type=="Ready")].status`,
+				Name:     "Ready",
+				Type:     "string",
+			},
+			{
+				JSONPath: ".spec.secretName",
+				Name:     "Secret",
+				Type:     "string",
+			},
+			{
+				JSONPath: ".spec.issuerRef.name",
+				Name:     "Issuer",
+				Type:     "string",
+				Priority: 1,
+			},
+			{
+				JSONPath: `.status.conditions[?(@.type=="Ready")].message`,
+				Name:     "Status",
+				Type:     "string",
+				Priority: 1,
+			},
+			{
+				JSONPath:    ".metadata.creationTimestamp",
+				Description: "CreationTimestamp is a timestamp representing time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC. Populated by the system. Read-only. Null for lists.",
+				Name:        "Age",
+				Type:        "date",
+			},
+			{
+				JSONPath: ".status.notAfter",
+				Name:     "Expiration",
+				Type:     "string",
+			},
+		},
 	},
 }
 
