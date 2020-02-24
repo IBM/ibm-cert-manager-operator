@@ -75,6 +75,114 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 				Type:     "string",
 			},
 		},
+		Versions: []apiext.CustomResourceDefinitionVersion{
+			{
+				Name: CRDVersion,
+				Served: TrueVar,
+				Storage: TrueVar,
+				Schema: &apiext.CustomResourceValidation{
+					OpenAPIV3Schema: &apiext.JSONSchemaProps{
+						Description: "Certificate is a type to represent a Certificate from ACME",
+						Properties: map[string]apiext.JSONSchemaProps{
+							"apiVersion": apiext.JSONSchemaProps{
+								Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+								Type: "string",
+							},
+							"kind": apiext.JSONSchemaProps{
+								Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+								Type: "string",
+							},
+							"metadata": apiext.JSONSchemaProps{
+								Type: "object",
+							},
+							"spec": apiext.JSONSchemaProps{
+								Description: "CertificateSpec defines the desired state of Certificate",
+								Properties: map[string]apiext.JSONSchemaProps{
+									"acme": apiext.JSONSchemaProps{
+										Description: "ACME contains configuration specific to ACME Certificates. Notably, this contains details on how the domain names listed on this Certificate resource should be 'solved', i.e. mapping HTTP01 and DNS01 providers to DNS names.",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"config": apiext.JSONSchemaProps{
+												Items: &apiext.JSONSchemaPropsOrArray{
+													Schema: &apiext.JSONSchemaProps{
+														Description: "DomainSolverConfig contains solver configuration for a set of domains.",
+														Properties: map[string]apiext.JSONSchemaProps{
+															"dns01": apiext.JSONSchemaProps{
+																Description: "DNS01 contains DNS01 challenge solving configuration",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"provider": apiext.JSONSchemaProps{
+																		Description: "Provider is the name of the DNS01 challenge provider to use, as configure on the referenced Issuer or ClusterIssuer resource.",
+																		Type: "string",
+																	},
+																},
+																Required: []string{"provider"},
+																Type: "object",
+															},
+															"domains": apiext.JSONSchemaProps{
+																Description: "Domains is the list of domains that this Solverconfig applies to.",
+																Items:  &apiext.JSONSchemaPropsOrArray{
+																	Type: "string",
+																},
+																Type: "array",
+															},
+															"http01": apiext.JSONSchemaProps{
+																Description: "HTTP01 contains HTTP01 challenge solving configuration",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"ingress": apiext.JSONSchemaProps{
+																		Description: "Ingress is the name of an Ingress resource that will be edited to include the ACME HTTP01 'well-known' challenge path in order to solve HTTP01 challenges. If this field is specified, 'ingressClass' **must not** be specified.",
+																		Type: "string",
+																	},
+																	"ingressClass": apiext.JSONSchemaProps{
+																		Description: "IngressClass is the ingress class that should be set on new ingress resources that are created in order to solve HTTP01 challenges. This field should be used when using an ingress controller such as nginx, which 'flattens' ingress configuration instead of maintaining a 1:1 mapping between loadbalancer IP:ingress resources. If this field is not set, and 'ingress' is not set, then ingresses without an ingress class set will be created to solve HTTP01 challenges. If this field is specified, 'ingress' **must not** be specified.",
+																		Type: "string",
+																	},
+																},
+																Type: "object",
+															},
+														},
+														Required: []string{"domains"},
+														Type: "object",
+													},
+												},
+												Type: "array",
+											},
+										},
+										Required: []string{"config"},
+										Type: "object",
+									},
+									"commonName": apiext.JSONSchemaProps{
+									},
+									"dnsNames": apiext.JSONSchemaProps{
+									},
+									"duration": apiext.JSONSchemaProps{
+									},
+									"ipAddresses": apiext.JSONSchemaProps{
+									},
+									"isCA": apiext.JSONSchemaProps{
+									},
+									"issuerRef": apiext.JSONSchemaProps{
+									},
+									"keyAlgorithm": apiext.JSONSchemaProps{
+									},
+									"keyEncoding": apiext.JSONSchemaProps{
+									},
+									"keySize": apiext.JSONSchemaProps{
+									},
+									"organization": apiext.JSONSchemaProps{
+									},
+									"renewBefore": apiext.JSONSchemaProps{
+									},
+									"secretName": apiext.JSONSchemaProps{
+									},
+									"usages": apiext.JSONSchemaProps{
+									},
+								},
+
+							},
+						},
+					},
+				},
+			},
+		},
 	},
 }
 
