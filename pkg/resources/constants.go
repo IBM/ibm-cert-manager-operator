@@ -80,7 +80,7 @@ var ConfigmapWatcherLabelMap = map[string]string{
 	"release":                      certManagerComponentName,
 }
 
-var securityAnnotation = map[string]string{}
+var securityAnnotation = map[string]string{"openshift.io/scc": "restricted"}
 
 var webhookAnnotation = map[string]string{
 	"watcher.ibm.com/configmap-resource": "kube-system/extension-apiserver-authentication",
@@ -121,10 +121,10 @@ const ConfigmapWatcherName = "configmap-watcher"
 const imageRegistry = "quay.io"
 
 // ControllerImageVersion is the image version used for the cert-manager-controller
-const ControllerImageVersion = "0.10.3"
+const ControllerImageVersion = "0.10.2"
 
 // WebhookImageVersion is the image version used for the cert-manager-webhook
-const WebhookImageVersion = "0.10.3"
+const WebhookImageVersion = "0.10.2"
 
 // ConfigmapWatcherVersion is the image version used for the configmap-watcher
 const ConfigmapWatcherVersion = "3.3.0"
@@ -158,8 +158,7 @@ const ClusterRoleName = "cert-manager"
 
 // SecurityContext values
 var runAsNonRoot = true
-var runAsUser int64 = 10000
-var fsgroup int64 = 1001
+var runAsUser int64 = 1000540001
 
 // Liveness/Readiness Probe
 var initialDelaySecondsLiveness int32 = 30

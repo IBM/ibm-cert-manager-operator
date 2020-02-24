@@ -118,6 +118,7 @@ spec:
           - configmaps
           - secrets
           - serviceaccounts
+          - namespaces
           verbs:
           - create
           - delete
@@ -325,6 +326,14 @@ spec:
           - certificaterequests
           verbs:
           - '*'
+        - apiGroups:
+          - security.openshift.io
+          resources:
+          - securitycontextconstraints
+          resourceNames:
+          - restricted
+          verbs:
+          - use
         serviceAccountName: ibm-cert-manager-operator
       deployments:
       - name: ibm-cert-manager-operator
