@@ -70,7 +70,7 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "delete"},
 			APIGroups: []string{""},
-			Resources: []string{"pods", "services"},
+			Resources: []string{"pods", "services", "configmaps"},
 		},
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "delete", "update"},
@@ -91,6 +91,12 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 			Verbs:     []string{"*"},
 			APIGroups: []string{"admission.certmanager.k8s.io"},
 			Resources: []string{"certificates", "clusterissuers", "issuers", "certificaterequests"},
+		},
+		{
+			Verbs:         []string{"use"},
+			APIGroups:     []string{"security.openshift.io"},
+			Resources:     []string{"securitycontextconstraints"},
+			ResourceNames: []string{"restricted", "hostnetwork"},
 		},
 	},
 }
