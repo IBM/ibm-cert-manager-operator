@@ -64,7 +64,7 @@ var WebhookDeployment = &appsv1.Deployment{
 				Labels: map[string]string{
 					"app": "ibm-cert-manager-webhook",
 				},
-				Annotations: securityAnnotation,
+				Annotations: securityAnnotationWebhook,
 			},
 			Spec: certManagerWebhookPod,
 		},
