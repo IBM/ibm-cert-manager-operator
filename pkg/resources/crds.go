@@ -37,8 +37,9 @@ var certificateCRD = &apiextensionv1beta1.CustomResourceDefinition{
 		Version: CRDVersion,
 		Scope:   apiextensionv1beta1.NamespaceScoped,
 		Names: apiextensionv1beta1.CustomResourceDefinitionNames{
-			Plural: "certificates",
-			Kind:   "Certificate",
+			Plural:     "certificates",
+			Kind:       "Certificate",
+			ShortNames: []string{"cert", "certs"},
 		},
 		AdditionalPrinterColumns: []apiextensionv1beta1.CustomResourceColumnDefinition{
 			{
