@@ -80,9 +80,7 @@ var ConfigmapWatcherLabelMap = map[string]string{
 	"release":                      certManagerComponentName,
 }
 
-var securityAnnotation = map[string]string{
-	"seccomp.security.alpha.kubernetes.io/pod": "docker/default",
-}
+var securityAnnotation = map[string]string{}
 
 var webhookAnnotation = map[string]string{
 	"watcher.ibm.com/configmap-resource": "kube-system/extension-apiserver-authentication",
