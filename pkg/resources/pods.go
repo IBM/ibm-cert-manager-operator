@@ -23,7 +23,6 @@ import (
 var podSecurity = &corev1.PodSecurityContext{
 	RunAsNonRoot: &runAsNonRoot,
 	RunAsUser:    &runAsUser,
-	FSGroup:      &fsgroup,
 }
 
 var certManagerControllerPod = corev1.PodSpec{

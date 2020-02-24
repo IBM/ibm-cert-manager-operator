@@ -35,10 +35,18 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 	Spec: apiext.CustomResourceDefinitionSpec{
 		Group:   GroupVersion,
 		Version: CRDVersion,
+<<<<<<< HEAD
 		Scope:   apiext.NamespaceScoped,
 		Names: apiext.CustomResourceDefinitionNames{
 			Plural: "certificates",
 			Kind:   "Certificate",
+=======
+		Scope:   apiextensionv1beta1.NamespaceScoped,
+		Names: apiextensionv1beta1.CustomResourceDefinitionNames{
+			Plural:     "certificates",
+			Kind:       "Certificate",
+			ShortNames: []string{"cert", "certs"},
+>>>>>>> master
 		},
 		AdditionalPrinterColumns: []apiext.CustomResourceColumnDefinition{
 			{

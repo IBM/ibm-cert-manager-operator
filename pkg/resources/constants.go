@@ -80,7 +80,9 @@ var ConfigmapWatcherLabelMap = map[string]string{
 	"release":                      certManagerComponentName,
 }
 
-var securityAnnotation = map[string]string{}
+var securityAnnotation = map[string]string{"openshift.io/scc": "restricted"}
+
+var securityAnnotationWebhook = map[string]string{"openshift.io/scc": "hostnetwork"}
 
 var webhookAnnotation = map[string]string{
 	"watcher.ibm.com/configmap-resource": "kube-system/extension-apiserver-authentication",
@@ -158,8 +160,7 @@ const ClusterRoleName = "cert-manager"
 
 // SecurityContext values
 var runAsNonRoot = true
-var runAsUser int64 = 10000
-var fsgroup int64 = 1001
+var runAsUser int64 = 1000550001
 
 // Liveness/Readiness Probe
 var initialDelaySecondsLiveness int32 = 30
