@@ -35,8 +35,8 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 	Spec: apiext.CustomResourceDefinitionSpec{
 		Group:   GroupVersion,
 		Version: CRDVersion,
-		Scope:   apiextensionv1beta1.NamespaceScoped,
-		Names: apiextensionv1beta1.CustomResourceDefinitionNames{
+		Scope:   apiext.NamespaceScoped,
+		Names: apiext.CustomResourceDefinitionNames{
 			Plural:     "certificates",
 			Kind:       "Certificate",
 			ShortNames: []string{"cert", "certs"},
@@ -78,8 +78,8 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 		},
 		Versions: []apiext.CustomResourceDefinitionVersion{
 			{
-				Name: CRDVersion,
-				Served: TrueVar,
+				Name:    CRDVersion,
+				Served:  TrueVar,
 				Storage: TrueVar,
 				Schema: &apiext.CustomResourceValidation{
 					OpenAPIV3Schema: &apiext.JSONSchemaProps{
@@ -87,11 +87,11 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 						Properties: map[string]apiext.JSONSchemaProps{
 							"apiVersion": apiext.JSONSchemaProps{
 								Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
-								Type: "string",
+								Type:        "string",
 							},
 							"kind": apiext.JSONSchemaProps{
 								Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
-								Type: "string",
+								Type:        "string",
 							},
 							"metadata": apiext.JSONSchemaProps{
 								Type: "object",
@@ -112,16 +112,18 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"provider": apiext.JSONSchemaProps{
 																		Description: "Provider is the name of the DNS01 challenge provider to use, as configure on the referenced Issuer or ClusterIssuer resource.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
 																Required: []string{"provider"},
-																Type: "object",
+																Type:     "object",
 															},
 															"domains": apiext.JSONSchemaProps{
 																Description: "Domains is the list of domains that this Solverconfig applies to.",
-																Items:  &apiext.JSONSchemaPropsOrArray{
-																	Type: "string",
+																Items: &apiext.JSONSchemaPropsOrArray{
+																	Schema: &apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
 																},
 																Type: "array",
 															},
@@ -130,51 +132,55 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"ingress": apiext.JSONSchemaProps{
 																		Description: "Ingress is the name of an Ingress resource that will be edited to include the ACME HTTP01 'well-known' challenge path in order to solve HTTP01 challenges. If this field is specified, 'ingressClass' **must not** be specified.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"ingressClass": apiext.JSONSchemaProps{
 																		Description: "IngressClass is the ingress class that should be set on new ingress resources that are created in order to solve HTTP01 challenges. This field should be used when using an ingress controller such as nginx, which 'flattens' ingress configuration instead of maintaining a 1:1 mapping between loadbalancer IP:ingress resources. If this field is not set, and 'ingress' is not set, then ingresses without an ingress class set will be created to solve HTTP01 challenges. If this field is specified, 'ingress' **must not** be specified.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
 																Type: "object",
 															},
 														},
 														Required: []string{"domains"},
-														Type: "object",
+														Type:     "object",
 													},
 												},
 												Type: "array",
 											},
 										},
 										Required: []string{"config"},
-										Type: "object",
+										Type:     "object",
 									},
 									"commonName": apiext.JSONSchemaProps{
 										Description: "CommonName is a common name to be used on the Certificate. If no CommonName is given, then the first entry in DNSNames is used as the CommonName. The CommonName should have a length of 64 characters or fewer to avoid generating invalid CSRs; in order to have longer domain names, set the CommonName (or first DNSNames entry) to have 64 characters or fewer, and then add the longer domain name to DNSNames.",
-										Type: "string",
+										Type:        "string",
 									},
 									"dnsNames": apiext.JSONSchemaProps{
 										Description: "DNSNames is a list of subject alt names to be used on the Certificate. If no CommonName is given, then the first entry in DNSNames is used as the CommonName and must have a length of 64 characters or fewer.",
-										Items:  &apiext.JSONSchemaPropsOrArray{
-											Type: "string",
+										Items: &apiext.JSONSchemaPropsOrArray{
+											Schema: &apiext.JSONSchemaProps{
+												Type: "string",
+											},
 										},
 										Type: "array",
 									},
 									"duration": apiext.JSONSchemaProps{
 										Description: "Certificate default Duration",
-										Type: "string",
+										Type:        "string",
 									},
 									"ipAddresses": apiext.JSONSchemaProps{
 										Description: "IPAddresses is a list of IP addresses to be used on the Certificate",
 										Items: &apiext.JSONSchemaPropsOrArray{
-											Type: "string",
+											Schema: &apiext.JSONSchemaProps{
+												Type: "string",
+											},
 										},
 										Type: "array",
 									},
 									"isCA": apiext.JSONSchemaProps{
 										Description: "IsCA will mark this Certificate as valid for signing. This implies that the 'cert sign' usage is set",
-										Type: "boolean",
+										Type:        "boolean",
 									},
 									"issuerRef": apiext.JSONSchemaProps{
 										Description: "IssuerRef is a reference to the issuer for this certificate. If the 'kind' field is not set, or set to 'Issuer', an Issuer resource with the given name in the same namespace as the Certificate will be used. If the 'kind' field is set to 'ClusterIssuer', a ClusterIssuer with the provided name will be used. The 'name' field in this stanza is required at all times.",
@@ -190,87 +196,91 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 											},
 										},
 										Required: []string{"name"},
-										Type: "object",
+										Type:     "object",
 									},
 									"keyAlgorithm": apiext.JSONSchemaProps{
 										Description: "KeyAlgorithm is the private key algorithm of the corresponding private key for this certificate. If provided, allowed values are either \"rsa\" or \"ecdsa\" If KeyAlgorithm is specified and KeySize is not provided, key size of 256 will be used for \"ecdsa\" key algorithm and key size of 2048 will be used for \"rsa\" key algorithm.",
-										Enum: []JSON{
+										Enum: []apiext.JSON{
 											{
-												Raw: []byte{"rsa", "ecdsa"},
+												Raw: []byte("rsa"),
+											},
+											{
+												Raw: []byte("ecdsa"),
 											},
 										},
 										Type: "string",
 									},
 									"keyEncoding": apiext.JSONSchemaProps{
 										Description: "KeyEncoding is the private key cryptography standards (PKCS) for this certificate's private key to be encoded in. If provided, allowed values are \"pkcs1\" and \"pkcs8\" standing for PKCS#1 and PKCS#8, respectively. If KeyEncoding is not specified, then PKCS#1 will be used by default.",
-										Enum: []JSON{
+										Enum: []apiext.JSON{
 											{
-												Raw: []byte{"pkcs1", "pkcs8"},
+												Raw: []byte("pkcs1"),
+											},
+											{
+												Raw: []byte("pkcs8"),
 											},
 										},
 										Type: "string",
 									},
 									"keySize": apiext.JSONSchemaProps{
 										Description: "KeySize is the key bit size of the corresponding private key for this certificate. If provided, value must be between 2048 and 8192 inclusive when KeyAlgorithm is empty or is set to \"rsa\", and value must be one of (256, 384, 521) when KeyAlgorithm is set to \"ecdsa\".",
-										Type: "integer",
+										Type:        "integer",
 									},
 									"organization": apiext.JSONSchemaProps{
 										Description: "Organization is the organization to be used on the Certificate",
-										Items:  &apiext.JSONSchemaPropsOrArray{
-											Type: "string",
+										Items: &apiext.JSONSchemaPropsOrArray{
+											Schema: &apiext.JSONSchemaProps{
+												Type: "string",
+											},
 										},
 										Type: "array",
 									},
 									"renewBefore": apiext.JSONSchemaProps{
 										Description: "Certificate renew before expiration duration",
-										Type: "string",
+										Type:        "string",
 									},
 									"secretName": apiext.JSONSchemaProps{
 										Description: "SecretName is the name of the secret resource to store this secret in",
-										Type: "string",
+										Type:        "string",
 									},
 									"usages": apiext.JSONSchemaProps{
 										Description: "Usages is the set of x509 actions that are enabled for a given key. Defaults are ('digital signature', 'key encipherment') if empty",
 										Items: &apiext.JSONSchemaPropsOrArray{
 											Schema: &apiext.JSONSchemaProps{
 												Description: "KeyUsage specifies valid usage contexts for keys. See: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12",
-												Enum: []JSON{
-													{
-														Raw: []byte{
-															"signing",
-															"digitial signature",
-															"content commitment",
-															"key encipherment",
-															"key agreement",
-															"data encipherment",
-															"cert sign",
-															"crl sign",
-															"encipher only",
-															"decipher only",
-															"any",
-															"server auth",
-															"client auth",
-															"code signing",
-															"email protection",
-															"s/mime",
-															"ipsec end system",
-															"ipsec tunnel",
-															"ipsec user",
-															"timestamping",
-															"ocsp signing",
-															"microsoft sgc",
-															"netscape sgc",
-														},
-													},
+												Enum: []apiext.JSON{
+													{Raw: []byte("signing")},
+													{Raw: []byte("digital signature")},
+													{Raw: []byte("content commitment")},
+													{Raw: []byte("key encipherment")},
+													{Raw: []byte("key agreement")},
+													{Raw: []byte("data encipherment")},
+													{Raw: []byte("cert sign")},
+													{Raw: []byte("crl sign")},
+													{Raw: []byte("encipher only")},
+													{Raw: []byte("decipher only")},
+													{Raw: []byte("any")},
+													{Raw: []byte("server auth")},
+													{Raw: []byte("client auth")},
+													{Raw: []byte("code signing")},
+													{Raw: []byte("email protection")},
+													{Raw: []byte("s/mime")},
+													{Raw: []byte("ipsec end system")},
+													{Raw: []byte("ipsec tunnel")},
+													{Raw: []byte("ipsec user")},
+													{Raw: []byte("timestamping")},
+													{Raw: []byte("ocsp signing")},
+													{Raw: []byte("microsoft sgc")},
+													{Raw: []byte("netscape sgc")},
 												},
+												Type: "string",
 											},
-											Type: "string",
 										},
 										Type: "array",
 									},
 								},
 								Required: []string{"issuerRef", "secretName"},
-								Type: "object",
+								Type:     "object",
 							},
 							"status": apiext.JSONSchemaProps{
 								Description: "CertificateStatus defines the observed state of Certificate",
@@ -282,45 +292,45 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 												Properties: map[string]apiext.JSONSchemaProps{
 													"lastTransitionTime": apiext.JSONSchemaProps{
 														Description: "LastTransitionTime is the timestamp corresponding to the last status change of this condition.",
-														Format: "date-time",
-														Type: "string",
+														Format:      "date-time",
+														Type:        "string",
 													},
 													"message": apiext.JSONSchemaProps{
 														Description: "Message is a human readable description of the details of the last transition, complementing reason.",
-														Type: "string",
+														Type:        "string",
 													},
 													"reason": apiext.JSONSchemaProps{
 														Description: "Reason is a brief machine readable explanation for the condition's last transition.",
-														Type: "string",
+														Type:        "string",
 													},
 													"status": apiext.JSONSchemaProps{
 														Description: "Status of the condition one of ('True', 'False', 'Unknown')",
-														Enum: []JSON{
-															{
-																Raw: []byte{"True", "False", "Unknown"},
-															},
+														Enum: []apiext.JSON{
+															{Raw: []byte("True")},
+															{Raw: []byte("False")},
+															{Raw: []byte("Unknown")},
 														},
 														Type: "string",
 													},
 													"type": apiext.JSONSchemaProps{
 														Description: "Type of the condition, currently ('Ready')",
-														Type: "string",
+														Type:        "string",
 													},
 												},
 												Required: []string{"status", "type"},
+												Type:     "object",
 											},
-											Type: "object",
 										},
 										Type: "array",
 									},
 									"lastFailureTime": apiext.JSONSchemaProps{
 										Format: "date-time",
-										Type: "string",
+										Type:   "string",
 									},
 									"notAfter": apiext.JSONSchemaProps{
 										Description: "The expiration time of the certificate stored in the secret named by this resource in spec.secretName.",
-										Format: "date-time",
-										Type: "string",
+										Format:      "date-time",
+										Type:        "string",
 									},
 								},
 								Type: "object",
@@ -335,7 +345,7 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 	Status: apiext.CustomResourceDefinitionStatus{
 		Conditions: []apiext.CustomResourceDefinitionCondition{},
 		AcceptedNames: apiext.CustomResourceDefinitionNames{
-			Kind: "",
+			Kind:   "",
 			Plural: "",
 		},
 		StoredVersions: []string{},
@@ -365,7 +375,6 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 			Plural: "clusterissuers",
 			Kind:   "ClusterIssuer",
 		},
-
 	},
 }
 
@@ -389,8 +398,8 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 		Version: CRDVersion,
 		Versions: []apiext.CustomResourceDefinitionVersion{
 			{
-				Name: CRDVersion,
-				Served: TrueVar,
+				Name:    CRDVersion,
+				Served:  TrueVar,
 				Storage: TrueVar,
 				Schema: &apiext.CustomResourceValidation{
 					OpenAPIV3Schema: &apiext.JSONSchemaProps{
@@ -398,11 +407,11 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 						Properties: map[string]apiext.JSONSchemaProps{
 							"apiVersion": apiext.JSONSchemaProps{
 								Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
-								Type: "string",
+								Type:        "string",
 							},
 							"kind": apiext.JSONSchemaProps{
 								Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
-								Type: "string",
+								Type:        "string",
 							},
 							"metadata": apiext.JSONSchemaProps{
 								Type: "object",
@@ -411,36 +420,36 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 								Properties: map[string]apiext.JSONSchemaProps{
 									"authzURL": apiext.JSONSchemaProps{
 										Description: "AuthzURL is the URL to the ACME Authorization resource that this challenge is a part of.",
-										Type: "string",
+										Type:        "string",
 									},
 									"config": apiext.JSONSchemaProps{
-										Description: "Config specifies the solver configuration for this challenge. Only **one** of ''config'' or ''solver'' may be specified, and if both are specified then no action will be performed on the Challenge resource. DEPRECATED: the ''solver'' field should be specified instead",
-										Type: "object",
+										Description: "Config specifies the solver configuration for this challenge. Only **one** of 'config' or 'solver' may be specified, and if both are specified then no action will be performed on the Challenge resource. DEPRECATED: the 'solver' field should be specified instead",
+										Type:        "object",
 										Properties: map[string]apiext.JSONSchemaProps{
 											"dns01": apiext.JSONSchemaProps{
 												Description: "DNS01 contains DNS01 challenge solving configuration",
-												Type: "object",
+												Type:        "object",
 												Properties: map[string]apiext.JSONSchemaProps{
-													"provider":  apiext.JSONSchemaProps{
+													"provider": apiext.JSONSchemaProps{
 														Description: "Provider is the name of the DNS01 challenge provider to use, as configure on the referenced Issuer or ClusterIssuer resource.",
-														Type: "string",
+														Type:        "string",
 													},
 												},
-												Required: []string {
+												Required: []string{
 													"provider",
 												},
 											},
 											"http01": apiext.JSONSchemaProps{
 												Description: "HTTP01 contains HTTP01 challenge solving configuration",
-												Type: "object",
+												Type:        "object",
 												Properties: map[string]apiext.JSONSchemaProps{
 													"ingress": apiext.JSONSchemaProps{
 														Description: "Ingress is the name of an Ingress resource that will be edited to include the ACME HTTP01 'well-known' challenge path in order to solve HTTP01 challenges. If this field is specified, 'ingressClass' **must not** be specified.",
-														Type: "string",
+														Type:        "string",
 													},
 													"ingressClass": apiext.JSONSchemaProps{
 														Description: "IngressClass is the ingress class that should be set on new ingress resources that are created in order to solve HTTP01 challenges. This field should be used when using an ingress controller such as nginx, which 'flattens' ingress configuration instead of maintaining a 1:1 mapping between loadbalancer IP:ingress resources. If this field is not set, and 'ingress' is not set, then ingresses without an ingress class set will be created to solve HTTP01 challenges. If this field is specified, 'ingress' **must not** be specified.",
-														Type: "string",
+														Type:        "string",
 													},
 												},
 											},
@@ -448,11 +457,11 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 									},
 									"dnsName": apiext.JSONSchemaProps{
 										Description: "DNSName is the identifier that this challenge is for, e.g. example.com.",
-										Type: "string",
+										Type:        "string",
 									},
 									"issuerRef": apiext.JSONSchemaProps{
 										Description: "IssuerRef references a properly configured ACME-type Issuer which should be used to create this Challenge. If the Issuer does not exist, processing will be retried. If the Issuer is not an 'ACME' Issuer, an error will be returned and the Challenge will be marked as failed.",
-										Type: "object",
+										Type:        "object",
 										Properties: map[string]apiext.JSONSchemaProps{
 											"group": apiext.JSONSchemaProps{
 												Type: "string",
@@ -463,17 +472,18 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 											"kind": apiext.JSONSchemaProps{
 												Type: "string",
 											},
+										},
 										Required: []string{
 											"name",
 										},
 									},
 									"key": apiext.JSONSchemaProps{
 										Description: "Key is the ACME challenge key for this challenge",
-										Type: "string",
+										Type:        "string",
 									},
 									"solver": apiext.JSONSchemaProps{
 										Description: "Solver contains the domain solving configuration that should be used to solve this challenge resource. Only **one** of 'config' or 'solver' may be specified, and if both are specified then no action will be performed on the Challenge resource.",
-										Type: "string",
+										Type:        "string",
 										Properties: map[string]apiext.JSONSchemaProps{
 											"dns01": apiext.JSONSchemaProps{
 												Properties: map[string]apiext.JSONSchemaProps{
@@ -484,14 +494,14 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"key": apiext.JSONSchemaProps{
 																		Description: "The key of the secret to select from. Must be a valid secret key.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"name": apiext.JSONSchemaProps{
 																		Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
-																Required: []string {
+																Required: []string{
 																	"name",
 																},
 																Type: "object",
@@ -513,50 +523,50 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"key": apiext.JSONSchemaProps{
 																		Description: "The key of the secret to select from. Must be a valid secret key.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"name": apiext.JSONSchemaProps{
 																		Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
 																Required: []string{"name"},
-																Type: "object",
+																Type:     "object",
 															},
 															"clientSecretSecretRef": apiext.JSONSchemaProps{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"key": apiext.JSONSchemaProps{
 																		Description: "The key of the secret to select from. Must be a valid secret key.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"name": apiext.JSONSchemaProps{
 																		Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
 																Required: []string{"name"},
-																Type: "object",
+																Type:     "object",
 															},
 															"clientTokenSecretRef": apiext.JSONSchemaProps{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"key": apiext.JSONSchemaProps{
 																		Description: "The key of the secret to select from. Must be a valid secret key.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"name": apiext.JSONSchemaProps{
 																		Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
 																Required: []string{"name"},
-																Type: "object",
+																Type:     "object",
 															},
 															"serviceConsumerDomain": apiext.JSONSchemaProps{
 																Type: "string",
 															},
 														},
 														Required: []string{"accessTokenSecretRef", "clientSecretSecretRef", "clientTokenSecretRef", "serviceConsumerDomain"},
-														Type: "object",
+														Type:     "object",
 													},
 													"azuredns": apiext.JSONSchemaProps{
 														Description: "",
@@ -568,25 +578,23 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"key": apiext.JSONSchemaProps{
 																		Description: "The key of the secret to select from. Must be a valid secret key.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"name": apiext.JSONSchemaProps{
 																		Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
 																Required: []string{"name"},
-																Type: "object",
+																Type:     "object",
 															},
 															"environment": apiext.JSONSchemaProps{
 																Type: "string",
-																Enum: []JSON{
-																	Raw: []byte{
-																		"AzurePublicCloud",
-																		"AzureChinaCloud",
-																		"AzureGermanCloud",
-																		"AzureUSGovernmentCloud",
-																	},
+																Enum: []apiext.JSON{
+																	{Raw: []byte("AzurePublicCloud")},
+																	{Raw: []byte("AzureChinaCloud")},
+																	{Raw: []byte("AzureGermanCloud")},
+																	{Raw: []byte("AzureUSGovernmentCloud")},
 																},
 															},
 															"hostedZoneName": apiext.JSONSchemaProps{
@@ -603,7 +611,7 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 															},
 														},
 														Required: []string{"clientID", "clientSecretSecretRef", "resourceGroupName", "subscriptionID", "tenantID"},
-														Type: "object",
+														Type:     "object",
 													},
 													"clouddns": apiext.JSONSchemaProps{
 														Description: "ACMEIssuerDNS01ProviderCloudDNS is a structure containing the DNS configuration for Google Cloud DNS",
@@ -615,19 +623,19 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"key": apiext.JSONSchemaProps{
 																		Description: "The key of the secret to select from. Must be a valid secret key.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"name": apiext.JSONSchemaProps{
 																		Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
 																Required: []string{"name"},
-																Type: "object",
+																Type:     "object",
 															},
 														},
 														Required: []string{"project", "serviceAccountSecretRef"},
-														Type: "object",
+														Type:     "object",
 													},
 													"cloudflare": apiext.JSONSchemaProps{
 														Description: "ACMEIssuerDNS01ProviderCloudflare is a structure containing the DNS configuration for Cloudflare",
@@ -636,14 +644,14 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"key": apiext.JSONSchemaProps{
 																		Description: "The key of the secret to select from. Must be a valid secret key.",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																	"name": apiext.JSONSchemaProps{
 																		Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																		Type: "string",
+																		Type:        "string",
 																	},
 																},
-																Required: []string {
+																Required: []string{
 																	"name",
 																},
 																Type: "object",
@@ -653,7 +661,7 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 															},
 														},
 														Required: []string{"apiKeySecretRef", "email"},
-														Type: "object",
+														Type:     "object",
 													},
 												},
 											},
@@ -661,51 +669,51 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 									},
 									"token": apiext.JSONSchemaProps{
 										Description: "AuthzURL is the URL to the ACME Authorization resource that this challenge is a part of.",
-										Type: "string",
+										Type:        "string",
 									},
 									"type": apiext.JSONSchemaProps{
 										Description: "AuthzURL is the URL to the ACME Authorization resource that this challenge is a part of.",
-										Type: "string",
+										Type:        "string",
 									},
 									"url": apiext.JSONSchemaProps{
 										Description: "AuthzURL is the URL to the ACME Authorization resource that this challenge is a part of.",
-										Type: "string",
+										Type:        "string",
 									},
 									"wildcard": apiext.JSONSchemaProps{
 										Description: "Wildcard will be true if this challenge is for a wildcard identifier, for example '*.example.com'",
-										Type: "boolean",
+										Type:        "boolean",
 									},
 								},
 							},
 						},
 					},
 				},
-				AdditionalPrinterColumns: []apixtensionv1.CustomResourceColumnDefinition{
+				AdditionalPrinterColumns: []apiext.CustomResourceColumnDefinition{
 					{
-						Name: "State",
-						Type: "string",
+						Name:     "State",
+						Type:     "string",
 						JSONPath: ".status.state",
 					},
 					{
-						Name: "Domain",
-						Type: "string",
+						Name:     "Domain",
+						Type:     "string",
 						JSONPath: ".spec.dnsName",
 					},
 					{
-						Name: "Reason",
-						Type: "string",
+						Name:     "Reason",
+						Type:     "string",
 						JSONPath: ".status.reason",
 					},
 					{
-						Name: "Age",
-						Type: "date",
-						JSONPath: ".metadata.creationTimestamp",
+						Name:        "Age",
+						Type:        "date",
+						JSONPath:    ".metadata.creationTimestamp",
 						Description: "CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",
 					},
 				},
 			},
 		},
-		Scope:   apiext.NamespacedScope,
+		Scope: apiext.NamespaceScoped,
 		Names: apiext.CustomResourceDefinitionNames{
 			Plural: "challenges",
 			Kind:   "Challenge",
