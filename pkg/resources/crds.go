@@ -35,18 +35,11 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 	Spec: apiext.CustomResourceDefinitionSpec{
 		Group:   GroupVersion,
 		Version: CRDVersion,
-<<<<<<< HEAD
-		Scope:   apiext.NamespaceScoped,
-		Names: apiext.CustomResourceDefinitionNames{
-			Plural: "certificates",
-			Kind:   "Certificate",
-=======
 		Scope:   apiextensionv1beta1.NamespaceScoped,
 		Names: apiextensionv1beta1.CustomResourceDefinitionNames{
 			Plural:     "certificates",
 			Kind:       "Certificate",
 			ShortNames: []string{"cert", "certs"},
->>>>>>> master
 		},
 		AdditionalPrinterColumns: []apiext.CustomResourceColumnDefinition{
 			{
@@ -158,39 +151,194 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 										Type: "object",
 									},
 									"commonName": apiext.JSONSchemaProps{
+										Description: "CommonName is a common name to be used on the Certificate. If no CommonName is given, then the first entry in DNSNames is used as the CommonName. The CommonName should have a length of 64 characters or fewer to avoid generating invalid CSRs; in order to have longer domain names, set the CommonName (or first DNSNames entry) to have 64 characters or fewer, and then add the longer domain name to DNSNames.",
+										Type: "string",
 									},
 									"dnsNames": apiext.JSONSchemaProps{
+										Description: "DNSNames is a list of subject alt names to be used on the Certificate. If no CommonName is given, then the first entry in DNSNames is used as the CommonName and must have a length of 64 characters or fewer.",
+										Items:  &apiext.JSONSchemaPropsOrArray{
+											Type: "string",
+										},
+										Type: "array",
 									},
 									"duration": apiext.JSONSchemaProps{
+										Description: "Certificate default Duration",
+										Type: "string",
 									},
 									"ipAddresses": apiext.JSONSchemaProps{
+										Description: "IPAddresses is a list of IP addresses to be used on the Certificate",
+										Items: &apiext.JSONSchemaPropsOrArray{
+											Type: "string",
+										},
+										Type: "array",
 									},
 									"isCA": apiext.JSONSchemaProps{
+										Description: "IsCA will mark this Certificate as valid for signing. This implies that the 'cert sign' usage is set",
+										Type: "boolean",
 									},
 									"issuerRef": apiext.JSONSchemaProps{
+										Description: "IssuerRef is a reference to the issuer for this certificate. If the 'kind' field is not set, or set to 'Issuer', an Issuer resource with the given name in the same namespace as the Certificate will be used. If the 'kind' field is set to 'ClusterIssuer', a ClusterIssuer with the provided name will be used. The 'name' field in this stanza is required at all times.",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"group": apiext.JSONSchemaProps{
+												Type: "string",
+											},
+											"kind": apiext.JSONSchemaProps{
+												Type: "string",
+											},
+											"name": apiext.JSONSchemaProps{
+												Type: "string",
+											},
+										},
+										Required: []string{"name"},
+										Type: "object",
 									},
 									"keyAlgorithm": apiext.JSONSchemaProps{
+										Description: "KeyAlgorithm is the private key algorithm of the corresponding private key for this certificate. If provided, allowed values are either \"rsa\" or \"ecdsa\" If KeyAlgorithm is specified and KeySize is not provided, key size of 256 will be used for \"ecdsa\" key algorithm and key size of 2048 will be used for \"rsa\" key algorithm.",
+										Enum: []JSON{
+											{
+												Raw: []byte{"rsa", "ecdsa"},
+											},
+										},
+										Type: "string",
 									},
 									"keyEncoding": apiext.JSONSchemaProps{
+										Description: "KeyEncoding is the private key cryptography standards (PKCS) for this certificate's private key to be encoded in. If provided, allowed values are \"pkcs1\" and \"pkcs8\" standing for PKCS#1 and PKCS#8, respectively. If KeyEncoding is not specified, then PKCS#1 will be used by default.",
+										Enum: []JSON{
+											{
+												Raw: []byte{"pkcs1", "pkcs8"},
+											},
+										},
+										Type: "string",
 									},
 									"keySize": apiext.JSONSchemaProps{
+										Description: "KeySize is the key bit size of the corresponding private key for this certificate. If provided, value must be between 2048 and 8192 inclusive when KeyAlgorithm is empty or is set to \"rsa\", and value must be one of (256, 384, 521) when KeyAlgorithm is set to \"ecdsa\".",
+										Type: "integer",
 									},
 									"organization": apiext.JSONSchemaProps{
+										Description: "Organization is the organization to be used on the Certificate",
+										Items:  &apiext.JSONSchemaPropsOrArray{
+											Type: "string",
+										},
+										Type: "array",
 									},
 									"renewBefore": apiext.JSONSchemaProps{
+										Description: "Certificate renew before expiration duration",
+										Type: "string",
 									},
 									"secretName": apiext.JSONSchemaProps{
+										Description: "SecretName is the name of the secret resource to store this secret in",
+										Type: "string",
 									},
 									"usages": apiext.JSONSchemaProps{
+										Description: "Usages is the set of x509 actions that are enabled for a given key. Defaults are ('digital signature', 'key encipherment') if empty",
+										Items: &apiext.JSONSchemaPropsOrArray{
+											Schema: &apiext.JSONSchemaProps{
+												Description: "KeyUsage specifies valid usage contexts for keys. See: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12",
+												Enum: []JSON{
+													{
+														Raw: []byte{
+															"signing",
+															"digitial signature",
+															"content commitment",
+															"key encipherment",
+															"key agreement",
+															"data encipherment",
+															"cert sign",
+															"crl sign",
+															"encipher only",
+															"decipher only",
+															"any",
+															"server auth",
+															"client auth",
+															"code signing",
+															"email protection",
+															"s/mime",
+															"ipsec end system",
+															"ipsec tunnel",
+															"ipsec user",
+															"timestamping",
+															"ocsp signing",
+															"microsoft sgc",
+															"netscape sgc",
+														},
+													},
+												},
+											},
+											Type: "string",
+										},
+										Type: "array",
 									},
 								},
-
+								Required: []string{"issuerRef", "secretName"},
+								Type: "object",
+							},
+							"status": apiext.JSONSchemaProps{
+								Description: "CertificateStatus defines the observed state of Certificate",
+								Properties: map[string]apiext.JSONSchemaProps{
+									"conditions": apiext.JSONSchemaProps{
+										Items: &apiext.JSONSchemaPropsOrArray{
+											Schema: &apiext.JSONSchemaProps{
+												Description: "CertificateCondition contains condition information for an Certificate.",
+												Properties: map[string]apiext.JSONSchemaProps{
+													"lastTransitionTime": apiext.JSONSchemaProps{
+														Description: "LastTransitionTime is the timestamp corresponding to the last status change of this condition.",
+														Format: "date-time",
+														Type: "string",
+													},
+													"message": apiext.JSONSchemaProps{
+														Description: "Message is a human readable description of the details of the last transition, complementing reason.",
+														Type: "string",
+													},
+													"reason": apiext.JSONSchemaProps{
+														Description: "Reason is a brief machine readable explanation for the condition's last transition.",
+														Type: "string",
+													},
+													"status": apiext.JSONSchemaProps{
+														Description: "Status of the condition one of ('True', 'False', 'Unknown')",
+														Enum: []JSON{
+															{
+																Raw: []byte{"True", "False", "Unknown"},
+															},
+														},
+														Type: "string",
+													},
+													"type": apiext.JSONSchemaProps{
+														Description: "Type of the condition, currently ('Ready')",
+														Type: "string",
+													},
+												},
+												Required: []string{"status", "type"},
+											},
+											Type: "object",
+										},
+										Type: "array",
+									},
+									"lastFailureTime": apiext.JSONSchemaProps{
+										Format: "date-time",
+										Type: "string",
+									},
+									"notAfter": apiext.JSONSchemaProps{
+										Description: "The expiration time of the certificate stored in the secret named by this resource in spec.secretName.",
+										Format: "date-time",
+										Type: "string",
+									},
+								},
+								Type: "object",
 							},
 						},
+						Type: "object",
 					},
 				},
 			},
 		},
+	},
+	Status: apiext.CustomResourceDefinitionStatus{
+		Conditions: []apiext.CustomResourceDefinitionCondition{},
+		AcceptedNames: apiext.CustomResourceDefinitionNames{
+			Kind: "",
+			Plural: "",
+		},
+		StoredVersions: []string{},
 	},
 }
 
@@ -217,7 +365,7 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 			Plural: "clusterissuers",
 			Kind:   "ClusterIssuer",
 		},
-		
+
 	},
 }
 
