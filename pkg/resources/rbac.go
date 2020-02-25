@@ -98,6 +98,16 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 			Resources:     []string{"securitycontextconstraints"},
 			ResourceNames: []string{"restricted", "hostnetwork"},
 		},
+		{
+			Verbs:     []string{"*"},
+			APIGroups: []string{"admissionregistration.k8s.io"},
+			Resources: []string{"mutatingwebhookconfigurations", "validatingwebhookconfigurations"},
+		},
+		{
+			Verbs:     []string{"*"},
+			APIGroups: []string{"apiservices.apiregistration.k8s.io"},
+			Resources: []string{"apiservices"},
+		},
 	},
 }
 
