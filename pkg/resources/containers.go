@@ -105,10 +105,6 @@ var webhookContainer = corev1.Container{
 				},
 			},
 		},
-		{
-			Name:  "TMPDIR",
-			Value: "/home/webhook/tmp",
-		},
 	},
 	LivenessProbe: &corev1.Probe{
 		Handler: corev1.Handler{
