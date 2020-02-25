@@ -160,7 +160,6 @@ const ClusterRoleName = "cert-manager"
 
 // SecurityContext values
 var runAsNonRoot = true
-var runAsUser int64 = 1000550001
 
 // Liveness/Readiness Probe
 var initialDelaySecondsLiveness int32 = 30
