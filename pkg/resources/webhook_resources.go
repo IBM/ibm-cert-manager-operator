@@ -136,6 +136,9 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:   CertManagerWebhookName,
 		Labels: WebhookLabelMap,
+		Annotations: map[string]string{
+			"certmanager.k8s.io/inject-apiserver-ca": "true",
+		},
 	},
 	Webhooks: []admRegv1beta1.ValidatingWebhook{
 		{
