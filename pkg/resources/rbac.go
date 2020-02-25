@@ -105,7 +105,7 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 		},
 		{
 			Verbs:     []string{"*"},
-			APIGroups: []string{"apiservices.apiregistration.k8s.io"},
+			APIGroups: []string{"apiregistration.k8s.io"},
 			Resources: []string{"apiservices"},
 		},
 	},
