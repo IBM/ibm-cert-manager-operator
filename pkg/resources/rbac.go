@@ -39,7 +39,7 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "update", "delete"},
 			APIGroups: []string{""},
-			Resources: []string{"secrets"},
+			Resources: []string{"secrets", "configmaps"},
 		},
 		{
 			Verbs:     []string{"*"},
@@ -70,7 +70,7 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "delete"},
 			APIGroups: []string{""},
-			Resources: []string{"pods", "services", "configmaps"},
+			Resources: []string{"pods", "services"},
 		},
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "delete", "update"},
