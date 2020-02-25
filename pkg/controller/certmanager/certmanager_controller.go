@@ -254,7 +254,7 @@ func (r *ReconcileCertManager) PreReqs(instance *operatorv1alpha1.CertManager) e
 		log.V(2).Info("Checking CRDs failed")
 		return err
 	}
-	if err := checkNamespace(r.kubeclient.CoreV1().Namespaces()); err != nil {
+	if err := checkNamespace(instance, r.scheme, r.kubeclient.CoreV1().Namespaces()); err != nil {
 		log.V(2).Info("Checking namespace failed")
 		return err
 	}

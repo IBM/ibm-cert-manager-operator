@@ -23,7 +23,6 @@ import (
 
 var containerSecurityGeneral = &corev1.SecurityContext{
 	RunAsNonRoot:             &runAsNonRoot,
-	RunAsUser:                &runAsUser,
 	AllowPrivilegeEscalation: &FalseVar,
 	ReadOnlyRootFilesystem:   &TrueVar,
 	Privileged:               &FalseVar,
@@ -36,7 +35,6 @@ var containerSecurityGeneral = &corev1.SecurityContext{
 
 var containerSecurityWebhook = &corev1.SecurityContext{
 	RunAsNonRoot:             &runAsNonRoot,
-	RunAsUser:                &runAsUser,
 	AllowPrivilegeEscalation: &FalseVar,
 	ReadOnlyRootFilesystem:   &FalseVar,
 	Privileged:               &FalseVar,
