@@ -110,10 +110,13 @@ func createServiceAccount(instance *operatorv1alpha1.CertManager, scheme *runtim
 }
 
 // Checks to ensure the namespace we're deploying the service in exists
-func checkNamespace(client typedCorev1.NamespaceInterface) error {
+func checkNamespace(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client typedCorev1.NamespaceInterface) error {
 	getOpt := metav1.GetOptions{}
 
 	if _, err := client.Get(res.DeployNamespace, getOpt); err != nil && apiErrors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(instance, res.NamespaceDef, scheme); err != nil {
+			log.Error(err, "Error setting controller reference on namespace")
+		}
 		log.V(1).Info("cert-manager namespace does not exist, creating it", "error", err)
 		if _, err = client.Create(res.NamespaceDef); err != nil {
 			return err
