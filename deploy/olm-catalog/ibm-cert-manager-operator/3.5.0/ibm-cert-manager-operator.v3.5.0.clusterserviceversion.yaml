@@ -78,7 +78,7 @@ spec:
         path: imageRegistry
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
-      - description: The namespace for the cert-manager operand to look in for cluster issuers
+      - description: The namespace where namespace scoped resources referenced by cert-manager clusterissuers must be placed
         displayName: ResourceNamespace
         path: resourceNamespace
         x-descriptors:
