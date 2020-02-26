@@ -39,7 +39,7 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "update", "delete"},
 			APIGroups: []string{""},
-			Resources: []string{"secrets"},
+			Resources: []string{"secrets", "configmaps"},
 		},
 		{
 			Verbs:     []string{"*"},
@@ -70,7 +70,7 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "delete"},
 			APIGroups: []string{""},
-			Resources: []string{"pods", "services", "configmaps"},
+			Resources: []string{"pods", "services"},
 		},
 		{
 			Verbs:     []string{"get", "list", "watch", "create", "delete", "update"},
@@ -97,6 +97,21 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 			APIGroups:     []string{"security.openshift.io"},
 			Resources:     []string{"securitycontextconstraints"},
 			ResourceNames: []string{"restricted", "hostnetwork"},
+		},
+		{
+			Verbs:     []string{"*"},
+			APIGroups: []string{"admissionregistration.k8s.io"},
+			Resources: []string{"mutatingwebhookconfigurations", "validatingwebhookconfigurations"},
+		},
+		{
+			Verbs:     []string{"*"},
+			APIGroups: []string{"apiregistration.k8s.io"},
+			Resources: []string{"apiservices"},
+		},
+		{
+			Verbs:     []string{"*"},
+			APIGroups: []string{"authorization.k8s.io"},
+			Resources: []string{"subjectaccessreviews"},
 		},
 	},
 }
