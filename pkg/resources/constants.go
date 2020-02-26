@@ -195,16 +195,19 @@ var readinessExecActionConfigmapWatcher = v1.ExecAction{
 // Cert-manager args
 const webhookServingSecret = "cert-manager-webhook-tls"
 
-const resourceNS = "--cluster-resource-namespace=kube-system"
+// ResourceNS is the resource namespace arg for cert-manager-controller
+const ResourceNS = "--cluster-resource-namespace=ibm-common-services"
 const leaderElectNS = "--leader-election-namespace=cert-manager"
-const acmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
+
+// AcmeSolverArg is the acme solver image to use for the cert-manager-controller
+const AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
 const webhookNSArg = "--webhook-namespace=" + DeployNamespace
 const webhookCASecretArg = "--webhook-ca-secret=cert-manager-webhook-ca"
 const webhookServingSecretArg = "--webhook-serving-secret=" + webhookServingSecret
 const webhookDNSNamesArg = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc"
 
 // DefaultArgs are the default arguments use for cert-manager-controller
-var DefaultArgs = []string{resourceNS, leaderElectNS, webhookNSArg, webhookCASecretArg, webhookServingSecretArg, webhookDNSNamesArg}
+var DefaultArgs = []string{leaderElectNS, webhookNSArg, webhookCASecretArg, webhookServingSecretArg, webhookDNSNamesArg}
 
 // CRDs is the list of crds created/used by cert-manager in this version
 var CRDs = [5]string{"certificates", "issuers", "clusterissuers", "orders", "challenges"}
