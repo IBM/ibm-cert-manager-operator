@@ -78,14 +78,9 @@ spec:
         path: imageRegistry
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
-      - description: Uses this pull secret name to pull the cert-manager images when specified
-        displayName: Pull Secret Name
-        path: pullSecret.name
-        x-descriptors:
-        - 'urn:alm:descriptor:com.tectonic.ui:text'
-      - description: Copies the pull secret name from this namespace to pull the cert-manager images when specified
-        displayName: Pull Secret Namespace
-        path: pullSecret.namespace
+      - description: The namespace where namespace scoped resources referenced by cert-manager clusterissuers must be placed
+        displayName: ResourceNamespace
+        path: resourceNamespace
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
       statusDescriptors:
