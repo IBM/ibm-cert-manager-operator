@@ -32,6 +32,7 @@ type CertManagerSpec struct {
 	ImagePostFix  string          `json:"imagePostFix,omitempty"`
 	PullSecret    ImagePullSecret `json:"pullSecret,omitempty"`
 	Webhook       bool            `json:"enableWebhook,omitempty"`
+	ResourceNS    string          `json:"resourceNamespace,omitempty"`
 }
 
 type ImagePullSecret struct {
