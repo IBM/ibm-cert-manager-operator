@@ -120,7 +120,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		if instance.Spec.ResourceNS != "" {
 			resourceNS = "--cluster-resource-namespace=" + instance.Spec.ResourceNS
 		}
-		var args []string = make([]string, len(res.DefaultArgs))
+		var args = make([]string, len(res.DefaultArgs))
 		copy(args, res.DefaultArgs)
 		args = append(args, acmesolver, resourceNS)
 		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
