@@ -28,16 +28,10 @@ type CertManagerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	ImageRegistry string          `json:"imageRegistry,omitempty"`
-	ImagePostFix  string          `json:"imagePostFix,omitempty"`
-	PullSecret    ImagePullSecret `json:"pullSecret,omitempty"`
-	Webhook       bool            `json:"enableWebhook,omitempty"`
-	ResourceNS    string          `json:"resourceNamespace,omitempty"`
-}
-
-type ImagePullSecret struct {
-	Name      string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
+	ImageRegistry string `json:"imageRegistry,omitempty"`
+	ImagePostFix  string `json:"imagePostFix,omitempty"`
+	Webhook       bool   `json:"enableWebhook,omitempty"`
+	ResourceNS    string `json:"resourceNamespace,omitempty"`
 }
 
 // CertManagerStatus defines the observed state of CertManager
