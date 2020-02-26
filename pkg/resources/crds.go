@@ -531,6 +531,13 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 			Plural: "clusterissuers",
 			Kind:   "ClusterIssuer",
 		},
+		AdditionalPrinterColumns: []apiext.CustomResourceColumnDefinition{
+			{
+				JSONPath: `.status.conditions[?(@.type=="Ready")].status`,
+				Name:     "Ready",
+				Type:     "string",
+			},
+		},
 	},
 	Status: apiext.CustomResourceDefinitionStatus{
 		Conditions: []apiext.CustomResourceDefinitionCondition{},
