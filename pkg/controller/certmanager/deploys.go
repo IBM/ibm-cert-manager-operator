@@ -129,8 +129,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		}
 		var args []string
 		copy(res.DefaultArgs, args)
-		args = append(args, acmesolver)
-		args = append(args, resourceNS)
+		args = append(args, acmesolver, resourceNS)
 		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
 		log.V(3).Info("The args", "args", deploy.Spec.Template.Spec.Containers[0].Args)
 	case res.CertManagerCainjectorName:
