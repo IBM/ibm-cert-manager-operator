@@ -17,12 +17,12 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    description: Operator for managing deployment of cert-manager service. 
     categories: Security
+    certified: "false"
     containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
     createdAt: "2020-01-14T10:16:16Z"
+    description: Operator for managing deployment of cert-manager service.
     support: IBM
-    certified: "false"
   name: ibm-cert-manager-operator.v3.5.0
   namespace: placeholder
 spec:
@@ -78,14 +78,9 @@ spec:
         path: imageRegistry
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
-      - description: Uses this pull secret name to pull the cert-manager images when specified
-        displayName: Pull Secret Name
-        path: pullSecret.name
-        x-descriptors:
-        - 'urn:alm:descriptor:com.tectonic.ui:text'
-      - description: Copies the pull secret name from this namespace to pull the cert-manager images when specified
-        displayName: Pull Secret Namespace
-        path: pullSecret.namespace
+      - description: The namespace where namespace scoped resources referenced by cert-manager clusterissuers must be placed
+        displayName: ResourceNamespace
+        path: resourceNamespace
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
       statusDescriptors:
@@ -328,11 +323,11 @@ spec:
           - '*'
         - apiGroups:
           - security.openshift.io
-          resources:
-          - securitycontextconstraints
           resourceNames:
           - restricted
           - hostnetwork
+          resources:
+          - securitycontextconstraints
           verbs:
           - use
         - apiGroups:
@@ -384,7 +379,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
