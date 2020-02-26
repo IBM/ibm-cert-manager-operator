@@ -30,8 +30,6 @@ var CRDMap = map[string]*apiext.CustomResourceDefinition{
 	"challenges":     challengeCRD,
 }
 
-var trueBytes = []byte("True")
-
 var certificateCRD = &apiext.CustomResourceDefinition{
 	ObjectMeta: metav1.ObjectMeta{Name: "certificates.certmanager.k8s.io", Labels: ControllerLabelMap},
 	Spec: apiext.CustomResourceDefinitionSpec{
@@ -357,6 +355,169 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 			Plural: "issuers",
 			Kind:   "Issuer",
 		},
+		AdditionalPrinterColumns: []apiext.CustomResourceColumnDefinition{
+			{
+				JSONPath: `.status.conditions[?(@.type=="Ready")].status`,
+				Name:     "Ready",
+				Type:     "string",
+			},
+		},
+		Validation: &apiext.CustomResourceValidation{
+			OpenAPIV3Schema: &apiext.JSONSchemaProps{
+				Properties: map[string]apiext.JSONSchemaProps{
+					"apiVersion": apiext.JSONSchemaProps{
+						Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+						Type:        "string",
+					},
+					"kind": apiext.JSONSchemaProps{
+						Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+						Type:        "string",
+					},
+					"metadata": apiext.JSONSchemaProps{
+						Type: "object",
+					},
+					"spec": apiext.JSONSchemaProps{
+						Type:        "object",
+						Description: "IssuerSpec is the specification of an Issuer. This includes any configuration required for the issuer.",
+						Properties: map[string]apiext.JSONSchemaProps{
+							"acme": apiext.JSONSchemaProps{
+								Description: "ACMEIssuer contains the specification for an ACME issuer",
+								Properties: map[string]apiext.JSONSchemaProps{
+									"dns01": apiext.JSONSchemaProps{
+										Description: "DEPRECATED: DNS-01 config",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"providers": apiext.JSONSchemaProps{
+												Items: &apiext.JSONSchemaPropsOrArray{
+													Schema: &apiext.JSONSchemaProps{
+														Description: "ACMEIssuerDNS01Provider contains configuration for a DNS provider that can be used to solve ACME DNS01 challenges.",
+														Properties: map[string]apiext.JSONSchemaProps{
+															"acmedns": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderAcmeDNS is a structure containing the configuration for ACME-DNS servers",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"accountSecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"host": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Required: []string{"accountSecretRef", "host"},
+																Type:     "object",
+															},
+															"akami": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderAkamai is a structure containing the DNS configuration for Akamai DNS—Zone Record Management API",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"accessTokenSecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"clientSecretSecretRef": apiext.JSONSchemaProps{Properties: map[string]apiext.JSONSchemaProps{
+																		"key": apiext.JSONSchemaProps{
+																			Description: "The key of the secret to select from. Must be a valid secret key.",
+																			Type:        "string",
+																		},
+																		"name": apiext.JSONSchemaProps{
+																			Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																			Type:        "string",
+																		},
+																	},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"clientTokenSecretRef": apiext.JSONSchemaProps{Properties: map[string]apiext.JSONSchemaProps{
+																		"key": apiext.JSONSchemaProps{
+																			Description: "The key of the secret to select from. Must be a valid secret key.",
+																			Type:        "string",
+																		},
+																		"name": apiext.JSONSchemaProps{
+																			Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																			Type:        "string",
+																		},
+																	},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"serviceConsumerDomain": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Required: []string{"accessTokenSecretRef", "clientSecretSecretRef", "clientTokenSecretRef", "serviceConsumerDomain"},
+																Type:     "object",
+															},
+															"azuredns":      apiext.JSONSchemaProps{},
+															"clouddns":      apiext.JSONSchemaProps{},
+															"cloudfalre":    apiext.JSONSchemaProps{},
+															"cnameStrategy": apiext.JSONSchemaProps{},
+															"digitalocean":  apiext.JSONSchemaProps{},
+															"name":          apiext.JSONSchemaProps{},
+															"rfc2136":       apiext.JSONSchemaProps{},
+															"router53":      apiext.JSONSchemaProps{},
+															"webhook":       apiext.JSONSchemaProps{},
+														},
+														Required: []string{"name"},
+														Type:     "object",
+													},
+												},
+												Type: "array",
+											},
+										},
+										Type: "object",
+									},
+									"email":               apiext.JSONSchemaProps{},
+									"http01":              apiext.JSONSchemaProps{},
+									"privateKeySecretRef": apiext.JSONSchemaProps{},
+									"server":              apiext.JSONSchemaProps{},
+									"skipTLSVerify":       apiext.JSONSchemaProps{},
+									"solvers":             apiext.JSONSchemaProps{},
+								},
+								Required: []string{"privateKeySecretRef", "server"},
+								Type:     "object",
+							},
+							"ca":         apiext.JSONSchemaProps{},
+							"selfSigned": apiext.JSONSchemaProps{},
+							"vault":      apiext.JSONSchemaProps{},
+							"venafi":     apiext.JSONSchemaProps{},
+						},
+					},
+					"status": apiext.JSONSchemaProps{
+						Description: "",
+						Properties: map[string]apiext.JSONSchemaProps{
+							"acme":       apiext.JSONSchemaProps{},
+							"conditions": apiext.JSONSchemaProps{},
+						},
+					},
+				},
+			},
+		},
+	},
+	Status: apiext.CustomResourceDefinitionStatus{
+		Conditions: []apiext.CustomResourceDefinitionCondition{},
+		AcceptedNames: apiext.CustomResourceDefinitionNames{
+			Kind:   "",
+			Plural: "",
+		},
+		StoredVersions: []string{},
 	},
 }
 
@@ -371,6 +532,14 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 			Kind:   "ClusterIssuer",
 		},
 	},
+	Status: apiext.CustomResourceDefinitionStatus{
+		Conditions: []apiext.CustomResourceDefinitionCondition{},
+		AcceptedNames: apiext.CustomResourceDefinitionNames{
+			Kind:   "",
+			Plural: "",
+		},
+		StoredVersions: []string{},
+	},
 }
 
 var orderCRD = &apiext.CustomResourceDefinition{
@@ -383,6 +552,14 @@ var orderCRD = &apiext.CustomResourceDefinition{
 			Plural: "orders",
 			Kind:   "Order",
 		},
+	},
+	Status: apiext.CustomResourceDefinitionStatus{
+		Conditions: []apiext.CustomResourceDefinitionCondition{},
+		AcceptedNames: apiext.CustomResourceDefinitionNames{
+			Kind:   "",
+			Plural: "",
+		},
+		StoredVersions: []string{},
 	},
 }
 
@@ -706,5 +883,13 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 				},
 			},
 		},
+	},
+	Status: apiext.CustomResourceDefinitionStatus{
+		Conditions: []apiext.CustomResourceDefinitionCondition{},
+		AcceptedNames: apiext.CustomResourceDefinitionNames{
+			Kind:   "",
+			Plural: "",
+		},
+		StoredVersions: []string{},
 	},
 }
