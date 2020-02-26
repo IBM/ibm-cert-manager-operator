@@ -107,13 +107,6 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 	// First copy the deploy template into a deployment object
 
 	returningDeploy := *deploy
-	// Possible customizations: pull secret name, image registry, image postfix
-	if instance.Spec.PullSecret.Name != "" {
-		// Set the deploy pull secret to the one specified
-		returningDeploy.Spec.Template.Spec.ImagePullSecrets = []corev1.LocalObjectReference{{
-			Name: instance.Spec.PullSecret.Name,
-		}}
-	}
 
 	switch deploy.Name {
 	case res.CertManagerControllerName:
