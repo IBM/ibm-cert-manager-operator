@@ -623,7 +623,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																Required: []string{"nameserver"},
 																Type:     "object",
 															},
-															"router53": apiext.JSONSchemaProps{
+															"route53": apiext.JSONSchemaProps{
 																Description: "ACMEIssuerDNS01ProviderRoute53 is a structure containing the Route 53 configuration for AWS",
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"accessKeyID": apiext.JSONSchemaProps{
@@ -662,7 +662,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																Type:     "object",
 															},
 															"webhook": apiext.JSONSchemaProps{
-																Description: " ACMEIssuerDNS01ProviderWebhook specifies configuration for a webhook DNS01 provider, including where to POST ChallengePayload resources.",
+																Description: "ACMEIssuerDNS01ProviderWebhook specifies configuration for a webhook DNS01 provider, including where to POST ChallengePayload resources.",
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"config": apiext.JSONSchemaProps{
 																		Description: "Additional configuration that should be passed to the webhook apiserver when challenges are processed. This can contain arbitrary JSON data. Secret values should not be specified in this stanza. If secret values are needed (e.g. credentials for a DNS service), you should use a SecretKeySelector to reference a Secret resource. For details on the schema of this field, consult the webhook provider implementation's documentation.",
@@ -698,7 +698,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 										Description: "DEPRECATED: HTTP-01 config",
 										Properties: map[string]apiext.JSONSchemaProps{
 											"serviceType": apiext.JSONSchemaProps{
-												Description: "Optional service type of Kubernetes solver service",
+												Description: "Optional service type for Kubernetes solver service",
 												Type:        "string",
 											},
 										},
@@ -758,7 +758,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																Required: []string{"accountSecretRef", "host"},
 																Type:     "object",
 															},
-															"akami": apiext.JSONSchemaProps{
+															"akamai": apiext.JSONSchemaProps{
 																Description: "ACMEIssuerDNS01ProviderAkamai is a structure containing the DNS configuration for Akamai DNS—Zone Record Management API",
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"accessTokenSecretRef": apiext.JSONSchemaProps{
@@ -966,7 +966,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																Required: []string{"nameserver"},
 																Type:     "object",
 															},
-															"router53": apiext.JSONSchemaProps{
+															"route53": apiext.JSONSchemaProps{
 																Description: "ACMEIssuerDNS01ProviderRoute53 is a structure containing the Route 53 configuration for AWS",
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"accessKeyID": apiext.JSONSchemaProps{
@@ -1005,7 +1005,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																Type:     "object",
 															},
 															"webhook": apiext.JSONSchemaProps{
-																Description: " ACMEIssuerDNS01ProviderWebhook specifies configuration for a webhook DNS01 provider, including where to POST ChallengePayload resources.",
+																Description: "ACMEIssuerDNS01ProviderWebhook specifies configuration for a webhook DNS01 provider, including where to POST ChallengePayload resources.",
 																Properties: map[string]apiext.JSONSchemaProps{
 																	"config": apiext.JSONSchemaProps{
 																		Description: "Additional configuration that should be passed to the webhook apiserver when challenges are processed. This can contain arbitrary JSON data. Secret values should not be specified in this stanza. If secret values are needed (e.g. credentials for a DNS service), you should use a SecretKeySelector to reference a Secret resource. For details on the schema of this field, consult the webhook provider implementation's documentation.",
@@ -1238,28 +1238,33 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Description: "A label query over a set of resources in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "A node selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-																																		Properties: map[string]apiext.JSONSchemaProps{
-																																			"key": apiext.JSONSchemaProps{
-																																				Description: "The label key that the selector applies to.",
-																																				Type:        "string",
-																																			},
-																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
-																																				Type:        "string",
-																																			},
-																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
-																																				Items: &apiext.JSONSchemaPropsOrArray{
-																																					Schema: &apiext.JSONSchemaProps{
-																																						Type: "string",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Items: &apiext.JSONSchemaPropsOrArray{
+																																			Schema: &apiext.JSONSchemaProps{
+																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+																																				Properties: map[string]apiext.JSONSchemaProps{
+																																					"key": apiext.JSONSchemaProps{
+																																						Description: "The label key that the selector applies to.",
+																																						Type:        "string",
+																																					},
+																																					"operator": apiext.JSONSchemaProps{
+																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																						Type:        "string",
+																																					},
+																																					"values": apiext.JSONSchemaProps{
+																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																						Items: &apiext.JSONSchemaPropsOrArray{
+																																							Schema: &apiext.JSONSchemaProps{
+																																								Type: "string",
+																																							},
+																																						},
 																																					},
 																																				},
-																																				Type: "array",
+																																				Required: []string{"key", "operator"},
+																																				Type:     "object",
 																																			},
 																																		},
-																																		Required: []string{"key", "operator"},
-																																		Type:     "object",
+																																		Type: "array",
 																																	},
 																																	"matchLabels": apiext.JSONSchemaProps{
 																																		AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
@@ -2062,7 +2067,7 @@ var challengeCRD = &apiext.CustomResourceDefinition{
 												},
 												Type: "object",
 											},
-											"akami": apiext.JSONSchemaProps{
+											"akamai": apiext.JSONSchemaProps{
 												Description: "ACMEIssuerDNS01ProviderAkamai is a structure containing the DNS configuration for Akamai DNS—Zone Record Management API",
 												Properties: map[string]apiext.JSONSchemaProps{
 													"accessTokenSecretRef": apiext.JSONSchemaProps{
