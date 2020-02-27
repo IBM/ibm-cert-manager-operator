@@ -1320,28 +1320,33 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Description: "A label query over a set of resources in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "A node selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-																																		Properties: map[string]apiext.JSONSchemaProps{
-																																			"key": apiext.JSONSchemaProps{
-																																				Description: "The label key that the selector applies to.",
-																																				Type:        "string",
-																																			},
-																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
-																																				Type:        "string",
-																																			},
-																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
-																																				Items: &apiext.JSONSchemaPropsOrArray{
-																																					Schema: &apiext.JSONSchemaProps{
-																																						Type: "string",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Items: &apiext.JSONSchemaPropsOrArray{
+																																			Schema: &apiext.JSONSchemaProps{
+																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+																																				Properties: map[string]apiext.JSONSchemaProps{
+																																					"key": apiext.JSONSchemaProps{
+																																						Description: "The label key that the selector applies to.",
+																																						Type:        "string",
+																																					},
+																																					"operator": apiext.JSONSchemaProps{
+																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																						Type:        "string",
+																																					},
+																																					"values": apiext.JSONSchemaProps{
+																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																						Items: &apiext.JSONSchemaPropsOrArray{
+																																							Schema: &apiext.JSONSchemaProps{
+																																								Type: "string",
+																																							},
+																																						},
 																																					},
 																																				},
-																																				Type: "array",
+																																				Required: []string{"key", "operator"},
+																																				Type:     "object",
 																																			},
 																																		},
-																																		Required: []string{"key", "operator"},
-																																		Type:     "object",
+																																		Type: "array",
 																																	},
 																																	"matchLabels": apiext.JSONSchemaProps{
 																																		AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
@@ -1403,28 +1408,33 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Description: "A label query over a set of resources in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "A node selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-																																		Properties: map[string]apiext.JSONSchemaProps{
-																																			"key": apiext.JSONSchemaProps{
-																																				Description: "The label key that the selector applies to.",
-																																				Type:        "string",
-																																			},
-																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
-																																				Type:        "string",
-																																			},
-																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
-																																				Items: &apiext.JSONSchemaPropsOrArray{
-																																					Schema: &apiext.JSONSchemaProps{
-																																						Type: "string",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Items: &apiext.JSONSchemaPropsOrArray{
+																																			Schema: &apiext.JSONSchemaProps{
+																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+																																				Properties: map[string]apiext.JSONSchemaProps{
+																																					"key": apiext.JSONSchemaProps{
+																																						Description: "The label key that the selector applies to.",
+																																						Type:        "string",
+																																					},
+																																					"operator": apiext.JSONSchemaProps{
+																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																						Type:        "string",
+																																					},
+																																					"values": apiext.JSONSchemaProps{
+																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																						Items: &apiext.JSONSchemaPropsOrArray{
+																																							Schema: &apiext.JSONSchemaProps{
+																																								Type: "string",
+																																							},
+																																						},
 																																					},
 																																				},
-																																				Type: "array",
+																																				Required: []string{"key", "operator"},
+																																				Type:     "object",
 																																			},
 																																		},
-																																		Required: []string{"key", "operator"},
-																																		Type:     "object",
+																																		Type: "array",
 																																	},
 																																	"matchLabels": apiext.JSONSchemaProps{
 																																		AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
@@ -1480,28 +1490,33 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Description: "A label query over a set of resources in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "A node selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-																																		Properties: map[string]apiext.JSONSchemaProps{
-																																			"key": apiext.JSONSchemaProps{
-																																				Description: "The label key that the selector applies to.",
-																																				Type:        "string",
-																																			},
-																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
-																																				Type:        "string",
-																																			},
-																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
-																																				Items: &apiext.JSONSchemaPropsOrArray{
-																																					Schema: &apiext.JSONSchemaProps{
-																																						Type: "string",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Items: &apiext.JSONSchemaPropsOrArray{
+																																			Schema: &apiext.JSONSchemaProps{
+																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+																																				Properties: map[string]apiext.JSONSchemaProps{
+																																					"key": apiext.JSONSchemaProps{
+																																						Description: "The label key that the selector applies to.",
+																																						Type:        "string",
+																																					},
+																																					"operator": apiext.JSONSchemaProps{
+																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																						Type:        "string",
+																																					},
+																																					"values": apiext.JSONSchemaProps{
+																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																						Items: &apiext.JSONSchemaPropsOrArray{
+																																							Schema: &apiext.JSONSchemaProps{
+																																								Type: "string",
+																																							},
+																																						},
 																																					},
 																																				},
-																																				Type: "array",
+																																				Required: []string{"key", "operator"},
+																																				Type:     "object",
 																																			},
 																																		},
-																																		Required: []string{"key", "operator"},
-																																		Type:     "object",
+																																		Type: "array",
 																																	},
 																																	"matchLabels": apiext.JSONSchemaProps{
 																																		AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
