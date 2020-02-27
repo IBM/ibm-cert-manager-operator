@@ -1231,10 +1231,10 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																														Description: "Required. A pod affinity term, associated with the corresponding weight.",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"labelSelector": apiext.JSONSchemaProps{
-																																Description: "A label query over a set of resources in this case pods.",
+																																Description: "A label query over a set of resources, in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
 																																		Items: &apiext.JSONSchemaPropsOrArray{
 																																			Schema: &apiext.JSONSchemaProps{
 																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -1391,10 +1391,10 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																														Description: "Required. A pod affinity term, associated with the corresponding weight..",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"labelSelector": apiext.JSONSchemaProps{
-																																Description: "A label query over a set of resources in this case pods.",
+																																Description: "A label query over a set of resources, in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
 																																		Items: &apiext.JSONSchemaPropsOrArray{
 																																			Schema: &apiext.JSONSchemaProps{
 																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -1471,10 +1471,10 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																												Description: "Defines a set of pods (namely those matching the labelSelector relative to the given namespace(s)) that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where co-located is defined as running on a node whose value of the label with key <topologyKey> matches that of any node on which a pod of the set of pods is running",
 																												Properties: map[string]apiext.JSONSchemaProps{
 																													"labelSelector": apiext.JSONSchemaProps{
-																														Description: "A label query over a set of resources in this case pods.",
+																														Description: "A label query over a set of resources, in this case pods.",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"matchExpressions": apiext.JSONSchemaProps{
-																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -2747,10 +2747,10 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																														Description: "Required. A pod affinity term, associated with the corresponding weight.",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"labelSelector": apiext.JSONSchemaProps{
-																																Description: "A label query over a set of resources in this case pods.",
+																																Description: "A label query over a set of resources, in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
 																																		Items: &apiext.JSONSchemaPropsOrArray{
 																																			Schema: &apiext.JSONSchemaProps{
 																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -2907,10 +2907,10 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																														Description: "Required. A pod affinity term, associated with the corresponding weight..",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"labelSelector": apiext.JSONSchemaProps{
-																																Description: "A label query over a set of resources in this case pods.",
+																																Description: "A label query over a set of resources, in this case pods.",
 																																Properties: map[string]apiext.JSONSchemaProps{
 																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
 																																		Items: &apiext.JSONSchemaPropsOrArray{
 																																			Schema: &apiext.JSONSchemaProps{
 																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -2987,10 +2987,10 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																												Description: "Defines a set of pods (namely those matching the labelSelector relative to the given namespace(s)) that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where co-located is defined as running on a node whose value of the label with key <topologyKey> matches that of any node on which a pod of the set of pods is running",
 																												Properties: map[string]apiext.JSONSchemaProps{
 																													"labelSelector": apiext.JSONSchemaProps{
-																														Description: "A label query over a set of resources in this case pods.",
+																														Description: "A label query over a set of resources, in this case pods.",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"matchExpressions": apiext.JSONSchemaProps{
-																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
