@@ -66,7 +66,7 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 			},
 			{
 				JSONPath:    ".metadata.creationTimestamp",
-				Description: "CreationTimestamp is a timestamp representing time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC. Populated by the system. Read-only. Null for lists.",
+				Description: "CreationTimestamp is a timestamp representing time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC. Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata",
 				Name:        "Age",
 				Type:        "date",
 			},
@@ -299,7 +299,7 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 												Type:        "string",
 											},
 											"status": apiext.JSONSchemaProps{
-												Description: "Status of the condition one of ('True', 'False', 'Unknown')",
+												Description: "Status of the condition one of ('True', 'False', 'Unknown').",
 												Enum: []apiext.JSON{
 													{Raw: []byte("\"True\"")},
 													{Raw: []byte("\"False\"")},
@@ -308,7 +308,7 @@ var certificateCRD = &apiext.CustomResourceDefinition{
 												Type: "string",
 											},
 											"type": apiext.JSONSchemaProps{
-												Description: "Type of the condition, currently ('Ready')",
+												Description: "Type of the condition, currently ('Ready').",
 												Type:        "string",
 											},
 										},
