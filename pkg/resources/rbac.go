@@ -25,8 +25,8 @@ import (
 // DefaultServiceAccount is the service account used by cert-manager service
 var DefaultServiceAccount = &corev1.ServiceAccount{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      ServiceAccount,
-		Namespace: DeployNamespace,
+		Name: ServiceAccount,
+		//		Namespace: DeployNamespace,
 	},
 }
 
@@ -123,10 +123,10 @@ var DefaultClusterRoleBinding = &rbacv1.ClusterRoleBinding{
 	},
 	Subjects: []rbacv1.Subject{
 		{
-			Kind:      "ServiceAccount",
-			APIGroup:  "",
-			Name:      ServiceAccount,
-			Namespace: DeployNamespace,
+			Kind:     "ServiceAccount",
+			APIGroup: "",
+			Name:     ServiceAccount,
+			//			Namespace: DeployNamespace,
 		},
 	},
 	RoleRef: rbacv1.RoleRef{

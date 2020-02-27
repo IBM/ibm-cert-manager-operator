@@ -22,6 +22,7 @@ import (
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -59,12 +60,16 @@ func Add(mgr manager.Manager) error {
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	apiextclient, _ := apiextensionclientset.NewForConfig(mgr.GetConfig())
 	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
+	ns, _ := k8sutil.GetWatchNamespace()
+
 	return &ReconcileCertManager{
 		client:       mgr.GetClient(),
 		kubeclient:   kubeclient,
 		apiextclient: apiextclient,
 		scheme:       mgr.GetScheme(),
-		recorder:     mgr.GetEventRecorderFor("ibm-cert-manager-operator")}
+		recorder:     mgr.GetEventRecorderFor("ibm-cert-manager-operator"),
+		ns:           ns,
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -173,6 +178,7 @@ type ReconcileCertManager struct {
 	apiextclient apiextensionclientset.Interface
 	scheme       *runtime.Scheme
 	recorder     record.EventRecorder
+	ns           string
 }
 
 // Reconcile reads that state of the cluster for a CertManager object and makes changes based on the state read
@@ -254,11 +260,7 @@ func (r *ReconcileCertManager) PreReqs(instance *operatorv1alpha1.CertManager) e
 		log.V(2).Info("Checking CRDs failed")
 		return err
 	}
-	if err := checkNamespace(instance, r.scheme, r.kubeclient.CoreV1().Namespaces()); err != nil {
-		log.V(2).Info("Checking namespace failed")
-		return err
-	}
-	if err := checkRbac(instance, r.scheme, r.client); err != nil {
+	if err := checkRbac(instance, r.scheme, r.client, r.ns); err != nil {
 		log.V(2).Info("Checking RBAC failed")
 		return err
 	}
@@ -266,24 +268,24 @@ func (r *ReconcileCertManager) PreReqs(instance *operatorv1alpha1.CertManager) e
 }
 
 func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManager) error {
-	if err := certManagerDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
+	if err := certManagerDeploy(instance, r.client, r.kubeclient, r.scheme, r.ns); err != nil {
 		return err
 	}
 
-	if err := configmapWatcherDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
+	if err := configmapWatcherDeploy(instance, r.client, r.kubeclient, r.scheme, r.ns); err != nil {
 		return err
 	}
 
 	if instance.Spec.Webhook {
 		// Check webhook prerequisites
-		if err := webhookPrereqs(instance, r.scheme, r.client); err != nil {
+		if err := webhookPrereqs(instance, r.scheme, r.client, r.ns); err != nil {
 			return err
 		}
 		// Deploy webhook and cainjector
-		if err := cainjectorDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
+		if err := cainjectorDeploy(instance, r.client, r.kubeclient, r.scheme, r.ns); err != nil {
 			return err
 		}
-		if err := webhookDeploy(instance, r.client, r.kubeclient, r.scheme); err != nil {
+		if err := webhookDeploy(instance, r.client, r.kubeclient, r.scheme, r.ns); err != nil {
 			return err
 		}
 	} else {
@@ -299,7 +301,7 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 			return cainjector
 		}
 		// Remove webhook prerequisites
-		if err := removeWebhookPrereqs(r.client); err != nil {
+		if err := removeWebhookPrereqs(r.client, r.ns); err != nil {
 			return err
 		}
 	}

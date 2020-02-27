@@ -33,14 +33,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func webhookPrereqs(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func webhookPrereqs(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
 	if err := createRoleBinding(instance, scheme, client); err != nil {
 		return err
 	}
-	if err := service(instance, scheme, client); err != nil {
+	if err := service(instance, scheme, client, ns); err != nil {
 		return err
 	}
-	if err := apiService(instance, scheme, client); err != nil {
+	if err := apiService(instance, scheme, client, ns); err != nil {
 		return err
 	}
 	if err := webhooks(instance, scheme, client); err != nil {
@@ -49,8 +49,8 @@ func webhookPrereqs(instance *operatorv1alpha1.CertManager, scheme *runtime.Sche
 	return nil
 }
 
-func removeWebhookPrereqs(client client.Client) error {
-	if err := removeSvc(client); err != nil {
+func removeWebhookPrereqs(client client.Client, ns string) error {
+	if err := removeSvc(client, ns); err != nil {
 		return err
 	}
 	if err := removeAPIService(client); err != nil {
@@ -65,12 +65,15 @@ func removeWebhookPrereqs(client client.Client) error {
 	return nil
 }
 
-func apiService(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func apiService(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
 	apiSvc := &apiRegv1.APIService{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.APISvcName, Namespace: ""}, apiSvc)
 	if err != nil && apiErrors.IsNotFound(err) {
 		// Create the apiservice spec
 		res.APIService.ResourceVersion = ""
+		var servingSecret = ns + "/" + res.WebhookServingSecret
+		res.APIService.Annotations = map[string]string{"certmanager.k8s.io/inject-ca-from-secret": servingSecret}
+		res.APIService.Spec.Service.Namespace = ns
 		if err := controllerutil.SetControllerReference(instance, res.APIService, scheme); err != nil {
 			log.Error(err, "Error setting controller reference on api service")
 		}
@@ -156,13 +159,14 @@ func removeWebhooks(client client.Client) error {
 	return nil
 }
 
-func service(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func service(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
 	svc := &corev1.Service{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: res.DeployNamespace}, svc)
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ns}, svc)
 	if err != nil && apiErrors.IsNotFound(err) {
 		// Create the webhook service spec
 		res.WebhookSvc.ResourceVersion = ""
 		res.WebhookSvc.Spec.ClusterIP = ""
+		res.WebhookSvc.Namespace = ns
 		if err := controllerutil.SetControllerReference(instance, res.WebhookSvc, scheme); err != nil {
 			log.Error(err, "Error setting controller reference on webhook's service")
 		}
@@ -174,9 +178,9 @@ func service(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, cli
 	return nil
 }
 
-func removeSvc(client client.Client) error {
+func removeSvc(client client.Client, ns string) error {
 	svc := &corev1.Service{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: res.DeployNamespace}, svc)
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ns}, svc)
 	if err != nil {
 		if !apiErrors.IsNotFound(err) {
 			return err

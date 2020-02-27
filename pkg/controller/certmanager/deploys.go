@@ -36,25 +36,25 @@ import (
 )
 
 // Returns true if no errors in deploy logic
-func certManagerDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme) error {
-	return deployLogic(instance, client, kubeclient, scheme, res.ControllerDeployment, res.CertManagerControllerName, res.ControllerImageName, res.ControllerLabels)
+func certManagerDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
+	return deployLogic(instance, client, kubeclient, scheme, res.ControllerDeployment, res.CertManagerControllerName, res.ControllerImageName, res.ControllerLabels, ns)
 }
 
-func cainjectorDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme) error {
-	return deployLogic(instance, client, kubeclient, scheme, res.CainjectorDeployment, res.CertManagerCainjectorName, res.CainjectorImageName, res.CainjectorLabels)
+func cainjectorDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
+	return deployLogic(instance, client, kubeclient, scheme, res.CainjectorDeployment, res.CertManagerCainjectorName, res.CainjectorImageName, res.CainjectorLabels, ns)
 }
 
-func webhookDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme) error {
-	return deployLogic(instance, client, kubeclient, scheme, res.WebhookDeployment, res.CertManagerWebhookName, res.WebhookImageName, res.WebhookLabels)
+func webhookDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
+	return deployLogic(instance, client, kubeclient, scheme, res.WebhookDeployment, res.CertManagerWebhookName, res.WebhookImageName, res.WebhookLabels, ns)
 }
 
-func configmapWatcherDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme) error {
-	return deployLogic(instance, client, kubeclient, scheme, res.ConfigmapWatcherDeployment, res.ConfigmapWatcherName, res.ConfigmapWatcherImageName, res.ConfigmapWatcherLabels)
+func configmapWatcherDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
+	return deployLogic(instance, client, kubeclient, scheme, res.ConfigmapWatcherDeployment, res.ConfigmapWatcherName, res.ConfigmapWatcherImageName, res.ConfigmapWatcherLabels, ns)
 }
 
-func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, deployTemplate *appsv1.Deployment, name, imageName, labels string) error {
+func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, deployTemplate *appsv1.Deployment, name, imageName, labels, ns string) error {
 	similarDeploys := deployFinder(kubeclient, labels, imageName)
-	deployment := setupDeploy(instance, deployTemplate)
+	deployment := setupDeploy(instance, deployTemplate, ns)
 	var existingDeploy appsv1.Deployment
 	create := true
 
@@ -63,7 +63,7 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 	log.V(4).Info("The similar deploys", "all of them", fmt.Sprintf("%v", similarDeploys))
 
 	for _, deploy := range similarDeploys {
-		if !(deploy.Name == name && deploy.Namespace == res.DeployNamespace) {
+		if !(deploy.Name == name && deploy.Namespace == ns) {
 			// If there's more than one, and it's not the correct one, return an error with a warning
 			errMsg := fmt.Sprintf("The service %s is already deployed as %s/%s. Please remove it if you want this version of %s to be deployed.",
 				name, deploy.Namespace, deploy.Name, name)
@@ -103,7 +103,7 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 // Args:deploy
 //     instance - The CR instance of CertManager
 //     deploy - The base deployment object - template contains most of the defaults/constants for the deployment
-func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployment) appsv1.Deployment {
+func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployment, ns string) appsv1.Deployment {
 	// First copy the deploy template into a deployment object
 
 	returningDeploy := *deploy
@@ -120,9 +120,12 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		if instance.Spec.ResourceNS != "" {
 			resourceNS = "--cluster-resource-namespace=" + instance.Spec.ResourceNS
 		}
-		var args []string
-		copy(res.DefaultArgs, args)
-		args = append(args, acmesolver, resourceNS)
+		var leaderElect = "--leader-election-namespace=" + ns
+		var webhookNS = "--webhook-namespace=" + ns
+		var webhookDNS = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook." + ns + ",cert-manager-webhook." + ns + ".svc"
+		var args = make([]string, len(res.DefaultArgs))
+		copy(args, res.DefaultArgs)
+		args = append(args, acmesolver, resourceNS, leaderElect, webhookNS, webhookDNS)
 		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
 		log.V(3).Info("The args", "args", deploy.Spec.Template.Spec.Containers[0].Args)
 	case res.CertManagerCainjectorName:
@@ -147,6 +150,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		returningDeploy.Spec.Template.Spec.Containers[0].Image += instance.Spec.ImagePostFix
 	}
 
+	returningDeploy.Namespace = ns
 	log.V(2).Info("Resulting image registry", "full name", returningDeploy.Spec.Template.Spec.Containers[0].Image)
 	log.V(3).Info("Resulting deployment to be created", "spec", fmt.Sprintf("%v", returningDeploy))
 	return returningDeploy

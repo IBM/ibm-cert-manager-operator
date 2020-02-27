@@ -25,9 +25,9 @@ import (
 // ControllerDeployment is the deployment template for deploying the cert-manager-controller
 var ControllerDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      CertManagerControllerName,
-		Namespace: DeployNamespace,
-		Labels:    ControllerLabelMap,
+		Name: CertManagerControllerName,
+		//		Namespace: DeployNamespace,
+		Labels: ControllerLabelMap,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -47,8 +47,8 @@ var ControllerDeployment = &appsv1.Deployment{
 // WebhookDeployment is the deployment template for deploying the cert-manager-webhook
 var WebhookDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:        CertManagerWebhookName,
-		Namespace:   DeployNamespace,
+		Name: CertManagerWebhookName,
+		//		Namespace:   DeployNamespace,
 		Labels:      WebhookLabelMap,
 		Annotations: webhookAnnotation,
 	},
@@ -74,9 +74,9 @@ var WebhookDeployment = &appsv1.Deployment{
 // CainjectorDeployment is the deployment template for deploying the cert-manager-cainjector
 var CainjectorDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      CertManagerCainjectorName,
-		Namespace: DeployNamespace,
-		Labels:    CainjectorLabelMap,
+		Name: CertManagerCainjectorName,
+		//		Namespace: DeployNamespace,
+		Labels: CainjectorLabelMap,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -96,9 +96,9 @@ var CainjectorDeployment = &appsv1.Deployment{
 // ConfigmapWatcherDeployment is the deployment spec for the configmap watcher
 var ConfigmapWatcherDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      ConfigmapWatcherName,
-		Namespace: DeployNamespace,
-		Labels:    ConfigmapWatcherLabelMap,
+		Name: ConfigmapWatcherName,
+		//		Namespace: DeployNamespace,
+		Labels: ConfigmapWatcherLabelMap,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
