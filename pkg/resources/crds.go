@@ -415,349 +415,6 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																Required: []string{"accountSecretRef", "host"},
 																Type:     "object",
 															},
-															"akami": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderAkamai is a structure containing the DNS configuration for Akamai DNS—Zone Record Management API",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"accessTokenSecretRef": apiext.JSONSchemaProps{
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																	"clientSecretSecretRef": apiext.JSONSchemaProps{Properties: map[string]apiext.JSONSchemaProps{
-																		"key": apiext.JSONSchemaProps{
-																			Description: "The key of the secret to select from. Must be a valid secret key.",
-																			Type:        "string",
-																		},
-																		"name": apiext.JSONSchemaProps{
-																			Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																			Type:        "string",
-																		},
-																	},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																	"clientTokenSecretRef": apiext.JSONSchemaProps{Properties: map[string]apiext.JSONSchemaProps{
-																		"key": apiext.JSONSchemaProps{
-																			Description: "The key of the secret to select from. Must be a valid secret key.",
-																			Type:        "string",
-																		},
-																		"name": apiext.JSONSchemaProps{
-																			Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																			Type:        "string",
-																		},
-																	},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																	"serviceConsumerDomain": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																},
-																Required: []string{"accessTokenSecretRef", "clientSecretSecretRef", "clientTokenSecretRef", "serviceConsumerDomain"},
-																Type:     "object",
-															},
-															"azuredns": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderAzureDNS is a structure containing the configuration for Azure DNS",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"clientID": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																	"clientSecretSecretRef": apiext.JSONSchemaProps{
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																	"environment": apiext.JSONSchemaProps{
-																		Enum: []apiext.JSON{
-																			{Raw: []byte("\"AzurePublicCloud\"")},
-																			{Raw: []byte("\"AzureChinaCloud\"")},
-																			{Raw: []byte("\"AzureGermanCloud\"")},
-																			{Raw: []byte("\"AzureUSGovernmentCloud\"")},
-																		},
-																		Type: "string",
-																	},
-																	"hostedZoneName": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																	"resourceGroupName": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																	"subscriptionID": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																	"tenantID": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																},
-																Required: []string{"clientID", "clientSecretSecretRef", "resourceGroupName", "subscriptionID", "tenantID"},
-																Type:     "object",
-															},
-															"clouddns": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderCloudDNS is a structure containing the DNS configuration for Google Cloud DNS",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"project": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																	"serviceAccountSecretRef": apiext.JSONSchemaProps{
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Type:     "object",
-																		Required: []string{"name"},
-																	},
-																},
-																Required: []string{"project", "serviceAccountSecretRef"},
-																Type:     "object",
-															},
-															"cloudflare": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderCloudflare is a structure containing the DNS configuration for Cloudflare",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"apiKeySecretRef": apiext.JSONSchemaProps{
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																	"email": apiext.JSONSchemaProps{Type: "string"},
-																},
-																Required: []string{"apiKeySecretRef", "email"},
-																Type:     "object",
-															},
-															"cnameStrategy": apiext.JSONSchemaProps{
-																Description: "CNAMEStrategy configures how the DNS01 provider should handle CNAME records when found in DNS zones.",
-																Enum: []apiext.JSON{
-																	{Raw: []byte("\"None\"")},
-																	{Raw: []byte("\"Follow\"")},
-																},
-																Type: "string",
-															},
-															"digitalocean": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderDigitalOcean is a structure containing the DNS configuration for DigitalOcean Domains",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"tokenSecretRef": apiext.JSONSchemaProps{
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																},
-																Required: []string{"tokenSecretRef"},
-																Type:     "object",
-															},
-															"name": apiext.JSONSchemaProps{
-																Description: "Name is the name of the DNS provider, which should be used to reference this DNS provider configuration on Certificate resources.",
-																Type:        "string",
-															},
-															"rfc2136": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderRFC2136 is a structure containing the configuration for RFC2136 DNS",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"nameserver": apiext.JSONSchemaProps{
-																		Description: "The IP address of the DNS supporting RFC2136. Required. Note: FQDN is not a valid value, only IP.",
-																		Type:        "string",
-																	},
-																	"tsigAlgorithm": apiext.JSONSchemaProps{
-																		Description: "The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when `tsigSecretSecretRef` and `tsigKeyName` are defined. Supported values are (case-insensitive): `HMACMD5` (default), `HMACSHA1`, `HMACSHA256` or `HMACSHA512`",
-																		Type:        "string",
-																	},
-																	"tsigKeyName": apiext.JSONSchemaProps{
-																		Description: "The TSIG Key name configured in the DNS. If `tsigSecretSecretRef` is defined, this field is required.",
-																		Type:        "string",
-																	},
-																	"tsigSecretSecretRef": apiext.JSONSchemaProps{
-																		Description: "The name of the secret containing the TSIG value. If `tsigKeyName` is defined, this field is required.",
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																},
-																Required: []string{"nameserver"},
-																Type:     "object",
-															},
-															"route53": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderRoute53 is a structure containing the Route 53 configuration for AWS",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"accessKeyID": apiext.JSONSchemaProps{
-																		Description: "The AccessKeyID is used for authentication. If not set we fall-back to using env vars, shared credentials file or AWS Instance metadata see: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials",
-																		Type:        "string",
-																	},
-																	"hostedZoneID": apiext.JSONSchemaProps{
-																		Description: "If set, the provider will manage only this zone in Route53 and will not do an lookup using the route53:ListHostedZonesByName api call.",
-																		Type:        "string",
-																	},
-																	"region": apiext.JSONSchemaProps{
-																		Description: "Always set the region when using AccessKeyID and SecretAccessKey",
-																		Type:        "string",
-																	},
-																	"role": apiext.JSONSchemaProps{
-																		Description: "Role is a Role ARN which the Route53 provider will assume using either the explicit credentials AccessKeyID/SecretAccessKey or the inferred credentials from environment variables, shared credentials file or AWS Instance metadata",
-																		Type:        "string",
-																	},
-																	"secretAccessKeySecretRef": apiext.JSONSchemaProps{
-																		Description: "The SecretAccessKey is used for authentication. If not set we fall-back to using env vars, shared credentials file or AWS Instance metadata https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials",
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																},
-																Required: []string{"region"},
-																Type:     "object",
-															},
-															"webhook": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderWebhook specifies configuration for a webhook DNS01 provider, including where to POST ChallengePayload resources.",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"config": apiext.JSONSchemaProps{
-																		Description: "Additional configuration that should be passed to the webhook apiserver when challenges are processed. This can contain arbitrary JSON data. Secret values should not be specified in this stanza. If secret values are needed (e.g. credentials for a DNS service), you should use a SecretKeySelector to reference a Secret resource. For details on the schema of this field, consult the webhook provider implementation's documentation.",
-																		Type:        "object",
-																	},
-																	"groupName": apiext.JSONSchemaProps{
-																		Description: "The API group name that should be used when POSTing ChallengePayload resources to the webhook apiserver. This should be the same as the GroupName specified in the webhook provider implementation.",
-																		Type:        "string",
-																	},
-																	"solverName": apiext.JSONSchemaProps{
-																		Description: "The name of the solve to use as defined in the webhook provider implementation. This will typically be the name of th eprovider, e.g. 'cloudflare'.",
-																		Type:        "string",
-																	},
-																},
-																Required: []string{"groupName", "solverName"},
-																Type:     "object",
-															},
-														},
-														Required: []string{"name"},
-														Type:     "object",
-													},
-												},
-												Type: "array",
-											},
-										},
-										Type: "object",
-									},
-									"email": apiext.JSONSchemaProps{
-										Description: "Email is the email for this account",
-										Type:        "string",
-									},
-									"http01": apiext.JSONSchemaProps{
-										Description: "DEPRECATED: HTTP-01 config",
-										Properties: map[string]apiext.JSONSchemaProps{
-											"serviceType": apiext.JSONSchemaProps{
-												Description: "Optional service type for Kubernetes solver service",
-												Type:        "string",
-											},
-										},
-										Type: "object",
-									},
-									"privateKeySecretRef": apiext.JSONSchemaProps{
-										Description: "PrivateKey is the name of a secret containing the private key for this user account.",
-										Properties: map[string]apiext.JSONSchemaProps{
-											"key": apiext.JSONSchemaProps{
-												Description: "The key of the secret to select from. Must be a valid secret key.",
-												Type:        "string",
-											},
-											"name": apiext.JSONSchemaProps{
-												Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-												Type:        "string",
-											},
-										},
-										Required: []string{"name"},
-										Type:     "object",
-									},
-									"server": apiext.JSONSchemaProps{
-										Description: "Server is the ACME server URL",
-										Type:        "string",
-									},
-									"skipTLSVerify": apiext.JSONSchemaProps{
-										Description: "If true, skip verifying the ACME server TLS certificate",
-										Type:        "boolean",
-									},
-									"solvers": apiext.JSONSchemaProps{
-										Description: "Solvers is a list of challenge solvers that will be used to solve ACME challenges for the matching domains.",
-										Items: &apiext.JSONSchemaPropsOrArray{
-											Schema: &apiext.JSONSchemaProps{
-												Properties: map[string]apiext.JSONSchemaProps{
-													"dns01": apiext.JSONSchemaProps{
-														Properties: map[string]apiext.JSONSchemaProps{
-															"acmedns": apiext.JSONSchemaProps{
-																Description: "ACMEIssuerDNS01ProviderAcmeDNS is a structure containing the configuration for ACME-DNS servers",
-																Properties: map[string]apiext.JSONSchemaProps{
-																	"accountSecretRef": apiext.JSONSchemaProps{
-																		Properties: map[string]apiext.JSONSchemaProps{
-																			"key": apiext.JSONSchemaProps{
-																				Description: "The key of the secret to select from. Must be a valid secret key.",
-																				Type:        "string",
-																			},
-																			"name": apiext.JSONSchemaProps{
-																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
-																				Type:        "string",
-																			},
-																		},
-																		Required: []string{"name"},
-																		Type:     "object",
-																	},
-																	"host": apiext.JSONSchemaProps{
-																		Type: "string",
-																	},
-																},
-																Required: []string{"accountSecretRef", "host"},
-																Type:     "object",
-															},
 															"akamai": apiext.JSONSchemaProps{
 																Description: "ACMEIssuerDNS01ProviderAkamai is a structure containing the DNS configuration for Akamai DNS—Zone Record Management API",
 																Properties: map[string]apiext.JSONSchemaProps{
@@ -1016,7 +673,346 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																		Type:        "string",
 																	},
 																	"solverName": apiext.JSONSchemaProps{
-																		Description: "The name of the solve to use as defined in the webhook provider implementation. This will typically be the name of th eprovider, e.g. 'cloudflare'.",
+																		Description: "The name of the solver to use, as defined in the webhook provider implementation. This will typically be the name of th eprovider, e.g. 'cloudflare'.",
+																		Type:        "string",
+																	},
+																},
+																Required: []string{"groupName", "solverName"},
+																Type:     "object",
+															},
+														},
+														Required: []string{"name"},
+														Type:     "object",
+													},
+												},
+												Type: "array",
+											},
+										},
+										Type: "object",
+									},
+									"email": apiext.JSONSchemaProps{
+										Description: "Email is the email for this account",
+										Type:        "string",
+									},
+									"http01": apiext.JSONSchemaProps{
+										Description: "DEPRECATED: HTTP-01 config",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"serviceType": apiext.JSONSchemaProps{
+												Description: "Optional service type for Kubernetes solver service",
+												Type:        "string",
+											},
+										},
+										Type: "object",
+									},
+									"privateKeySecretRef": apiext.JSONSchemaProps{
+										Description: "PrivateKey is the name of a secret containing the private key for this user account.",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"key": apiext.JSONSchemaProps{
+												Description: "The key of the secret to select from. Must be a valid secret key.",
+												Type:        "string",
+											},
+											"name": apiext.JSONSchemaProps{
+												Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+												Type:        "string",
+											},
+										},
+										Required: []string{"name"},
+										Type:     "object",
+									},
+									"server": apiext.JSONSchemaProps{
+										Description: "Server is the ACME server URL",
+										Type:        "string",
+									},
+									"skipTLSVerify": apiext.JSONSchemaProps{
+										Description: "If true, skip verifying the ACME server TLS certificate",
+										Type:        "boolean",
+									},
+									"solvers": apiext.JSONSchemaProps{
+										Description: "Solvers is a list of challenge solvers that will be used to solve ACME challenges for the matching domains.",
+										Items: &apiext.JSONSchemaPropsOrArray{
+											Schema: &apiext.JSONSchemaProps{
+												Properties: map[string]apiext.JSONSchemaProps{
+													"dns01": apiext.JSONSchemaProps{
+														Properties: map[string]apiext.JSONSchemaProps{
+															"acmedns": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderAcmeDNS is a structure containing the configuration for ACME-DNS servers",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"accountSecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"host": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Required: []string{"accountSecretRef", "host"},
+																Type:     "object",
+															},
+															"akamai": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderAkamai is a structure containing the DNS configuration for Akamai DNS—Zone Record Management API",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"accessTokenSecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"clientSecretSecretRef": apiext.JSONSchemaProps{Properties: map[string]apiext.JSONSchemaProps{
+																		"key": apiext.JSONSchemaProps{
+																			Description: "The key of the secret to select from. Must be a valid secret key.",
+																			Type:        "string",
+																		},
+																		"name": apiext.JSONSchemaProps{
+																			Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																			Type:        "string",
+																		},
+																	},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"clientTokenSecretRef": apiext.JSONSchemaProps{Properties: map[string]apiext.JSONSchemaProps{
+																		"key": apiext.JSONSchemaProps{
+																			Description: "The key of the secret to select from. Must be a valid secret key.",
+																			Type:        "string",
+																		},
+																		"name": apiext.JSONSchemaProps{
+																			Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																			Type:        "string",
+																		},
+																	},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"serviceConsumerDomain": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Required: []string{"accessTokenSecretRef", "clientSecretSecretRef", "clientTokenSecretRef", "serviceConsumerDomain"},
+																Type:     "object",
+															},
+															"azuredns": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderAzureDNS is a structure containing the configuration for Azure DNS",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"clientID": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																	"clientSecretSecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"environment": apiext.JSONSchemaProps{
+																		Enum: []apiext.JSON{
+																			{Raw: []byte("\"AzurePublicCloud\"")},
+																			{Raw: []byte("\"AzureChinaCloud\"")},
+																			{Raw: []byte("\"AzureGermanCloud\"")},
+																			{Raw: []byte("\"AzureUSGovernmentCloud\"")},
+																		},
+																		Type: "string",
+																	},
+																	"hostedZoneName": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																	"resourceGroupName": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																	"subscriptionID": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																	"tenantID": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Required: []string{"clientID", "clientSecretSecretRef", "resourceGroupName", "subscriptionID", "tenantID"},
+																Type:     "object",
+															},
+															"clouddns": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderCloudDNS is a structure containing the DNS configuration for Google Cloud DNS",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"project": apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																	"serviceAccountSecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Type:     "object",
+																		Required: []string{"name"},
+																	},
+																},
+																Required: []string{"project", "serviceAccountSecretRef"},
+																Type:     "object",
+															},
+															"cloudflare": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderCloudflare is a structure containing the DNS configuration for Cloudflare",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"apiKeySecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																	"email": apiext.JSONSchemaProps{Type: "string"},
+																},
+																Required: []string{"apiKeySecretRef", "email"},
+																Type:     "object",
+															},
+															"cnameStrategy": apiext.JSONSchemaProps{
+																Description: "CNAMEStrategy configures how the DNS01 provider should handle CNAME records when found in DNS zones.",
+																Enum: []apiext.JSON{
+																	{Raw: []byte("\"None\"")},
+																	{Raw: []byte("\"Follow\"")},
+																},
+																Type: "string",
+															},
+															"digitalocean": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderDigitalOcean is a structure containing the DNS configuration for DigitalOcean Domains",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"tokenSecretRef": apiext.JSONSchemaProps{
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																},
+																Required: []string{"tokenSecretRef"},
+																Type:     "object",
+															},
+															"rfc2136": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderRFC2136 is a structure containing the configuration for RFC2136 DNS",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"nameserver": apiext.JSONSchemaProps{
+																		Description: "The IP address of the DNS supporting RFC2136. Required. Note: FQDN is not a valid value, only IP.",
+																		Type:        "string",
+																	},
+																	"tsigAlgorithm": apiext.JSONSchemaProps{
+																		Description: "The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when `tsigSecretSecretRef` and `tsigKeyName` are defined. Supported values are (case-insensitive): `HMACMD5` (default), `HMACSHA1`, `HMACSHA256` or `HMACSHA512`",
+																		Type:        "string",
+																	},
+																	"tsigKeyName": apiext.JSONSchemaProps{
+																		Description: "The TSIG Key name configured in the DNS. If `tsigSecretSecretRef` is defined, this field is required.",
+																		Type:        "string",
+																	},
+																	"tsigSecretSecretRef": apiext.JSONSchemaProps{
+																		Description: "The name of the secret containing the TSIG value. If `tsigKeyName` is defined, this field is required.",
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																},
+																Required: []string{"nameserver"},
+																Type:     "object",
+															},
+															"route53": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderRoute53 is a structure containing the Route 53 configuration for AWS",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"accessKeyID": apiext.JSONSchemaProps{
+																		Description: "The AccessKeyID is used for authentication. If not set we fall-back to using env vars, shared credentials file or AWS Instance metadata see: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials",
+																		Type:        "string",
+																	},
+																	"hostedZoneID": apiext.JSONSchemaProps{
+																		Description: "If set, the provider will manage only this zone in Route53 and will not do an lookup using the route53:ListHostedZonesByName api call.",
+																		Type:        "string",
+																	},
+																	"region": apiext.JSONSchemaProps{
+																		Description: "Always set the region when using AccessKeyID and SecretAccessKey",
+																		Type:        "string",
+																	},
+																	"role": apiext.JSONSchemaProps{
+																		Description: "Role is a Role ARN which the Route53 provider will assume using either the explicit credentials AccessKeyID/SecretAccessKey or the inferred credentials from environment variables, shared credentials file or AWS Instance metadata",
+																		Type:        "string",
+																	},
+																	"secretAccessKeySecretRef": apiext.JSONSchemaProps{
+																		Description: "The SecretAccessKey is used for authentication. If not set we fall-back to using env vars, shared credentials file or AWS Instance metadata https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials",
+																		Properties: map[string]apiext.JSONSchemaProps{
+																			"key": apiext.JSONSchemaProps{
+																				Description: "The key of the secret to select from. Must be a valid secret key.",
+																				Type:        "string",
+																			},
+																			"name": apiext.JSONSchemaProps{
+																				Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																				Type:        "string",
+																			},
+																		},
+																		Required: []string{"name"},
+																		Type:     "object",
+																	},
+																},
+																Required: []string{"region"},
+																Type:     "object",
+															},
+															"webhook": apiext.JSONSchemaProps{
+																Description: "ACMEIssuerDNS01ProviderWebhook specifies configuration for a webhook DNS01 provider, including where to POST ChallengePayload resources.",
+																Properties: map[string]apiext.JSONSchemaProps{
+																	"config": apiext.JSONSchemaProps{
+																		Description: "Additional configuration that should be passed to the webhook apiserver when challenges are processed. This can contain arbitrary JSON data. Secret values should not be specified in this stanza. If secret values are needed (e.g. credentials for a DNS service), you should use a SecretKeySelector to reference a Secret resource. For details on the schema of this field, consult the webhook provider implementation's documentation.",
+																		Type:        "object",
+																	},
+																	"groupName": apiext.JSONSchemaProps{
+																		Description: "The API group name that should be used when POSTing ChallengePayload resources to the webhook apiserver. This should be the same as the GroupName specified in the webhook provider implementation.",
+																		Type:        "string",
+																	},
+																	"solverName": apiext.JSONSchemaProps{
+																		Description: "The name of the solver to use as defined in the webhook provider implementation. This will typically be the name of the provider, e.g. 'cloudflare'.",
 																		Type:        "string",
 																	},
 																},
@@ -1080,7 +1076,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1096,7 +1092,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Type: "array",
 																															},
 																															"matchFields": apiext.JSONSchemaProps{
-																																Description: "A list of node selector requirements by node's labels.",
+																																Description: "A list of node selector requirements by node's fields.",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Description: "A node selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -1110,7 +1106,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1147,7 +1143,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																												Description: "Required. A list of node selector terms. The terms are ORed.",
 																												Items: &apiext.JSONSchemaPropsOrArray{
 																													Schema: &apiext.JSONSchemaProps{
-																														Description: "A null or empty node selector term matches no objects. The requirements of them are ANDed. The TopologySelectorTerm type implements a subset of the NodeSelectorTerm",
+																														Description: "A null or empty node selector term matches no objects. The requirements of them are ANDed. The TopologySelectorTerm type implements a subset of the NodeSelectorTerm.",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"matchExpressions": apiext.JSONSchemaProps{
 																																Description: "A list of node selector requirements by node's labels.",
@@ -1164,7 +1160,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1180,7 +1176,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Type: "array",
 																															},
 																															"matchFields": apiext.JSONSchemaProps{
-																																Description: "A list of node selector requirements by node's labels.",
+																																Description: "A list of node selector requirements by node's fields.",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Description: "A node selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -1194,7 +1190,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1229,10 +1225,10 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																										Description: "The scheduler will prefer to schedule pods to nodes that satisfy the affinity expressions specified by this field, but it may choose a node that violates one or more of the expressions. The node that is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of the scheduling requirements (resource request, requiredDuringScheduling affinity expressions, etc.), compute a sum by iterating through the elements of this field and adding 'weight' to the sum if the node matches the corresponding matchExpressions; the node(s) with the highest sum are the most preferred.",
 																										Items: &apiext.JSONSchemaPropsOrArray{
 																											Schema: &apiext.JSONSchemaProps{
-																												Description: "An empty preferred scheduling term matches all objects with implicit weight 0 (i.e. it's a no-op). A null preferred scheduling term matches no objects (i.e. is also a no-op).",
+																												Description: "The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most preferred node(s)",
 																												Properties: map[string]apiext.JSONSchemaProps{
 																													"podAffinityTerm": apiext.JSONSchemaProps{
-																														Description: "Required. A pod affinity term, associated with the corresponding weight..",
+																														Description: "Required. A pod affinity term, associated with the corresponding weight.",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"labelSelector": apiext.JSONSchemaProps{
 																																Description: "A label query over a set of resources in this case pods.",
@@ -1244,15 +1240,15 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
 																																				Properties: map[string]apiext.JSONSchemaProps{
 																																					"key": apiext.JSONSchemaProps{
-																																						Description: "The label key that the selector applies to.",
+																																						Description: "key is the label key that the selector applies to.",
 																																						Type:        "string",
 																																					},
 																																					"operator": apiext.JSONSchemaProps{
-																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																						Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
 																																						Type:        "string",
 																																					},
 																																					"values": apiext.JSONSchemaProps{
-																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																						Description: "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
 																																						Items: &apiext.JSONSchemaPropsOrArray{
 																																							Schema: &apiext.JSONSchemaProps{
 																																								Type: "string",
@@ -1289,7 +1285,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Type: "array",
 																															},
 																															"topologyKey": apiext.JSONSchemaProps{
-																																Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
+																																Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches that of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
 																																Type:        "string",
 																															},
 																														},
@@ -1315,10 +1311,10 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																												Description: "Defines a set of pods (namely those matching the labelSelector relative to the given namespace(s)) that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where co-located is defined as running on a node whose value of the label with key <topologyKey> matches that of any node on which a pod of the set of pods is running",
 																												Properties: map[string]apiext.JSONSchemaProps{
 																													"labelSelector": apiext.JSONSchemaProps{
-																														Description: "A label query over a set of resources in this case pods.",
+																														Description: "A label query over a set of resources, in this case pods.",
 																														Properties: map[string]apiext.JSONSchemaProps{
 																															"matchExpressions": apiext.JSONSchemaProps{
-																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
+																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
@@ -1332,7 +1328,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1369,7 +1365,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																														Type: "array",
 																													},
 																													"topologyKey": apiext.JSONSchemaProps{
-																														Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
+																														Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches that of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
 																														Type:        "string",
 																													},
 																												},
@@ -1404,15 +1400,15 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
 																																				Properties: map[string]apiext.JSONSchemaProps{
 																																					"key": apiext.JSONSchemaProps{
-																																						Description: "The label key that the selector applies to.",
+																																						Description: "key is the label key that the selector applies to.",
 																																						Type:        "string",
 																																					},
 																																					"operator": apiext.JSONSchemaProps{
-																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																						Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
 																																						Type:        "string",
 																																					},
 																																					"values": apiext.JSONSchemaProps{
-																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																						Description: "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
 																																						Items: &apiext.JSONSchemaPropsOrArray{
 																																							Schema: &apiext.JSONSchemaProps{
 																																								Type: "string",
@@ -1449,7 +1445,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																Type: "array",
 																															},
 																															"topologyKey": apiext.JSONSchemaProps{
-																																Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
+																																Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches that of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
 																																Type:        "string",
 																															},
 																														},
@@ -1492,7 +1488,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1529,7 +1525,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																														Type: "array",
 																													},
 																													"topologyKey": apiext.JSONSchemaProps{
-																														Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
+																														Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches that of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
 																														Type:        "string",
 																													},
 																												},
