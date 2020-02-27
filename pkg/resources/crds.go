@@ -1309,83 +1309,71 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																										Type: "array",
 																									},
 																									"requiredDuringSchedulingIgnoredDuringExecution": apiext.JSONSchemaProps{
-																										Description: "If the affinity requirements specified by this field are not met at scheduling time, the pod will not be scheduled onto the node. If the affinity requirements specified by this field cease to be met at some point during pod execution (e.g. due to an update), the system may or may not try to eventually evict the pod from its node.",
+																										Description: "If the affinity requirements specified by this field are not met at scheduling time, the pod will not be scheduled onto the node. If the affinity requirements specified by this field cease to be met at some point during pod execution (e.g. due to a pod label update), the system may or may not try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.",
 																										Items: &apiext.JSONSchemaPropsOrArray{
 																											Schema: &apiext.JSONSchemaProps{
-																												Description: "An empty preferred scheduling term matches all objects with implicit weight 0 (i.e. it's a no-op). A null preferred scheduling term matches no objects (i.e. is also a no-op).",
+																												Description: "Defines a set of pods (namely those matching the labelSelector relative to the given namespace(s)) that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where co-located is defined as running on a node whose value of the label with key <topologyKey> matches that of any node on which a pod of the set of pods is running",
 																												Properties: map[string]apiext.JSONSchemaProps{
-																													"podAffinityTerm": apiext.JSONSchemaProps{
-																														Description: "Required. A pod affinity term, associated with the corresponding weight..",
+																													"labelSelector": apiext.JSONSchemaProps{
+																														Description: "A label query over a set of resources in this case pods.",
 																														Properties: map[string]apiext.JSONSchemaProps{
-																															"labelSelector": apiext.JSONSchemaProps{
-																																Description: "A label query over a set of resources in this case pods.",
-																																Properties: map[string]apiext.JSONSchemaProps{
-																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
-																																		Items: &apiext.JSONSchemaPropsOrArray{
-																																			Schema: &apiext.JSONSchemaProps{
-																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-																																				Properties: map[string]apiext.JSONSchemaProps{
-																																					"key": apiext.JSONSchemaProps{
-																																						Description: "The label key that the selector applies to.",
-																																						Type:        "string",
-																																					},
-																																					"operator": apiext.JSONSchemaProps{
-																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
-																																						Type:        "string",
-																																					},
-																																					"values": apiext.JSONSchemaProps{
-																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
-																																						Items: &apiext.JSONSchemaPropsOrArray{
-																																							Schema: &apiext.JSONSchemaProps{
-																																								Type: "string",
-																																							},
-																																						},
-																																						Type: "array",
-																																					},
-																																				},
-																																				Required: []string{"key", "operator"},
-																																				Type:     "object",
-																																			},
-																																		},
-																																		Type: "array",
-																																	},
-																																	"matchLabels": apiext.JSONSchemaProps{
-																																		AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
-																																			Schema: &apiext.JSONSchemaProps{
-																																				Type: "string",
-																																			},
-																																		},
-																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
-																																		Type:        "object",
-																																	},
-																																},
-																																Type: "object",
-																															},
-																															"namespaces": apiext.JSONSchemaProps{
-																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																															"matchExpressions": apiext.JSONSchemaProps{
+																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
-																																		Type: "string",
+																																		Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+																																		Properties: map[string]apiext.JSONSchemaProps{
+																																			"key": apiext.JSONSchemaProps{
+																																				Description: "The label key that the selector applies to.",
+																																				Type:        "string",
+																																			},
+																																			"operator": apiext.JSONSchemaProps{
+																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																				Type:        "string",
+																																			},
+																																			"values": apiext.JSONSchemaProps{
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Items: &apiext.JSONSchemaPropsOrArray{
+																																					Schema: &apiext.JSONSchemaProps{
+																																						Type: "string",
+																																					},
+																																				},
+																																				Type: "array",
+																																			},
+																																		},
+																																		Required: []string{"key", "operator"},
+																																		Type:     "object",
 																																	},
 																																},
 																																Type: "array",
 																															},
-																															"topologyKey": apiext.JSONSchemaProps{
-																																Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
-																																Type:        "string",
+																															"matchLabels": apiext.JSONSchemaProps{
+																																AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
+																																	Schema: &apiext.JSONSchemaProps{
+																																		Type: "string",
+																																	},
+																																},
+																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																Type:        "object",
 																															},
 																														},
-																														Required: []string{"topologyKey"},
-																														Type:     "object",
+																														Type: "object",
 																													},
-																													"weight": apiext.JSONSchemaProps{
-																														Description: "Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100.",
-																														Format:      "int32",
-																														Type:        "integer",
+																													"namespaces": apiext.JSONSchemaProps{
+																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																														Items: &apiext.JSONSchemaPropsOrArray{
+																															Schema: &apiext.JSONSchemaProps{
+																																Type: "string",
+																															},
+																														},
+																														Type: "array",
+																													},
+																													"topologyKey": apiext.JSONSchemaProps{
+																														Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
+																														Type:        "string",
 																													},
 																												},
-																												Required: []string{"podAffinityTerm", "weight"},
+																												Required: []string{"topologyKey"},
 																												Type:     "object",
 																											},
 																										},
@@ -1481,83 +1469,71 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																										Type: "array",
 																									},
 																									"requiredDuringSchedulingIgnoredDuringExecution": apiext.JSONSchemaProps{
-																										Description: "If the affinity requirements specified by this field are not met at scheduling time, the pod will not be scheduled onto the node. If the affinity requirements specified by this field cease to be met at some point during pod execution (e.g. due to an update), the system may or may not try to eventually evict the pod from its node.",
+																										Description: "If the anti-affinity requirements specified by this field are not met at scheduling time, the pod will not be scheduled onto the node. If the anti-affinity requirements specified by this field cease to be met at some point during pod execution (e.g. due to a pod label update), the system may or may not try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.",
 																										Items: &apiext.JSONSchemaPropsOrArray{
 																											Schema: &apiext.JSONSchemaProps{
-																												Description: "An empty preferred scheduling term matches all objects with implicit weight 0 (i.e. it's a no-op). A null preferred scheduling term matches no objects (i.e. is also a no-op).",
+																												Description: "Defines a set of pods (namely those matching the labelSelector relative to the given namespace(s)) that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where co-located is defined as running on a node whose value of the label with key <topologyKey> matches that of any node on which a pod of the set of pods is running",
 																												Properties: map[string]apiext.JSONSchemaProps{
-																													"podAffinityTerm": apiext.JSONSchemaProps{
-																														Description: "Required. A pod affinity term, associated with the corresponding weight..",
+																													"labelSelector": apiext.JSONSchemaProps{
+																														Description: "A label query over a set of resources in this case pods.",
 																														Properties: map[string]apiext.JSONSchemaProps{
-																															"labelSelector": apiext.JSONSchemaProps{
-																																Description: "A label query over a set of resources in this case pods.",
-																																Properties: map[string]apiext.JSONSchemaProps{
-																																	"matchExpressions": apiext.JSONSchemaProps{
-																																		Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
-																																		Items: &apiext.JSONSchemaPropsOrArray{
-																																			Schema: &apiext.JSONSchemaProps{
-																																				Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-																																				Properties: map[string]apiext.JSONSchemaProps{
-																																					"key": apiext.JSONSchemaProps{
-																																						Description: "The label key that the selector applies to.",
-																																						Type:        "string",
-																																					},
-																																					"operator": apiext.JSONSchemaProps{
-																																						Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
-																																						Type:        "string",
-																																					},
-																																					"values": apiext.JSONSchemaProps{
-																																						Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
-																																						Items: &apiext.JSONSchemaPropsOrArray{
-																																							Schema: &apiext.JSONSchemaProps{
-																																								Type: "string",
-																																							},
-																																						},
-																																						Type: "array",
-																																					},
-																																				},
-																																				Required: []string{"key", "operator"},
-																																				Type:     "object",
-																																			},
-																																		},
-																																		Type: "array",
-																																	},
-																																	"matchLabels": apiext.JSONSchemaProps{
-																																		AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
-																																			Schema: &apiext.JSONSchemaProps{
-																																				Type: "string",
-																																			},
-																																		},
-																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
-																																		Type:        "object",
-																																	},
-																																},
-																																Type: "object",
-																															},
-																															"namespaces": apiext.JSONSchemaProps{
-																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																															"matchExpressions": apiext.JSONSchemaProps{
+																																Description: "matchExpressions is a list of label selector requirements. The requirements are ANDed",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
-																																		Type: "string",
+																																		Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+																																		Properties: map[string]apiext.JSONSchemaProps{
+																																			"key": apiext.JSONSchemaProps{
+																																				Description: "The label key that the selector applies to.",
+																																				Type:        "string",
+																																			},
+																																			"operator": apiext.JSONSchemaProps{
+																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																				Type:        "string",
+																																			},
+																																			"values": apiext.JSONSchemaProps{
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be intepreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Items: &apiext.JSONSchemaPropsOrArray{
+																																					Schema: &apiext.JSONSchemaProps{
+																																						Type: "string",
+																																					},
+																																				},
+																																				Type: "array",
+																																			},
+																																		},
+																																		Required: []string{"key", "operator"},
+																																		Type:     "object",
 																																	},
 																																},
 																																Type: "array",
 																															},
-																															"topologyKey": apiext.JSONSchemaProps{
-																																Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
-																																Type:        "string",
+																															"matchLabels": apiext.JSONSchemaProps{
+																																AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
+																																	Schema: &apiext.JSONSchemaProps{
+																																		Type: "string",
+																																	},
+																																},
+																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																Type:        "object",
 																															},
 																														},
-																														Required: []string{"topologyKey"},
-																														Type:     "object",
+																														Type: "object",
 																													},
-																													"weight": apiext.JSONSchemaProps{
-																														Description: "Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100.",
-																														Format:      "int32",
-																														Type:        "integer",
+																													"namespaces": apiext.JSONSchemaProps{
+																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																														Items: &apiext.JSONSchemaPropsOrArray{
+																															Schema: &apiext.JSONSchemaProps{
+																																Type: "string",
+																															},
+																														},
+																														Type: "array",
+																													},
+																													"topologyKey": apiext.JSONSchemaProps{
+																														Description: "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the labelSelector in the specified namespaces, where co-located is defined as running on a node whose value of the label with key topologyKey matches taht of any node on which any of the selected pods is running. Empty topologyKey is not allowed.",
+																														Type:        "string",
 																													},
 																												},
-																												Required: []string{"podAffinityTerm", "weight"},
+																												Required: []string{"topologyKey"},
 																												Type:     "object",
 																											},
 																										},
@@ -1575,7 +1551,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																								Type: "string",
 																							},
 																						},
-																						Description: "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
+																						Description: "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
 																						Type:        "object",
 																					},
 																					"tolerations": apiext.JSONSchemaProps{
@@ -1586,7 +1562,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																								Type:        "object",
 																								Properties: map[string]apiext.JSONSchemaProps{
 																									"effect": apiext.JSONSchemaProps{
-																										Description: "Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and Noexecute.",
+																										Description: "Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.",
 																										Type:        "string",
 																									},
 																									"key": apiext.JSONSchemaProps{
@@ -1631,7 +1607,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 														Description: "Selector selects a set of DNSNames on the Certificate resource that should be solved using this challenge solver.",
 														Properties: map[string]apiext.JSONSchemaProps{
 															"dnsNames": apiext.JSONSchemaProps{
-																Description: "List of DNSNames that this solver will be used to solve. If specified and a match is found, dnsNames selector will take precedence over a dnsZones selector. If multiple solvers match with the same dnsNames value, the solver with the most matching labels in matchLabels will be selected. If neither has more matches, the solver defined earlier in the list will be selected.",
+																Description: "List of DNSNames that this solver will be used to solve. If specified and a match is found, a dnsNames selector will take precedence over a dnsZones selector. If multiple solvers match with the same dnsNames value, the solver with the most matching labels in matchLabels will be selected. If neither has more matches, the solver defined earlier in the list will be selected.",
 																Items: &apiext.JSONSchemaPropsOrArray{
 																	Schema: &apiext.JSONSchemaProps{
 																		Type: "string",
@@ -1752,7 +1728,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 								Type:     "object",
 							},
 							"venafi": apiext.JSONSchemaProps{
-								Description: "VenaifIssuer describes issuer configuration details for Venaif Cloud.",
+								Description: "VenafiIssuer describes issuer configuration details for Venafi Cloud.",
 								Properties: map[string]apiext.JSONSchemaProps{
 									"cloud": apiext.JSONSchemaProps{
 										Description: "Cloud specifies the Venafi cloud configuration settings. Only one of TPP or Cloud may be specified.",
@@ -1818,7 +1794,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 						},
 					},
 					"status": apiext.JSONSchemaProps{
-						Description: "IssuerStatus contains tatus information about an Issuer",
+						Description: "IssuerStatus contains status information about an Issuer",
 						Properties: map[string]apiext.JSONSchemaProps{
 							"acme": apiext.JSONSchemaProps{
 								Properties: map[string]apiext.JSONSchemaProps{
