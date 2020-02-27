@@ -77,7 +77,7 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 	},
 }
 
-const injectSecretCA = DeployNamespace + "/" + webhookServingSecret
+//const injectSecretCA = DeployNamespace + "/" + webhookServingSecret
 
 // APISvcName is the name used for cert-manager-webhooks' apiservice definition
 const APISvcName = "v1beta1.webhook.certmanager.k8s.io"
@@ -90,7 +90,7 @@ var APIService = &apiRegv1.APIService{
 			"app": "ibm-cert-manager-webhook",
 		},
 		Annotations: map[string]string{
-			"certmanager.k8s.io/inject-ca-from-secret": injectSecretCA,
+			//"certmanager.k8s.io/inject-ca-from-secret": injectSecretCA,
 		},
 	},
 	Spec: apiRegv1.APIServiceSpec{
@@ -98,8 +98,8 @@ var APIService = &apiRegv1.APIService{
 		GroupPriorityMinimum: 1000,
 		VersionPriority:      15,
 		Service: &apiRegv1.ServiceReference{
-			Name:      CertManagerWebhookName,
-			Namespace: DeployNamespace,
+			Name: CertManagerWebhookName,
+			//Namespace: DeployNamespace,
 		},
 		Version: "v1beta1",
 	},
@@ -108,8 +108,8 @@ var APIService = &apiRegv1.APIService{
 // WebhookSvc is the service definition for cert-manager-webhook
 var WebhookSvc = &corev1.Service{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      CertManagerWebhookName,
-		Namespace: DeployNamespace,
+		Name: CertManagerWebhookName,
+		//Namespace: DeployNamespace,
 		Labels: map[string]string{
 			"app": "ibm-cert-manager-webhook",
 		},

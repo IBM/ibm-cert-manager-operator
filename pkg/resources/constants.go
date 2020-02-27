@@ -153,7 +153,7 @@ const webhookImage = imageRegistry + "/" + WebhookImageName + ":" + WebhookImage
 const configmapWatcherImage = imageRegistry + "/" + ConfigmapWatcherImageName + ":" + ConfigmapWatcherVersion
 
 // ServiceAccount is the name of the default service account to be used by cert-manager services
-const ServiceAccount = "default"
+const ServiceAccount = "cert-manager"
 
 // ClusterRoleName is the default name of the clusterrole and clusterrolebinding used by the cert-manager services
 const ClusterRoleName = "cert-manager"
@@ -193,21 +193,26 @@ var readinessExecActionConfigmapWatcher = v1.ExecAction{
 }
 
 // Cert-manager args
-const webhookServingSecret = "cert-manager-webhook-tls"
+
+// WebhookServingSecret is the name of tls secret used for serving the cert-manager-webhook
+const WebhookServingSecret = "cert-manager-webhook-tls"
 
 // ResourceNS is the resource namespace arg for cert-manager-controller
 const ResourceNS = "--cluster-resource-namespace=ibm-common-services"
+
 const leaderElectNS = "--leader-election-namespace=cert-manager"
 
 // AcmeSolverArg is the acme solver image to use for the cert-manager-controller
 const AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
+
 const webhookNSArg = "--webhook-namespace=" + DeployNamespace
 const webhookCASecretArg = "--webhook-ca-secret=cert-manager-webhook-ca"
-const webhookServingSecretArg = "--webhook-serving-secret=" + webhookServingSecret
+const webhookServingSecretArg = "--webhook-serving-secret=" + WebhookServingSecret
+
 const webhookDNSNamesArg = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc"
 
 // DefaultArgs are the default arguments use for cert-manager-controller
-var DefaultArgs = []string{leaderElectNS, webhookNSArg, webhookCASecretArg, webhookServingSecretArg, webhookDNSNamesArg}
+var DefaultArgs = []string{webhookCASecretArg, webhookServingSecretArg}
 
 // CRDs is the list of crds created/used by cert-manager in this version
 var CRDs = [5]string{"certificates", "issuers", "clusterissuers", "orders", "challenges"}
