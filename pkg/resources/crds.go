@@ -527,6 +527,8 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																				Type:        "string",
 																			},
 																		},
+																		Type:     "object",
+																		Required: []string{"name"},
 																	},
 																},
 																Required: []string{"project", "serviceAccountSecretRef"},
@@ -868,6 +870,8 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																				Type:        "string",
 																			},
 																		},
+																		Type:     "object",
+																		Required: []string{"name"},
 																	},
 																},
 																Required: []string{"project", "serviceAccountSecretRef"},
@@ -1267,6 +1271,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Type:        "object",
 																																	},
 																																},
+																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
 																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
@@ -1343,6 +1348,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Type:        "object",
 																																	},
 																																},
+																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
 																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
@@ -1425,6 +1431,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Type:        "object",
 																																	},
 																																},
+																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
 																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
@@ -1501,6 +1508,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Type:        "object",
 																																	},
 																																},
+																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
 																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
