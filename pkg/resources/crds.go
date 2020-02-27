@@ -1547,16 +1547,33 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																						Type:        "object",
 																					},
 																					"tolerations": apiext.JSONSchemaProps{
+																						Description: "If specified, the pod's tolerations.",
 																						Items: &apiext.JSONSchemaPropsOrArray{
 																							Schema: &apiext.JSONSchemaProps{
 																								Description: "The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.",
 																								Type:        "object",
 																								Properties: map[string]apiext.JSONSchemaProps{
-																									"effect":            apiext.JSONSchemaProps{},
-																									"key":               apiext.JSONSchemaProps{},
-																									"operator":          apiext.JSONSchemaProps{},
-																									"tolerationSeconds": apiext.JSONSchemaProps{},
-																									"value":             apiext.JSONSchemaProps{},
+																									"effect": apiext.JSONSchemaProps{
+																										Description: "Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and Noexecute.",
+																										Type:        "string",
+																									},
+																									"key": apiext.JSONSchemaProps{
+																										Description: "Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.",
+																										Type:        "string",
+																									},
+																									"operator": apiext.JSONSchemaProps{
+																										Description: "Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.",
+																										Type:        "string",
+																									},
+																									"tolerationSeconds": apiext.JSONSchemaProps{
+																										Description: "TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.",
+																										Type:        "integer",
+																										Format:      "int64",
+																									},
+																									"value": apiext.JSONSchemaProps{
+																										Description: "Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.",
+																										Type:        "string",
+																									},
 																								},
 																							},
 																						},
@@ -1568,16 +1585,51 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																		},
 																		Type: "object",
 																	},
-																	"serviceType": apiext.JSONSchemaProps{},
+																	"serviceType": apiext.JSONSchemaProps{
+																		Description: "Optional service type for Kubernetes solver service",
+																		Type:        "string",
+																	},
 																},
+																Type: "object",
 															},
 														},
 														Type: "object",
 													},
-													"selector": apiext.JSONSchemaProps{},
+													"selector": apiext.JSONSchemaProps{
+														Description: "Selector selects a set of DNSNames on the Certificate resource that should be solved using this challenge solver.",
+														Properties: map[string]apiext.JSONSchemaProps{
+															"dnsNames": apiext.JSONSchemaProps{
+																Description: "List of DNSNames that this solver will be used to solve. If specified and a match is found, dnsNames selector will take precedence over a dnsZones selector. If multiple solvers match with the same dnsNames value, the solver with the most matching labels in matchLabels will be selected. If neither has more matches, the solver defined earlier in the list will be selected.",
+																Items: &apiext.JSONSchemaPropsOrArray{
+																	Schema: &apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Type: "array",
+															},
+															"dnsZones": apiext.JSONSchemaProps{
+																Description: "List of DNSZones that this solver will be used to solve. The most specific DNS zone match specified here will take precedence over other DNS zone matches, so a solver specifying sys.example.com will be selected over one specifying example.com for the domain www.sys.example.com. If multiple solvers match with the same dnsZones value, the solver with the most matching labels in matchLabels will be selected. If neither has more matches, the solver defined earlier in the list will be selected.",
+																Items: &apiext.JSONSchemaPropsOrArray{
+																	Schema: &apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Type: "array",
+															},
+															"matchLabels": apiext.JSONSchemaProps{
+																AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
+																	Schema: &apiext.JSONSchemaProps{
+																		Type: "string",
+																	},
+																},
+																Description: "A label selector that is used to refine the set of certificate's that this challenge solver will apply to.",
+																Type:        "object",
+															},
+														},
+														Type: "object",
+													},
 												},
-												Required: []string{"privateKeySecretRef", "server"},
-												Type:     "object",
+												Type: "object",
 											},
 										},
 										Type: "array",
@@ -1586,20 +1638,212 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 								Required: []string{"privateKeySecretRef", "server"},
 								Type:     "object",
 							},
-							"ca":         apiext.JSONSchemaProps{},
-							"selfSigned": apiext.JSONSchemaProps{},
-							"vault":      apiext.JSONSchemaProps{},
-							"venafi":     apiext.JSONSchemaProps{},
+							"ca": apiext.JSONSchemaProps{
+								Properties: map[string]apiext.JSONSchemaProps{
+									"secretName": apiext.JSONSchemaProps{
+										Description: "SecretName is the name of the secret used to sign Certificates issued by this Issuer.",
+										Type:        "string",
+									},
+								},
+								Required: []string{"secretName"},
+								Type:     "object",
+							},
+							"selfSigned": apiext.JSONSchemaProps{
+								Type: "object",
+							},
+							"vault": apiext.JSONSchemaProps{
+								Properties: map[string]apiext.JSONSchemaProps{
+									"auth": apiext.JSONSchemaProps{
+										Description: "Vault authentication",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"appRole": apiext.JSONSchemaProps{
+												Description: "This Secret contains an AppRole and Secret",
+												Properties: map[string]apiext.JSONSchemaProps{
+													"path": apiext.JSONSchemaProps{
+														Description: "Where the authentication path is mounted in Vault.",
+														Type:        "string",
+													},
+													"roleId": apiext.JSONSchemaProps{
+														Type: "string",
+													},
+													"secretRef": apiext.JSONSchemaProps{
+														Properties: map[string]apiext.JSONSchemaProps{
+															"key": apiext.JSONSchemaProps{
+																Description: "The key of the secret to select from. Must be a valid secret key.",
+																Type:        "string",
+															},
+															"name": apiext.JSONSchemaProps{
+																Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+																Type:        "string",
+															},
+														},
+														Required: []string{"name"},
+														Type:     "object",
+													},
+												},
+												Required: []string{"path", "roleId", "secretRef"},
+												Type:     "object",
+											},
+											"tokenSecretRef": apiext.JSONSchemaProps{
+												Description: "This Secret contains the Vault token key",
+												Properties: map[string]apiext.JSONSchemaProps{
+													"key": apiext.JSONSchemaProps{
+														Description: "The key of the secret to select from. Must be a valid secret key.",
+														Type:        "string",
+													},
+													"name": apiext.JSONSchemaProps{
+														Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+														Type:        "string",
+													},
+												},
+												Required: []string{"name"},
+												Type:     "object",
+											},
+										},
+										Type: "object",
+									},
+									"caBundle": apiext.JSONSchemaProps{
+										Description: "Base64 encoded CA bundle to validate Vault server certificate. Only used if the Server URL is using HTTPS protocol. This parameter is ignored for plain HTTP protocol connection. If not set the system root certificates are used to validate the TLS connection.",
+										Format:      "byte",
+										Type:        "string",
+									},
+									"path": apiext.JSONSchemaProps{
+										Description: "Vault URL path to the certificate role",
+										Type:        "string",
+									},
+									"server": apiext.JSONSchemaProps{
+										Description: "Server is the vault connection address",
+										Type:        "string",
+									},
+								},
+								Required: []string{"auth", "path", "server"},
+								Type:     "object",
+							},
+							"venafi": apiext.JSONSchemaProps{
+								Description: "VenaifIssuer describes issuer configuration details for Venaif Cloud.",
+								Properties: map[string]apiext.JSONSchemaProps{
+									"cloud": apiext.JSONSchemaProps{
+										Description: "Cloud specifies the Venafi cloud configuration settings. Only one of TPP or Cloud may be specified.",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"apiTokenSecretRef": apiext.JSONSchemaProps{
+												Description: "APITokenSecretRef is a secret key selector for the Venafi Cloud API token.",
+												Properties: map[string]apiext.JSONSchemaProps{
+													"key": apiext.JSONSchemaProps{
+														Description: "The key of the secret to select from. Must be a valid secret key.",
+														Type:        "string",
+													},
+													"name": apiext.JSONSchemaProps{
+														Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+														Type:        "string",
+													},
+												},
+												Required: []string{"name"},
+												Type:     "object",
+											},
+											"url": apiext.JSONSchemaProps{
+												Description: "URL is the base URL for Venafi Cloud",
+												Type:        "string",
+											},
+										},
+										Required: []string{"apiTokenSecretRef", "url"},
+										Type:     "object",
+									},
+									"tpp": apiext.JSONSchemaProps{
+										Description: "TPP specifies Trust Protection Platform configuration settings. Only one of TPP or Cloud may be specified.",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"caBundle": apiext.JSONSchemaProps{
+												Description: "CABundle is a PEM encoded TLS certifiate to use to verify connections to the TPP instance. If specified, system roots will not be used and the issuing CA for the TPP instance must be verifiable using the provided root. If not specified, the connection will be verified using the cert-manager system root certificates.",
+												Format:      "byte",
+												Type:        "string",
+											},
+											"credentialsRef": apiext.JSONSchemaProps{
+												Description: "CredentialsRef is a reference to a Secret containing the username and password for the TPP server. The secret must contain two keys, 'username' and 'password'.",
+												Properties: map[string]apiext.JSONSchemaProps{
+													"name": apiext.JSONSchemaProps{
+														Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?",
+														Type:        "string",
+													},
+												},
+												Required: []string{"name"},
+												Type:     "object",
+											},
+											"url": apiext.JSONSchemaProps{
+												Description: "URL is the base URL for the Venafi TPP instance",
+												Type:        "string",
+											},
+										},
+										Required: []string{"credentialsRef", "url"},
+										Type:     "object",
+									},
+									"zone": apiext.JSONSchemaProps{
+										Description: "Zone is the Venafi Policy Zone to use for this issuer. All requests made to the Venafi platform will be restricted by the named zone policy. This field is required.",
+										Type:        "string",
+									},
+								},
+								Required: []string{"zone"},
+								Type:     "object",
+							},
 						},
 					},
 					"status": apiext.JSONSchemaProps{
-						Description: "",
+						Description: "IssuerStatus contains tatus information about an Issuer",
 						Properties: map[string]apiext.JSONSchemaProps{
-							"acme":       apiext.JSONSchemaProps{},
-							"conditions": apiext.JSONSchemaProps{},
+							"acme": apiext.JSONSchemaProps{
+								Properties: map[string]apiext.JSONSchemaProps{
+									"lastRegisteredEmail": apiext.JSONSchemaProps{
+										Description: "LastRegisteredEmail is the email associated with the latest registered ACME account, in order to track changes made to registered account associated with the Issuer",
+										Type:        "string",
+									},
+									"uri": apiext.JSONSchemaProps{
+										Description: "URI is the unique account identifier, which can also be used to retrieve account details from the CA",
+										Type:        "string",
+									},
+								},
+								Type: "object",
+							},
+							"conditions": apiext.JSONSchemaProps{
+								Items: &apiext.JSONSchemaPropsOrArray{
+									Schema: &apiext.JSONSchemaProps{
+										Description: "IssuerCondition contains condition information for an Issuer.",
+										Properties: map[string]apiext.JSONSchemaProps{
+											"lastTransitionTime": apiext.JSONSchemaProps{
+												Description: "LastTransitionTime is the timestamp corresponding to the last status change of this condition.",
+												Format:      "date-time",
+												Type:        "string",
+											},
+											"message": apiext.JSONSchemaProps{
+												Description: "Message is a human readable description of the details of the last transition, complementing reason.",
+												Type:        "string",
+											},
+											"reason": apiext.JSONSchemaProps{
+												Description: "Reason is a brief machine readable explanation for the condition's last transition.",
+												Type:        "string",
+											},
+											"status": apiext.JSONSchemaProps{
+												Description: "Status of the condition, one of ('True', 'False', 'Unknown').",
+												Enum: []apiext.JSON{
+													{Raw: []byte("\"True\"")},
+													{Raw: []byte("\"False\"")},
+													{Raw: []byte("\"Unknown\"")},
+												},
+												Type: "string",
+											},
+											"type": apiext.JSONSchemaProps{
+												Description: "Type of the condition, currently ('Ready').",
+												Type:        "string",
+											},
+										},
+										Required: []string{"status", "type"},
+										Type:     "object",
+									},
+								},
+								Type: "array",
+							},
 						},
+						Type: "object",
 					},
 				},
+				Type: "object",
 			},
 		},
 	},
