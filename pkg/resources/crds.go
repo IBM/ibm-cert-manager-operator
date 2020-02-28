@@ -1244,7 +1244,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																						Type:        "string",
 																																					},
 																																					"operator": apiext.JSONSchemaProps{
-																																						Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, and DoesNotExist.",
+																																						Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
 																																						Type:        "string",
 																																					},
 																																					"values": apiext.JSONSchemaProps{
@@ -1324,7 +1324,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, and DoesNotExist.",
+																																				Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
@@ -1404,7 +1404,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																						Type:        "string",
 																																					},
 																																					"operator": apiext.JSONSchemaProps{
-																																						Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, and DoesNotExist.",
+																																						Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
 																																						Type:        "string",
 																																					},
 																																					"values": apiext.JSONSchemaProps{
@@ -1484,7 +1484,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type:        "string",
 																																			},
 																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, and DoesNotExist.",
+																																				Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
