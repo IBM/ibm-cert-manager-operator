@@ -12,7 +12,7 @@ metadata:
           },
           "spec": {
             "enableWebhook": true,
-            "imageRegistry": "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
+            "imageRegistry": "quay.io",
           }
         },
         {
