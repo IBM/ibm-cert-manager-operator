@@ -13,8 +13,10 @@ Previously, when all the services were deployed as helm charts, it was easy to u
 
 ## How to do it
 
-There are two ways to create cert-manager resources in your operator:
+Fulfill the prerequisites:
 1. [Preqrequisites](#pre)
+
+There are two options to create cert-manager resources in your operator:
 1. [As Go code](#go)
 1. [As yaml](#yaml)
 
