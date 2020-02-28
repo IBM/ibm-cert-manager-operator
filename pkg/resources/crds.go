@@ -597,15 +597,15 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																		Type:        "string",
 																	},
 																	"tsigAlgorithm": apiext.JSONSchemaProps{
-																		Description: "The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when `tsigSecretSecretRef` and `tsigKeyName` are defined. Supported values are (case-insensitive): `HMACMD5` (default), `HMACSHA1`, `HMACSHA256` or `HMACSHA512`",
+																		Description: "The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when ``tsigSecretSecretRef`` and ``tsigKeyName`` are defined. Supported values are (case-insensitive): ``HMACMD5`` (default), ``HMACSHA1``, ``HMACSHA256`` or ``HMACSHA512``",
 																		Type:        "string",
 																	},
 																	"tsigKeyName": apiext.JSONSchemaProps{
-																		Description: "The TSIG Key name configured in the DNS. If `tsigSecretSecretRef` is defined, this field is required.",
+																		Description: "The TSIG Key name configured in the DNS. If ``tsigSecretSecretRef`` is defined, this field is required.",
 																		Type:        "string",
 																	},
 																	"tsigSecretSecretRef": apiext.JSONSchemaProps{
-																		Description: "The name of the secret containing the TSIG value. If `tsigKeyName` is defined, this field is required.",
+																		Description: "The name of the secret containing the TSIG value. If ``tsigKeyName`` is defined, this field is required.",
 																		Properties: map[string]apiext.JSONSchemaProps{
 																			"key": apiext.JSONSchemaProps{
 																				Description: "The key of the secret to select from. Must be a valid secret key.",
@@ -673,7 +673,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																		Type:        "string",
 																	},
 																	"solverName": apiext.JSONSchemaProps{
-																		Description: "The name of the solver to use, as defined in the webhook provider implementation. This will typically be the name of th eprovider, e.g. 'cloudflare'.",
+																		Description: "The name of the solver to use, as defined in the webhook provider implementation. This will typically be the name of the provider, e.g. 'cloudflare'.",
 																		Type:        "string",
 																	},
 																},
@@ -1269,14 +1269,14 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type: "string",
 																																			},
 																																		},
-																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																		Type:        "object",
 																																	},
 																																},
 																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
-																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Type: "string",
@@ -1320,15 +1320,15 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
 																																		Properties: map[string]apiext.JSONSchemaProps{
 																																			"key": apiext.JSONSchemaProps{
-																																				Description: "The label key that the selector applies to.",
+																																				Description: "key is the label key that the selector applies to.",
 																																				Type:        "string",
 																																			},
 																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																				Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, and DoesNotExist.",
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1349,14 +1349,14 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Type: "string",
 																																	},
 																																},
-																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																Type:        "object",
 																															},
 																														},
 																														Type: "object",
 																													},
 																													"namespaces": apiext.JSONSchemaProps{
-																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																														Items: &apiext.JSONSchemaPropsOrArray{
 																															Schema: &apiext.JSONSchemaProps{
 																																Type: "string",
@@ -1379,10 +1379,10 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																								Type: "object",
 																							},
 																							"podAntiAffinity": apiext.JSONSchemaProps{
-																								Description: "Describes pod anti-affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as some other pod(s)).",
+																								Description: "Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone, etc. as some other pod(s)).",
 																								Properties: map[string]apiext.JSONSchemaProps{
 																									"preferredDuringSchedulingIgnoredDuringExecution": apiext.JSONSchemaProps{
-																										Description: "The scheduler will prefer to schedule pods to nodes that satisfy the anti-affinity expressions specified by this field, but it may choose a node that violates one or more of the expressions. The node that is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of the scheduling requirements (resource request, requiredDuringScheduling anti-affinity expressions, etc.), compute a sum by iterating through the elements of this field and adding 'weight' to the sum if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest sum are the most preferred.",
+																										Description: "The scheduler will prefer to schedule pods to nodes that satisfy the anti-affinity expressions specified by this field, but it may choose a node that violates one or more of the expressions. The node that is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of the scheduling requirements (resource request, requiredDuringScheduling anti-affinity expressions, etc.), compute a sum by iterating through the elements of this field and adding \"weight\" to the sum if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest sum are the most preferred.",
 																										Items: &apiext.JSONSchemaPropsOrArray{
 																											Schema: &apiext.JSONSchemaProps{
 																												Description: "The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most preferred node(s)",
@@ -1429,14 +1429,14 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																				Type: "string",
 																																			},
 																																		},
-																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																		Type:        "object",
 																																	},
 																																},
 																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
-																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Type: "string",
@@ -1480,15 +1480,15 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Description: "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
 																																		Properties: map[string]apiext.JSONSchemaProps{
 																																			"key": apiext.JSONSchemaProps{
-																																				Description: "The label key that the selector applies to.",
+																																				Description: "key is the label key that the selector applies to.",
 																																				Type:        "string",
 																																			},
 																																			"operator": apiext.JSONSchemaProps{
-																																				Description: "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+																																				Description: "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, and DoesNotExist.",
 																																				Type:        "string",
 																																			},
 																																			"values": apiext.JSONSchemaProps{
-																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
+																																				Description: "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
 																																				Items: &apiext.JSONSchemaPropsOrArray{
 																																					Schema: &apiext.JSONSchemaProps{
 																																						Type: "string",
@@ -1509,14 +1509,14 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 																																		Type: "string",
 																																	},
 																																},
-																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																Type:        "object",
 																															},
 																														},
 																														Type: "object",
 																													},
 																													"namespaces": apiext.JSONSchemaProps{
-																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																														Items: &apiext.JSONSchemaPropsOrArray{
 																															Schema: &apiext.JSONSchemaProps{
 																																Type: "string",
@@ -1661,7 +1661,7 @@ var issuerCRD = &apiext.CustomResourceDefinition{
 										Description: "Vault authentication",
 										Properties: map[string]apiext.JSONSchemaProps{
 											"appRole": apiext.JSONSchemaProps{
-												Description: "This Secret contains an AppRole and Secret",
+												Description: "This Secret contains a AppRole and Secret",
 												Properties: map[string]apiext.JSONSchemaProps{
 													"path": apiext.JSONSchemaProps{
 														Description: "Where the authentication path is mounted in Vault.",
@@ -2189,7 +2189,7 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																		Type:        "string",
 																	},
 																	"solverName": apiext.JSONSchemaProps{
-																		Description: "The name of the solver to use, as defined in the webhook provider implementation. This will typically be the name of th eprovider, e.g. 'cloudflare'.",
+																		Description: "The name of the solver to use, as defined in the webhook provider implementation. This will typically be the name of the provider, e.g. 'cloudflare'.",
 																		Type:        "string",
 																	},
 																},
@@ -2452,15 +2452,15 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																		Type:        "string",
 																	},
 																	"tsigAlgorithm": apiext.JSONSchemaProps{
-																		Description: "The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when `tsigSecretSecretRef` and `tsigKeyName` are defined. Supported values are (case-insensitive): `HMACMD5` (default), `HMACSHA1`, `HMACSHA256` or `HMACSHA512`",
+																		Description: "The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when ``tsigSecretSecretRef`` and ``tsigKeyName`` are defined. Supported values are (case-insensitive): ``HMACMD5`` (default), ``HMACSHA1``, ``HMACSHA256`` or ``HMACSHA512``",
 																		Type:        "string",
 																	},
 																	"tsigKeyName": apiext.JSONSchemaProps{
-																		Description: "The TSIG Key name configured in the DNS. If `tsigSecretSecretRef` is defined, this field is required.",
+																		Description: "The TSIG Key name configured in the DNS. If ``tsigSecretSecretRef`` is defined, this field is required.",
 																		Type:        "string",
 																	},
 																	"tsigSecretSecretRef": apiext.JSONSchemaProps{
-																		Description: "The name of the secret containing the TSIG value. If `tsigKeyName` is defined, this field is required.",
+																		Description: "The name of the secret containing the TSIG value. If ``tsigKeyName`` is defined, this field is required.",
 																		Properties: map[string]apiext.JSONSchemaProps{
 																			"key": apiext.JSONSchemaProps{
 																				Description: "The key of the secret to select from. Must be a valid secret key.",
@@ -2785,14 +2785,14 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																																				Type: "string",
 																																			},
 																																		},
-																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																		Type:        "object",
 																																	},
 																																},
 																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
-																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Type: "string",
@@ -2809,7 +2809,7 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																														Type:     "object",
 																													},
 																													"weight": apiext.JSONSchemaProps{
-																														Description: "Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100.",
+																														Description: "Weight associated with matching the corresponding podAffinityTerm, in the range 1-100.",
 																														Format:      "int32",
 																														Type:        "integer",
 																													},
@@ -2865,14 +2865,14 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																																		Type: "string",
 																																	},
 																																},
-																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																Type:        "object",
 																															},
 																														},
 																														Type: "object",
 																													},
 																													"namespaces": apiext.JSONSchemaProps{
-																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																														Items: &apiext.JSONSchemaPropsOrArray{
 																															Schema: &apiext.JSONSchemaProps{
 																																Type: "string",
@@ -2895,7 +2895,7 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																								Type: "object",
 																							},
 																							"podAntiAffinity": apiext.JSONSchemaProps{
-																								Description: "Describes pod anti-affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as some other pod(s)).",
+																								Description: "Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone, etc. as some other pod(s)).",
 																								Properties: map[string]apiext.JSONSchemaProps{
 																									"preferredDuringSchedulingIgnoredDuringExecution": apiext.JSONSchemaProps{
 																										Description: "The scheduler will prefer to schedule pods to nodes that satisfy the anti-affinity expressions specified by this field, but it may choose a node that violates one or more of the expressions. The node that is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of the scheduling requirements (resource request, requiredDuringScheduling anti-affinity expressions, etc.), compute a sum by iterating through the elements of this field and adding 'weight' to the sum if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest sum are the most preferred.",
@@ -2945,14 +2945,14 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																																				Type: "string",
 																																			},
 																																		},
-																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																		Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																		Type:        "object",
 																																	},
 																																},
 																																Type: "object",
 																															},
 																															"namespaces": apiext.JSONSchemaProps{
-																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																																Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																																Items: &apiext.JSONSchemaPropsOrArray{
 																																	Schema: &apiext.JSONSchemaProps{
 																																		Type: "string",
@@ -2969,7 +2969,7 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																														Type:     "object",
 																													},
 																													"weight": apiext.JSONSchemaProps{
-																														Description: "Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100.",
+																														Description: "Weight associated with matching the corresponding podAffinityTerm, in the range 1-100.",
 																														Format:      "int32",
 																														Type:        "integer",
 																													},
@@ -3025,14 +3025,14 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 																																		Type: "string",
 																																	},
 																																},
-																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'. The requirements are ANDed.",
+																																Description: "matchLabels is a map of {key, value} pairs. A single {key, value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
 																																Type:        "object",
 																															},
 																														},
 																														Type: "object",
 																													},
 																													"namespaces": apiext.JSONSchemaProps{
-																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means this pod's namespace",
+																														Description: "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
 																														Items: &apiext.JSONSchemaPropsOrArray{
 																															Schema: &apiext.JSONSchemaProps{
 																																Type: "string",
@@ -3177,7 +3177,7 @@ var clusterIssuerCRD = &apiext.CustomResourceDefinition{
 										Description: "Vault authentication",
 										Properties: map[string]apiext.JSONSchemaProps{
 											"appRole": apiext.JSONSchemaProps{
-												Description: "This Secret contains an AppRole and Secret",
+												Description: "This Secret contains a AppRole and Secret",
 												Properties: map[string]apiext.JSONSchemaProps{
 													"path": apiext.JSONSchemaProps{
 														Description: "Where the authentication path is mounted in Vault.",
