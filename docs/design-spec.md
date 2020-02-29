@@ -11,10 +11,6 @@
         - if they exist, continue
         - if they do not exist, try to create them
             - if there's errors creating them, requeue and try again
-    1. Check the cert-manager namespace exists
-        - if it exists, continue
-        - if it does not exist, create it
-            - if there's an error creating it, requeue and try again
     1. Check RBAC is in place for cert-manager
         - Check roles
             - Clusterrole
@@ -28,6 +24,9 @@
             - Create the service account ignoring errors if it already exists
                 - if there's an error that's not related to it already existing, requeue and try again
     1. Check the deployment
+        - If an instance of cert-manager already exists
+            - Create a warning status on the CertManager CR telling them one exists and to remove it before proceeding and requeue and try again
+        - If an instance of cert-manager does not already exist, continue
         - If the cert-manager deployment exists
             - if it does, check if anything differs from the template
                 - if it does send an update using the template
@@ -65,7 +64,6 @@
         - RBAC
             - Removes clusterrolebinding
             - Removes the clusterrole
-            - Removes the imagepullsecret - if it was copied over by this operator
             - Removes webhook rolebinding
         - Deployments
             - webhook deploy
@@ -76,6 +74,7 @@
         - Mutating Webhook Configuration
         - Service
         - API Service
+        - Cert-manager CRDS (certificates, issuers, clusterissuers, orders, and challenges)
         - NOTE: the finalizer automatically removes resources created by this operator. If any of these were not created by operator and were already present in the system then the operator will not remove them upon CR removal.
     1. Remove the finalizer from list of finalizers on CR
 
