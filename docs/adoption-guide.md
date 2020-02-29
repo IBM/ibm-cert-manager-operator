@@ -28,7 +28,7 @@ There are two options to create cert-manager resources in your operator:
 
     ````
     rules:
-    - apiGroup: 
+    - apiGroup:
       - certmanager.k8s.io
       resources:
       - certificates
