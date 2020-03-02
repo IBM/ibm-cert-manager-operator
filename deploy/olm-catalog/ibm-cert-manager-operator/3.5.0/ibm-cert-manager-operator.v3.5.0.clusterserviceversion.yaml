@@ -397,5 +397,4 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-cert-manager-operator.v0.0.0
   version: 3.5.0
