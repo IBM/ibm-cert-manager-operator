@@ -12,7 +12,7 @@ metadata:
           },
           "spec": {
             "enableWebhook": true,
-            "imageRegistry": "quay.io",
+            "imageRegistry": "quay.io"
           }
         },
         {
