@@ -27,7 +27,8 @@ var ControllerDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: CertManagerControllerName,
 		//		Namespace: DeployNamespace,
-		Labels: ControllerLabelMap,
+		Labels:      ControllerLabelMap,
+		Annotations: MeteringAnnotations,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -76,7 +77,8 @@ var CainjectorDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: CertManagerCainjectorName,
 		//		Namespace: DeployNamespace,
-		Labels: CainjectorLabelMap,
+		Labels:      CainjectorLabelMap,
+		Annotations: MeteringAnnotations,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -98,7 +100,8 @@ var ConfigmapWatcherDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: ConfigmapWatcherName,
 		//		Namespace: DeployNamespace,
-		Labels: ConfigmapWatcherLabelMap,
+		Labels:      ConfigmapWatcherLabelMap,
+		Annotations: MeteringAnnotations,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
