@@ -14,6 +14,46 @@ metadata:
             "enableWebhook": true,
             "imageRegistry": "quay.io"
           }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Issuer",
+          "metadata": {
+            "name": "cs-ss-issuer",
+            "namespace": "ibm-common-services"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Certificate",
+          "metadata": {
+            "name": "cs-ca-certificate",
+            "namespace": "ibm-common-services"
+          },
+          "spec": {
+            "secretName": "cs-ca-certificate-secret",
+            "issuerRef": {
+              "name": "cs-ss-issuer",
+              "kind": "Issuer"
+            },
+            "commonName": "cs-ca-certificate",
+            "isCA": true
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "cs-ca-clusterissuer"
+          },
+          "spec": {
+            "ca": {
+              "secretName": "cs-ca-certificate-secret"
+            }
+          }
         }
       ]
     capabilities: Basic Install
