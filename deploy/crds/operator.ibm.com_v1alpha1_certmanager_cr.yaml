@@ -6,4 +6,4 @@ spec:
   enableWebhook: true
   imageRegistry: quay.io
 status:
-  deploymentStatus: {}
+  certManagerStatus: {}
