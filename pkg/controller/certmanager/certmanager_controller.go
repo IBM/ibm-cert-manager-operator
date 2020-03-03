@@ -64,7 +64,6 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	ns, _ := k8sutil.GetWatchNamespace()
 
 	if ns == "" {
-		log.Info("NO NAMESPACE SETTING TO DEFAULT")
 		ns = res.DeployNamespace
 	}
 
