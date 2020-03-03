@@ -2,5 +2,4 @@ crd-cr-paths:
 - deploy/crds
 operator-path: deploy/operator.yaml
 role-paths:
-- deploy/clusterrole.yaml
 - deploy/role.yaml

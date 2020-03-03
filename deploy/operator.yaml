@@ -15,7 +15,7 @@ spec:
       serviceAccountName: ibm-cert-manager-operator
       containers:
         - name: ibm-cert-manager-operator
-          image: quay.io/opencloudio/ibm-cert-manager-operator
+          image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:7b8022c3-dirty
           command:
           - ibm-cert-manager-operator
           args:
@@ -23,7 +23,9 @@ spec:
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
-              value: ""
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: POD_NAME
               valueFrom:
                 fieldRef:

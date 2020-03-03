@@ -13,13 +13,53 @@ metadata:
           "spec": {
             "enableWebhook": true,
             "imageRegistry": "quay.io"
+          },
+          "status": {
+            "certManagerStatus": "",
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Issuer",
+          "metadata": {
+            "name": "cs-ss-issuer"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Certificate",
+          "metadata": {
+            "name": "cs-ca-certificate"
+          },
+          "spec": {
+            "secretName": "cs-ca-certificate-secret",
+            "issuerRef": {
+              "name": "cs-ss-issuer",
+              "kind": "Issuer"
+            },
+            "commonName": "cs-ca-certificate"
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "cs-ca-clusterissuer"
+          },
+          "spec": {
+            "ca": {
+              "secretName": "cs-ca-certificate-secret"
+            }
           }
         }
       ]
     capabilities: Basic Install
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator-amd64:7b8022c3-dirty
     createdAt: "2020-01-14T10:16:16Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
@@ -32,6 +72,12 @@ spec:
     - description: CertManager is the Schema for the certmanagers API
       kind: CertManager
       name: certmanagers.operator.ibm.com
+      statusDescriptors:
+      - description: It will be as "OK when all objects are created successfully
+        displayName: CertManager Status
+        path: certManagerStatus
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
       version: v1alpha1
       displayName: CertManager
       resources:
@@ -83,12 +129,6 @@ spec:
         path: resourceNamespace
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
-      statusDescriptors:
-      - description: The status of deploying cert-manager
-        displayName: Status
-        path: CertManagerStatus
-        x-descriptors:
-        - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
   description: Operator for managing deployment of cert-manager service.
   displayName: Ibm Cert Manager Operator
   install:
@@ -152,12 +192,6 @@ spec:
           - deployments/finalizers
           verbs:
           - update
-        - apiGroups:
-          - ""
-          resources:
-          - pods
-          verbs:
-          - get
         - apiGroups:
           - apps
           resources:
@@ -372,14 +406,14 @@ spec:
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
-                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                      fieldPath: metadata.namespace
                 - name: POD_NAME
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:7b8022c3-dirty
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}

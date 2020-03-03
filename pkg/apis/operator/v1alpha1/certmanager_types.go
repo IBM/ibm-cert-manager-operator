@@ -36,16 +36,17 @@ type CertManagerSpec struct {
 
 // CertManagerStatus defines the observed state of CertManager
 type CertManagerStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	// It will be as "OK when all objects are created successfully
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors.displayName="CertManager Status"
+	OverallStatus string `json:"certManagerStatus"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // CertManager is the Schema for the certmanagers API
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=certmanagers,scope=Namespaced
+// +kubebuilder:resource:path=certmanagers,scope=Cluster
 type CertManager struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
