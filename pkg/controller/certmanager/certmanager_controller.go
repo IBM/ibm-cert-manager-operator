@@ -241,12 +241,12 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	log.Info("The namespace", "ns", r.ns)
-	r.updateStatus(instance, "Preparing to deploy cert-manager")
 	r.updateEvent(instance, "Instance found", corev1.EventTypeNormal, "Initializing")
 
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {
 		log.Error(err, "One or more prerequisites not met, requeueing")
+		r.updateStatus(instance, "Error deploying cert-manager, prereqs not met")
 		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "PrereqsFailed")
 		return reconcile.Result{Requeue: true}, nil
 	}
@@ -256,7 +256,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	if err := r.deployments(instance); err != nil {
 		log.Error(err, "Error with deploying cert-manager, requeueing")
 		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "Failed")
-
+		r.updateStatus(instance, "Error deploying cert-manager")
 		return reconcile.Result{Requeue: true}, nil
 	}
 	r.updateEvent(instance, "Deployed cert-manager successfully", corev1.EventTypeNormal, "Deployed")
@@ -324,6 +324,7 @@ func (r *ReconcileCertManager) updateEvent(instance *operatorv1alpha1.CertManage
 
 func (r *ReconcileCertManager) updateStatus(instance *operatorv1alpha1.CertManager, message string) {
 	if !reflect.DeepEqual(instance.Status.OverallStatus, message) {
+		log.Info("Status not equal", "current", instance.Status.OverallStatus, "new", message)
 		instance.Status.OverallStatus = message
 		r.client.Status().Update(context.TODO(), instance)
 	}

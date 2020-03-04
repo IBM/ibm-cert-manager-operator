@@ -12,17 +12,18 @@ metadata:
           },
           "spec": {
             "enableWebhook": true,
-            "imageRegistry": "quay.io"
+            "imageRegistry": "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
           },
           "status": {
-            "certManagerStatus": "",
+            "certManagerStatus": {}
           }
         },
         {
           "apiVersion": "certmanager.k8s.io/v1alpha1",
           "kind": "Issuer",
           "metadata": {
-            "name": "cs-ss-issuer"
+            "name": "cs-ss-issuer",
+            "namespace": "ibm-common-services"
           },
           "spec": {
             "selfSigned": {}
@@ -32,7 +33,8 @@ metadata:
           "apiVersion": "certmanager.k8s.io/v1alpha1",
           "kind": "Certificate",
           "metadata": {
-            "name": "cs-ca-certificate"
+            "name": "cs-ca-certificate",
+            "namespace": "ibm-common-services"
           },
           "spec": {
             "secretName": "cs-ca-certificate-secret",
@@ -40,7 +42,8 @@ metadata:
               "name": "cs-ss-issuer",
               "kind": "Issuer"
             },
-            "commonName": "cs-ca-certificate"
+            "commonName": "cs-ca-certificate",
+            "isCA": true
           }
         },
         {
@@ -59,7 +62,7 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator-amd64:7b8022c3-dirty
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator-amd64:043c5c9d-dirty
     createdAt: "2020-01-14T10:16:16Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
@@ -413,7 +416,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:7b8022c3-dirty
+                image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:043c5c9d-dirty
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
