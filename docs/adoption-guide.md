@@ -355,6 +355,42 @@ We've thought of multiple ways to handle the problems faced above and this is ou
 
 To adopt the solution, each operator must:
 
+1. In your `deploy/role.yaml` add the following after your `Role` definition:
+
+    ````
+
+    ---
+
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: <service name>-cluster-role
+    rules:
+    - apiGroups: ["certmanager.k8s.io"]
+      resources: ["clusterissuers"]
+      verbs: ["use"]
+    ````
+
+1. In your `deploy/role_binding.yaml` add the following after your `RoleBinding` definition:
+
+    ````
+
+    ---
+
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: <service name>-cluster-role-binding
+    subjects:
+    - kind: ServiceAccount
+      name: <service account name>
+      namespace: ibm-common-services
+    roleRef:
+      kind: ClusterRole
+      name: <service name>-cluster-role
+      apiGroup: rbac.authorization.k8s.io
+    ````
+
 1. Create your Certificate (cert-manager resource) using the common CA ClusterIssuer that's predefined.
     - Example go code (see yaml example above if you wish to do it that way):
 

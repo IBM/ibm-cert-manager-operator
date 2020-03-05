@@ -324,8 +324,9 @@ func (r *ReconcileCertManager) updateEvent(instance *operatorv1alpha1.CertManage
 
 func (r *ReconcileCertManager) updateStatus(instance *operatorv1alpha1.CertManager, message string) {
 	if !reflect.DeepEqual(instance.Status.OverallStatus, message) {
-		log.Info("Status not equal", "current", instance.Status.OverallStatus, "new", message)
 		instance.Status.OverallStatus = message
-		r.client.Status().Update(context.TODO(), instance)
+		if err := r.client.Status().Update(context.TODO(), instance); err != nil {
+			log.Error(err, "Error updating instance status")
+		}
 	}
 }
