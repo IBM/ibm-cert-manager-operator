@@ -15,7 +15,7 @@ spec:
       serviceAccountName: ibm-cert-manager-operator
       containers:
         - name: ibm-cert-manager-operator
-          image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:7b8022c3-dirty
+          image: quay.io/opencloudio/ibm-cert-manager-operator:latest
           command:
           - ibm-cert-manager-operator
           args:
