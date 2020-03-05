@@ -110,11 +110,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 
 	imageRegistry := res.ImageRegistry
 	if instance.Spec.ImageRegistry != "" {
-		imageRegistry = instance.Spec.ImageRegistry
-		// Remove forward slash
-		if imageRegistry[len(imageRegistry)-1] == '/' {
-			imageRegistry = imageRegistry[:len(imageRegistry)-1]
-		}
+		imageRegistry = strings.TrimRight(instance.Spec.ImageRegistry, "/")
 	}
 	switch deploy.Name {
 	case res.CertManagerControllerName:
