@@ -42,6 +42,8 @@ There are two options to create cert-manager resources in your operator:
       - watch
     ````
 
+NOTE: Feel free to add `issuers` under `resources` as well if you are performing CRUD operations on Issuers.
+
 ### Go Code
 
 {: #go}
@@ -392,7 +394,7 @@ To adopt the solution, each operator must:
     ````
 
 1. Create your Certificate (cert-manager resource) using the common CA ClusterIssuer that's predefined.
-    - Example go code (see yaml example above if you wish to do it that way):
+    - Example [go code](#go) (see [yaml](#yaml) example above if you wish to do it that way):
 
         ````
             crt := &certmgr.Certificate{
@@ -418,6 +420,8 @@ To adopt the solution, each operator must:
         ````
 
         - Notice the `Name` of the Spec.IssuerRef.Name, always use `cs-ca-clusterissuer` when using the shared CA clusterissuer we provide.
+        - Make sure to fully follow the steps outlined in either [Go](#go) or [Yaml](#yaml) outlined above to get this working properly.
+            - This sample merely provides a small code snippet of using the clusterissuer, and not the full way of using cert-manager.
 
 ## Resources
 
