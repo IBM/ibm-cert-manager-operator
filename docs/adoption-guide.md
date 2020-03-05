@@ -1,28 +1,24 @@
 # Cert-manager Adoption Guide for Operators
 
-- [Background](#back)
-- [How to use cert-manager generally](#how)
-- [Guidance with the CA](#ca)
-- [Resources and Additional Links](#res)
+- [Background](#background)
+- [How to use cert-manager generally](#how-to-use-cert-manager)
+- [Guidance with the CA](#guidance-for-common-services-adopters-requiring-common-ca)
+- [Resources and Additional Links](#resources)
 
 ## Background
 
-{: #back}
-
 Previously, when all the services were deployed as helm charts, it was easy to use cert-manager by specifying a yaml file with your cert-manager resource in your chart. When your chart was installed, the cert-manager resources were created.
 
-## How to do it
+## How to use cert-manager
 
 Fulfill the prerequisites:
-1. [Preqrequisites](#pre)
+1. [Preqrequisites](#prerequisites)
 
 There are two options to create cert-manager resources in your operator:
-1. [As Go code](#go)
+1. [As Go code](#go-code)
 1. [As yaml](#yaml)
 
 ### Prerequisites
-
-{: #pre}
 
 1. In your operator's `Role` (most commonly found in `deploy/role.yaml` in your operator's directory), add the following so that your operator has permission to create/read/update/delete cert-manager Certificate resources.
 
@@ -45,8 +41,6 @@ There are two options to create cert-manager resources in your operator:
 NOTE: Feel free to add `issuers` under `resources` as well if you are performing CRUD operations on Issuers.
 
 ### Go Code
-
-{: #go}
 
 1. In the `require` section of your operator's go.mod file
     - add:
@@ -178,8 +172,6 @@ Can be found in [ibm-cert-manager-operator](http://github.com/Crystal-Chun/ibm-c
 
 ### Yaml
 
-{: #yaml}
-
 This way will be most similar to how it's done in the helm chart.
 Credits to @chenzhiwei for coming up with this.
 
@@ -310,16 +302,12 @@ Courtesy of @chenzhiwei: [ibm-mongodb-operator](https://github.com/IBM/ibm-mongo
 
 ## Guidance for Common Services Adopters requiring common CA
 
-{: #ca}
-
-- [Background](#ca-back)
-- [The Problem](#problem)
-- [Proposed Solution](#proposal)
-- [Your Steps to Adopt](#steps)
+- [Background](#ca-background)
+- [The Problem](#the-problem)
+- [Proposed Solution](#proposed-solution)
+- [Your Steps to Adopt](#ca-steps)
 
 ### CA Background
-
-{: #ca-back}
 
 Previously in ICP and common services 4Q 2019 release, the icp-inception installer created a Root CA (self-signed CA certificate) that was used to create the ClusterIssuer `icp-ca-issuer`. From there, all the services were able to create Certificate yaml specs in their helm charts that were issued by the `icp-ca-issuer`.
 
@@ -329,14 +317,10 @@ This scenario was fine because:
 
 ### The Problem
 
-{: #problem}
-
 Now with moving to operators:
 1. The ODLM doesn't create this Root CA certificate anymore
 
 ### Proposed Solution
-
-{: #proposal}
 
 We've thought of multiple ways to handle the problems faced above and this is our proposed solution to it.
 
@@ -351,9 +335,7 @@ We've thought of multiple ways to handle the problems faced above and this is ou
 1. Each operator will just need to create their Certificates (cert-manager resource) signed by the common CA ClusterIssuer.
     - See steps below
 
-### Steps
-
-{: #steps}
+### CA Steps
 
 To adopt the solution, each operator must:
 
@@ -394,7 +376,7 @@ To adopt the solution, each operator must:
     ````
 
 1. Create your Certificate (cert-manager resource) using the common CA ClusterIssuer that's predefined.
-    - Example [go code](#go) (see [yaml](#yaml) example above if you wish to do it that way):
+    - Example [go code](#go-code) (see [yaml](#yaml) example above if you wish to do it that way):
 
         ````
             crt := &certmgr.Certificate{
@@ -420,11 +402,9 @@ To adopt the solution, each operator must:
         ````
 
         - Notice the `Name` of the Spec.IssuerRef.Name, always use `cs-ca-clusterissuer` when using the shared CA clusterissuer we provide.
-        - Make sure to fully follow the steps outlined in either [Go](#go) or [Yaml](#yaml) outlined above to get this working properly.
+        - Make sure to fully follow the steps outlined in either [Go](#go-code) or [Yaml](#yaml) outlined above to get this working properly.
             - This sample merely provides a small code snippet of using the clusterissuer, and not the full way of using cert-manager.
 
 ## Resources
-
-{: #res}
 
 1. [Cert-Manager Knowledge Center Documents](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.2.1/manage_applications/cert_manager.html?pos=2)
