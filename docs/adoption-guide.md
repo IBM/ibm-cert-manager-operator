@@ -417,7 +417,7 @@ To adopt the solution, each operator must:
             return nil
         ````
 
-        - Notice the `Name` of the Spec.IssuerRef.Name matches the Issuer I defined in step 1.
+        - Notice the `Name` of the Spec.IssuerRef.Name, always use `cs-ca-clusterissuer` when using the shared CA clusterissuer we provide.
 
 ## Resources
 
