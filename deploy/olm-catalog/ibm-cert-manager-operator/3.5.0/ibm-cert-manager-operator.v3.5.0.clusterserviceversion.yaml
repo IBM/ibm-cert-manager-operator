@@ -12,7 +12,7 @@ metadata:
           },
           "spec": {
             "enableWebhook": true,
-            "imageRegistry": "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
+            "imageRegistry": "quay.io"
           },
           "status": {
             "certManagerStatus": {}
@@ -62,7 +62,7 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator-amd64:043c5c9d-dirty
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
     createdAt: "2020-01-14T10:16:16Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
@@ -416,7 +416,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:043c5c9d-dirty
+                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
