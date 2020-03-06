@@ -18,6 +18,7 @@ package certmanager
 
 import (
 	"context"
+	"reflect"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
@@ -61,6 +62,10 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	apiextclient, _ := apiextensionclientset.NewForConfig(mgr.GetConfig())
 	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
 	ns, _ := k8sutil.GetWatchNamespace()
+
+	if ns == "" {
+		ns = res.DeployNamespace
+	}
 
 	return &ReconcileCertManager{
 		client:       mgr.GetClient(),
@@ -207,7 +212,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	if request.Name != "default" {
 		msg := "Only one CR named default is allowed"
 		log.Info(msg, "request name", request.Name)
-		r.updateStatus(instance, msg, corev1.EventTypeWarning, "Not Allowed")
+		r.updateEvent(instance, msg, corev1.EventTypeWarning, "Not Allowed")
 		return reconcile.Result{}, nil
 	}
 
@@ -235,22 +240,27 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
+	log.Info("The namespace", "ns", r.ns)
+	r.updateEvent(instance, "Instance found", corev1.EventTypeNormal, "Initializing")
+
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {
 		log.Error(err, "One or more prerequisites not met, requeueing")
-		r.updateStatus(instance, err.Error(), corev1.EventTypeWarning, "PrereqsFailed")
+		r.updateStatus(instance, "Error deploying cert-manager, prereqs not met")
+		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "PrereqsFailed")
 		return reconcile.Result{Requeue: true}, nil
 	}
-	r.updateStatus(instance, "All prerequisites for deploying cert-manager service found", corev1.EventTypeNormal, "PrereqsMet")
+	r.updateEvent(instance, "All prerequisites for deploying cert-manager service found", corev1.EventTypeNormal, "PrereqsMet")
 
 	// Check Deployment itself
 	if err := r.deployments(instance); err != nil {
 		log.Error(err, "Error with deploying cert-manager, requeueing")
-		r.updateStatus(instance, err.Error(), corev1.EventTypeWarning, "Failed")
-
+		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "Failed")
+		r.updateStatus(instance, "Error deploying cert-manager")
 		return reconcile.Result{Requeue: true}, nil
 	}
-	r.updateStatus(instance, "Deployed cert-manager successfully", corev1.EventTypeNormal, "Deployed")
+	r.updateEvent(instance, "Deployed cert-manager successfully", corev1.EventTypeNormal, "Deployed")
+	r.updateStatus(instance, "Successfully deployed cert-manager")
 
 	return reconcile.Result{}, nil
 }
@@ -308,6 +318,15 @@ func (r *ReconcileCertManager) deployments(instance *operatorv1alpha1.CertManage
 	return nil
 }
 
-func (r *ReconcileCertManager) updateStatus(instance *operatorv1alpha1.CertManager, message, event, reason string) {
+func (r *ReconcileCertManager) updateEvent(instance *operatorv1alpha1.CertManager, message, event, reason string) {
 	r.recorder.Event(instance, event, reason, message)
+}
+
+func (r *ReconcileCertManager) updateStatus(instance *operatorv1alpha1.CertManager, message string) {
+	if !reflect.DeepEqual(instance.Status.OverallStatus, message) {
+		instance.Status.OverallStatus = message
+		if err := r.client.Status().Update(context.TODO(), instance); err != nil {
+			log.Error(err, "Error updating instance status")
+		}
+	}
 }

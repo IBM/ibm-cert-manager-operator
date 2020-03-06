@@ -5,3 +5,5 @@ metadata:
 spec:
   enableWebhook: true
   imageRegistry: quay.io
+status:
+  certManagerStatus: {}

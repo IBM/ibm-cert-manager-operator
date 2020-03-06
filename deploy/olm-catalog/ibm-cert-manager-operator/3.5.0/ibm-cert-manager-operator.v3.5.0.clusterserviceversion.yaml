@@ -13,6 +13,9 @@ metadata:
           "spec": {
             "enableWebhook": true,
             "imageRegistry": "quay.io"
+          },
+          "status": {
+            "certManagerStatus": {}
           }
         },
         {
@@ -72,6 +75,12 @@ spec:
     - description: CertManager is the Schema for the certmanagers API
       kind: CertManager
       name: certmanagers.operator.ibm.com
+      statusDescriptors:
+      - description: It will be as "OK when all objects are created successfully
+        displayName: CertManager Status
+        path: certManagerStatus
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
       version: v1alpha1
       displayName: CertManager
       resources:
@@ -123,12 +132,6 @@ spec:
         path: resourceNamespace
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
-      statusDescriptors:
-      - description: The status of deploying cert-manager
-        displayName: Status
-        path: CertManagerStatus
-        x-descriptors:
-        - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
   description: Operator for managing deployment of cert-manager service.
   displayName: Ibm Cert Manager Operator
   install:
@@ -192,12 +195,6 @@ spec:
           - deployments/finalizers
           verbs:
           - update
-        - apiGroups:
-          - ""
-          resources:
-          - pods
-          verbs:
-          - get
         - apiGroups:
           - apps
           resources:
@@ -412,14 +409,14 @@ spec:
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
-                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                      fieldPath: metadata.namespace
                 - name: POD_NAME
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator
+                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
@@ -437,5 +434,4 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-cert-manager-operator.v0.0.0
   version: 3.5.0

@@ -101,7 +101,7 @@ const CainjectorLabels = "app=ibm-cert-manager-cainjector"
 const ConfigmapWatcherLabels = "app.kubernetes.io/name=configmap-watcher"
 
 // DeployNamespace is the namespace the cert-manager services will be deployed in
-const DeployNamespace = "cert-manager"
+const DeployNamespace = "ibm-common-services"
 const pullPolicy = v1.PullIfNotPresent
 
 // CertManagerControllerName is the name of the container/pod/deployment for cert-manager-controller
