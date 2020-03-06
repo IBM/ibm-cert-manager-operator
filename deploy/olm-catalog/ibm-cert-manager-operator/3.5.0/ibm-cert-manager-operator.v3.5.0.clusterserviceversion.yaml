@@ -69,6 +69,21 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: Represents a certificate
+      displayName: Certificate
+      kind: Certificate
+      name: certificates.certmanager.k8s.io
+      version: v1alpha1
+    - description: Represents a cluster issuer
+      displayName: Cluster Issuer
+      kind: ClusterIssuer
+      name: clusterissuers.certmanager.k8s.io
+      version: v1alpha1
+    - description: Represents an issuer
+      displayName: Issuer
+      kind: Issuer
+      name: issuers.certmanager.k8s.io
+      version: v1alpha1
     - description: CertManager is the Schema for the certmanagers API
       kind: CertManager
       name: certmanagers.operator.ibm.com
@@ -129,22 +144,6 @@ spec:
         path: resourceNamespace
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
-    required:
-    - description: Represents a certificate
-      displayName: Certificate
-      kind: Certificate
-      name: certificates.certmanager.k8s.io
-      version: v1alpha1
-    - description: Represents a cluster issuer
-      displayName: Cluster Issuer
-      kind: ClusterIssuer
-      name: clusterissuers.certmanager.k8s.io
-      version: v1alpha1
-    - description: Represents an issuer
-      displayName: Issuer
-      kind: Issuer
-      name: issuers.certmanager.k8s.io
-      version: v1alpha1
   description: Operator for managing deployment of cert-manager service.
   displayName: Ibm Cert Manager Operator
   install:
