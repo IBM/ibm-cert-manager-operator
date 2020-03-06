@@ -108,14 +108,15 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 
 	returningDeploy := *deploy
 
+	imageRegistry := res.ImageRegistry
+	if instance.Spec.ImageRegistry != "" {
+		imageRegistry = strings.TrimRight(instance.Spec.ImageRegistry, "/")
+	}
 	switch deploy.Name {
 	case res.CertManagerControllerName:
-		var acmesolver = res.AcmeSolverArg
-		if instance.Spec.ImageRegistry != "" { // Set the image registry to the one specified
-			// Assume image registry doesn't have forward slash at the end
-			returningDeploy.Spec.Template.Spec.Containers[0].Image = instance.Spec.ImageRegistry + "/" + res.ControllerImageName + ":" + res.ControllerImageVersion
-			acmesolver = "--acme-http01-solver-image=" + instance.Spec.ImageRegistry + "/" + res.AcmesolverImageName + ":" + res.ControllerImageVersion
-		}
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.ControllerImageName + ":" + res.ControllerImageVersion
+		var acmesolver = "--acme-http01-solver-image=" + imageRegistry + "/" + res.AcmesolverImageName + ":" + res.ControllerImageVersion
+
 		var resourceNS = res.ResourceNS
 		if instance.Spec.ResourceNS != "" {
 			resourceNS = "--cluster-resource-namespace=" + instance.Spec.ResourceNS
@@ -129,21 +130,12 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
 		log.V(3).Info("The args", "args", deploy.Spec.Template.Spec.Containers[0].Args)
 	case res.CertManagerCainjectorName:
-		if instance.Spec.ImageRegistry != "" { // Set the image registry to the one specified
-			// Assume image registry doesn't have forward slash at the end
-			returningDeploy.Spec.Template.Spec.Containers[0].Image = instance.Spec.ImageRegistry + "/" + res.CainjectorImageName + ":" + res.ControllerImageVersion
-		}
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.CainjectorImageName + ":" + res.ControllerImageVersion
 	case res.CertManagerWebhookName:
-		if instance.Spec.ImageRegistry != "" { // Set the image registry to the one specified
-			// Assume image registry doesn't have forward slash at the end
-			returningDeploy.Spec.Template.Spec.Containers[0].Image = instance.Spec.ImageRegistry + "/" + res.WebhookImageName + ":" + res.WebhookImageVersion
-			returningDeploy.Spec.Template.Spec.Containers[0].SecurityContext.ReadOnlyRootFilesystem = &res.FalseVar
-		}
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.WebhookImageName + ":" + res.WebhookImageVersion
+		returningDeploy.Spec.Template.Spec.Containers[0].SecurityContext.ReadOnlyRootFilesystem = &res.FalseVar
 	case res.ConfigmapWatcherName:
-		if instance.Spec.ImageRegistry != "" { // Set the image registry to the one specified
-			// Assume image registry doesn't have forward slash at the end
-			returningDeploy.Spec.Template.Spec.Containers[0].Image = instance.Spec.ImageRegistry + "/" + res.ConfigmapWatcherImageName + ":" + res.ConfigmapWatcherVersion
-		}
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.ConfigmapWatcherImageName + ":" + res.ConfigmapWatcherVersion
 	}
 
 	if instance.Spec.ImagePostFix != "" {
