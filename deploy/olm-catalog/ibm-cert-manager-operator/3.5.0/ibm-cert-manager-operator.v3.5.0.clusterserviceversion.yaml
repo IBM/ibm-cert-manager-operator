@@ -12,7 +12,7 @@ metadata:
           },
           "spec": {
             "enableWebhook": true,
-            "imageRegistry": "quay.io"
+            "imageRegistry": "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
           },
           "status": {
             "certManagerStatus": {}
@@ -62,7 +62,7 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator-amd64:617388e0-dirty
     createdAt: "2020-01-14T10:16:16Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
@@ -132,6 +132,22 @@ spec:
         path: resourceNamespace
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
+    required:
+    - name: certificates.certmanager.k8s.io
+      version: v1alpha1
+      kind: Certificate
+      displayName: Certificate
+      description: Represents a certificate
+    - name: issuers.certmanager.k8s.io
+      version: v1alpha1
+      kind: Issuer
+      displayName: Issuer
+      description: Represents an issuer
+    - name: clusterissuers.certmanager.k8s.io
+      version: v1alpha1
+      kind: ClusterIssuer
+      displayName: Cluster Issuer
+      description: Represents a cluster issuer
   description: Operator for managing deployment of cert-manager service.
   displayName: Ibm Cert Manager Operator
   install:
@@ -416,7 +432,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:617388e0-dirty
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
