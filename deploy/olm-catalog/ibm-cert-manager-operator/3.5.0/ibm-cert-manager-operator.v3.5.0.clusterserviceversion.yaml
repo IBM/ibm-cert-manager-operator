@@ -5,45 +5,18 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "operator.ibm.com/v1alpha1",
-          "kind": "CertManager",
-          "metadata": {
-            "name": "default"
-          },
-          "spec": {
-            "enableWebhook": true,
-            "imageRegistry": "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
-          },
-          "status": {
-            "certManagerStatus": {}
-          }
-        },
-        {
-          "apiVersion": "certmanager.k8s.io/v1alpha1",
-          "kind": "Issuer",
-          "metadata": {
-            "name": "cs-ss-issuer",
-            "namespace": "ibm-common-services"
-          },
-          "spec": {
-            "selfSigned": {}
-          }
-        },
-        {
           "apiVersion": "certmanager.k8s.io/v1alpha1",
           "kind": "Certificate",
           "metadata": {
-            "name": "cs-ca-certificate",
-            "namespace": "ibm-common-services"
+            "name": "cs-ca-certificate"
           },
           "spec": {
-            "secretName": "cs-ca-certificate-secret",
+            "isCA": true,
             "issuerRef": {
-              "name": "cs-ss-issuer",
-              "kind": "Issuer"
-            },
-            "commonName": "cs-ca-certificate",
-            "isCA": true
+              "kind": "Issuer",
+              "name": "cs-ss-issuer"
+          },
+            "secretName": "cs-ca-certificate-secret"
           }
         },
         {
@@ -55,9 +28,33 @@ metadata:
           "spec": {
             "ca": {
               "secretName": "cs-ca-certificate-secret"
+          }
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Issuer",
+          "metadata": {
+            "name": "cs-ss-issuer"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
+        },
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "CertManager",
+          "metadata": {
+            "name": "default"
+          },
+          "spec": {
+            "enableWebhook": true,
+            "imageRegistry": "quay.io"
+          },
+          "status": {
+            "certManagerStatus": {}
             }
           }
-        }
       ]
     capabilities: Basic Install
     categories: Security
@@ -133,21 +130,21 @@ spec:
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
     required:
-    - name: certificates.certmanager.k8s.io
-      version: v1alpha1
-      kind: Certificate
+    - description: Represents a certificate
       displayName: Certificate
-      description: Represents a certificate
-    - name: issuers.certmanager.k8s.io
+      kind: Certificate
+      name: certificates.certmanager.k8s.io
       version: v1alpha1
-      kind: Issuer
-      displayName: Issuer
-      description: Represents an issuer
-    - name: clusterissuers.certmanager.k8s.io
-      version: v1alpha1
-      kind: ClusterIssuer
+    - description: Represents a cluster issuer
       displayName: Cluster Issuer
-      description: Represents a cluster issuer
+      kind: ClusterIssuer
+      name: clusterissuers.certmanager.k8s.io
+      version: v1alpha1
+    - description: Represents an issuer
+      displayName: Issuer
+      kind: Issuer
+      name: issuers.certmanager.k8s.io
+      version: v1alpha1
   description: Operator for managing deployment of cert-manager service.
   displayName: Ibm Cert Manager Operator
   install:
