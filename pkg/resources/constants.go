@@ -129,7 +129,7 @@ const ControllerImageVersion = "0.10.3"
 const WebhookImageVersion = "0.10.3"
 
 // ConfigmapWatcherVersion is the image version used for the configmap-watcher
-const ConfigmapWatcherVersion = "3.3.0"
+const ConfigmapWatcherVersion = "3.3.1"
 
 // ControllerImageName is the image name of the cert-manager-controller
 const ControllerImageName = "icp-cert-manager-controller"
