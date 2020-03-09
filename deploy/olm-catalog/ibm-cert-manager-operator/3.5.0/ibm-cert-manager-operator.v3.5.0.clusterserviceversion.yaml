@@ -22,7 +22,8 @@ metadata:
           "apiVersion": "certmanager.k8s.io/v1alpha1",
           "kind": "Issuer",
           "metadata": {
-            "name": "cs-ss-issuer"
+            "name": "cs-ss-issuer",
+            "namespace": "ibm-common-services"
           },
           "spec": {
             "selfSigned": {}
@@ -32,16 +33,17 @@ metadata:
           "apiVersion": "certmanager.k8s.io/v1alpha1",
           "kind": "Certificate",
           "metadata": {
-            "name": "cs-ca-certificate"
+            "name": "cs-ca-certificate",
+            "namespace": "ibm-common-services"
           },
           "spec": {
-            "isCA": true,
-            "issuerRef": {
-              "kind": "Issuer",
-              "name": "cs-ss-issuer"
-            },
             "secretName": "cs-ca-certificate-secret",
-            "commonName": "cs-ca-certificate"
+            "issuerRef": {
+              "name": "cs-ss-issuer",
+              "kind": "Issuer"
+            },
+            "commonName": "cs-ca-certificate",
+            "isCA": true
           }
         },
         {
@@ -60,7 +62,7 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator-amd64:617388e0-dirty
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
     createdAt: "2020-01-14T10:16:16Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM

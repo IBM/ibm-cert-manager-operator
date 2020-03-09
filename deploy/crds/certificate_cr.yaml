@@ -8,3 +8,4 @@ spec:
     kind: Issuer
   secretName: cs-ca-certificate-secret
   isCA: true
+  commonName: cs-ca-certificate
