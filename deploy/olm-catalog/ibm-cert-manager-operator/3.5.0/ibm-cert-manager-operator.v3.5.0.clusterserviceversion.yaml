@@ -15,8 +15,9 @@ metadata:
             "issuerRef": {
               "kind": "Issuer",
               "name": "cs-ss-issuer"
-          },
-            "secretName": "cs-ca-certificate-secret"
+            },
+            "secretName": "cs-ca-certificate-secret",
+            "commonName": "cs-ca-certificate"
           }
         },
         {
