@@ -27,8 +27,7 @@ var ControllerDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: CertManagerControllerName,
 		//		Namespace: DeployNamespace,
-		Labels:      ControllerLabelMap,
-		Annotations: MeteringAnnotations,
+		Labels: ControllerLabelMap,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -38,7 +37,7 @@ var ControllerDeployment = &appsv1.Deployment{
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels:      ControllerLabelMap,
-				Annotations: securityAnnotation,
+				Annotations: PodAnnotations,
 			},
 			Spec: certManagerControllerPod,
 		},
@@ -77,8 +76,7 @@ var CainjectorDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: CertManagerCainjectorName,
 		//		Namespace: DeployNamespace,
-		Labels:      CainjectorLabelMap,
-		Annotations: MeteringAnnotations,
+		Labels: CainjectorLabelMap,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -88,7 +86,7 @@ var CainjectorDeployment = &appsv1.Deployment{
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels:      CainjectorLabelMap,
-				Annotations: securityAnnotation,
+				Annotations: PodAnnotations,
 			},
 			Spec: certManagerCainjectorPod,
 		},
@@ -100,8 +98,7 @@ var ConfigmapWatcherDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: ConfigmapWatcherName,
 		//		Namespace: DeployNamespace,
-		Labels:      ConfigmapWatcherLabelMap,
-		Annotations: MeteringAnnotations,
+		Labels: ConfigmapWatcherLabelMap,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -111,7 +108,7 @@ var ConfigmapWatcherDeployment = &appsv1.Deployment{
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels:      ConfigmapWatcherLabelMap,
-				Annotations: securityAnnotation,
+				Annotations: PodAnnotations,
 			},
 			Spec: configmapWatcherPod,
 		},
