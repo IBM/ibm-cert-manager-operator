@@ -62,7 +62,8 @@ var WebhookDeployment = &appsv1.Deployment{
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: map[string]string{
-					"app": "ibm-cert-manager-webhook",
+					"app":                        "ibm-cert-manager-webhook",
+					"app.kubernetes.io/instance": certManagerComponentName,
 				},
 				Annotations: securityAnnotationWebhook,
 			},
