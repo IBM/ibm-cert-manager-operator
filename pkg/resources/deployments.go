@@ -37,7 +37,7 @@ var ControllerDeployment = &appsv1.Deployment{
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels:      ControllerLabelMap,
-				Annotations: securityAnnotation,
+				Annotations: PodAnnotations,
 			},
 			Spec: certManagerControllerPod,
 		},
@@ -86,7 +86,7 @@ var CainjectorDeployment = &appsv1.Deployment{
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels:      CainjectorLabelMap,
-				Annotations: securityAnnotation,
+				Annotations: PodAnnotations,
 			},
 			Spec: certManagerCainjectorPod,
 		},
@@ -108,7 +108,7 @@ var ConfigmapWatcherDeployment = &appsv1.Deployment{
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels:      ConfigmapWatcherLabelMap,
-				Annotations: securityAnnotation,
+				Annotations: PodAnnotations,
 			},
 			Spec: configmapWatcherPod,
 		},
