@@ -81,7 +81,7 @@ var ConfigmapWatcherLabelMap = map[string]string{
 }
 
 // MeteringAnnotations are the annotations required for certification
-var MeteringAnnotations = map[string]string{"productName": "IBM Cloud Platform Common Services", "productID": "", "productVersion": ""}
+var MeteringAnnotations = map[string]string{"productName": "IBM Cloud Platform Common Services", "productID": "068a62892a1e4db39641342e592daa25", "productVersion": "3.3.0", "productMetric": "FREE"}
 
 var securityAnnotation = map[string]string{"openshift.io/scc": "restricted"}
 
@@ -90,8 +90,9 @@ var securityAnnotationWebhook = map[string]string{"openshift.io/scc": "hostnetwo
 var webhookAnnotation = map[string]string{
 	"watcher.ibm.com/configmap-resource": "kube-system/extension-apiserver-authentication",
 	"productName":                        "IBM Cloud Platform Common Services",
-	"productID":                          "",
-	"productVersion":                     "",
+	"productID":                          "068a62892a1e4db39641342e592daa25",
+	"productVersion":                     "3.3.0",
+	"productMetric":                      "FREE",
 }
 
 // ControllerLabels is a string of the cert-manager-controller's labels
