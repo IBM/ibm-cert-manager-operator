@@ -4,6 +4,10 @@ metadata:
   creationTimestamp: null
   name: issuers.certmanager.k8s.io
 spec:
+  additionalPrinterColumns:
+    - JSONPath: .status.conditions[?(@.type=="Ready")].status
+      name: Ready
+      type: string
   group: certmanager.k8s.io
   names:
     kind: Issuer
