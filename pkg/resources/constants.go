@@ -119,8 +119,8 @@ const CertManagerWebhookName = "cert-manager-webhook"
 // ConfigmapWatcherName is the name of the container/pod/deployment for the configmap-watcher
 const ConfigmapWatcherName = "configmap-watcher"
 
-// Default Image Values
-const imageRegistry = "quay.io"
+// ImageRegistry is the default image registry for the operand deployments
+const ImageRegistry = "quay.io"
 
 // ControllerImageVersion is the image version used for the cert-manager-controller
 const ControllerImageVersion = "0.10.3"
@@ -129,7 +129,7 @@ const ControllerImageVersion = "0.10.3"
 const WebhookImageVersion = "0.10.3"
 
 // ConfigmapWatcherVersion is the image version used for the configmap-watcher
-const ConfigmapWatcherVersion = "3.3.0"
+const ConfigmapWatcherVersion = "3.3.1"
 
 // ControllerImageName is the image name of the cert-manager-controller
 const ControllerImageName = "icp-cert-manager-controller"
@@ -146,11 +146,11 @@ const WebhookImageName = "icp-cert-manager-webhook"
 // ConfigmapWatcherImageName is the name of the configmap watcher image
 const ConfigmapWatcherImageName = "icp-configmap-watcher"
 
-const controllerImage = imageRegistry + "/" + ControllerImageName + ":" + ControllerImageVersion
-const acmesolverImage = imageRegistry + "/" + AcmesolverImageName + ":" + ControllerImageVersion
-const cainjectorImage = imageRegistry + "/" + CainjectorImageName + ":" + ControllerImageVersion
-const webhookImage = imageRegistry + "/" + WebhookImageName + ":" + WebhookImageVersion
-const configmapWatcherImage = imageRegistry + "/" + ConfigmapWatcherImageName + ":" + ConfigmapWatcherVersion
+const controllerImage = ImageRegistry + "/" + ControllerImageName + ":" + ControllerImageVersion
+const acmesolverImage = ImageRegistry + "/" + AcmesolverImageName + ":" + ControllerImageVersion
+const cainjectorImage = ImageRegistry + "/" + CainjectorImageName + ":" + ControllerImageVersion
+const webhookImage = ImageRegistry + "/" + WebhookImageName + ":" + WebhookImageVersion
+const configmapWatcherImage = ImageRegistry + "/" + ConfigmapWatcherImageName + ":" + ConfigmapWatcherVersion
 
 // ServiceAccount is the name of the default service account to be used by cert-manager services
 const ServiceAccount = "cert-manager"

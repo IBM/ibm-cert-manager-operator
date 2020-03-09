@@ -5,6 +5,30 @@ metadata:
     alm-examples: |-
       [
         {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "CertManager",
+          "metadata": {
+            "name": "default"
+          },
+          "spec": {
+            "enableWebhook": true,
+            "imageRegistry": "quay.io"
+          },
+          "status": {
+            "certManagerStatus": {}
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Issuer",
+          "metadata": {
+            "name": "cs-ss-issuer"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
+        },
+        {
           "apiVersion": "certmanager.k8s.io/v1alpha1",
           "kind": "Certificate",
           "metadata": {
@@ -29,33 +53,9 @@ metadata:
           "spec": {
             "ca": {
               "secretName": "cs-ca-certificate-secret"
-          }
-          }
-        },
-        {
-          "apiVersion": "certmanager.k8s.io/v1alpha1",
-          "kind": "Issuer",
-          "metadata": {
-            "name": "cs-ss-issuer"
-          },
-          "spec": {
-            "selfSigned": {}
-          }
-        },
-        {
-          "apiVersion": "operator.ibm.com/v1alpha1",
-          "kind": "CertManager",
-          "metadata": {
-            "name": "default"
-          },
-          "spec": {
-            "enableWebhook": true,
-            "imageRegistry": "quay.io"
-          },
-          "status": {
-            "certManagerStatus": {}
             }
           }
+        }
       ]
     capabilities: Basic Install
     categories: Security
@@ -429,7 +429,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator-amd64:617388e0-dirty
+                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources: {}
