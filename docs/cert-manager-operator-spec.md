@@ -73,6 +73,79 @@
     - for information about the Go types that implement Pods, VolumeMounts, etc, go to [k8s core document](https://godoc.org/k8s.io/api/core/v1)
     - for information about the Go types that implement Ingress, etc, go to [k8s networking document](https://godoc.org/k8s.io/api/networking/v1beta1)
 
+- Generate the CSV
+    1. Create a `csv-config.yaml` file in the directory `deploy/olm-catalog`
+
+        ```
+        crd-cr-paths:
+        - deploy/crds
+        operator-path: deploy/operator.yaml
+        role-paths:
+        - deploy/role.yaml
+        ```
+
+    1. Run the following command:
+
+        ```
+        operator-sdk generate csv --csv-version 3.5.0 --update-crds
+        ```
+
+    1. Edit the CSV generated in `deploy/olm-catalog/ibm-cert-manager-operator/3.5.0` to add the following CRs in `alm-examples`
+
+        ```
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Issuer",
+          "metadata": {
+            "name": "cs-ss-issuer",
+            "namespace": "ibm-common-services"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Certificate",
+          "metadata": {
+            "name": "cs-ca-certificate",
+            "namespace": "ibm-common-services"
+          },
+          "spec": {
+            "secretName": "cs-ca-certificate-secret",
+            "issuerRef": {
+              "name": "cs-ss-issuer",
+              "kind": "Issuer"
+            },
+            "commonName": "cs-ca-certificate",
+            "isCA": true
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "cs-ca-clusterissuer"
+          },
+          "spec": {
+            "ca": {
+              "secretName": "cs-ca-certificate-secret"
+            }
+          }
+        }
+        ```
+
+    1. Add the `latest` tag to all images used in the CSV file to pass red hat certification
+    1. Push the CSV file to quay.io
+
+        ```
+
+        export QUAY_USERNAME=
+        export QUAY_PASSWORD=
+        export RELEASE=
+        make csv
+        ```
+
 ## Testing
 
 - Create the CRD. Do this one time before starting the operator.
