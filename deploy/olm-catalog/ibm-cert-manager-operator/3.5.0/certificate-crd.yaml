@@ -28,6 +28,7 @@ spec:
       name: Expiration
       type: string
   group: certmanager.k8s.io
+  version: v1alpha1
   scope: Namespaced
   names:
     kind: Certificate
