@@ -1,0 +1,11 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: cs-ca-certificate
+spec:
+  issuerRef:
+    name: cs-ss-issuer
+    kind: Issuer
+  secretName: cs-ca-certificate-secret
+  isCA: true
+  commonName: cs-ca-certificate

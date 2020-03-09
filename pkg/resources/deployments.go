@@ -61,9 +61,7 @@ var WebhookDeployment = &appsv1.Deployment{
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"app": "ibm-cert-manager-webhook",
-				},
+				Labels:      WebhookLabelMap,
 				Annotations: securityAnnotationWebhook,
 			},
 			Spec: certManagerWebhookPod,
