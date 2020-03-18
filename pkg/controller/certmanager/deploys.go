@@ -87,7 +87,6 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 	} else {
 		if !equalDeploys(deployment, existingDeploy) {
 			// Update
-			log.V(1).Info("Deploys not equal!!!!!!!!!!!!!!")
 			log.V(2).Info("Updating deployment")
 			if err := client.Update(context.Background(), &deployment); err != nil {
 				return err
@@ -541,15 +540,14 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 }
 
 func isSubset(first, second map[string]string) bool {
-	log.Info("in subset")
 	for k, v := range first {
 		val, ok := second[k]
 		if !ok {
-			log.Info("couldn't find key", "k", k)
+			log.V(2).Info("Key doesn't exist in the second map", "k", k)
 			return false
 		}
 		if v != val {
-			log.Info("val wasn't same", "v", v, "val", val)
+			log.V(2).Info("Values aren't equal", "v", v, "val", val)
 			return false
 		}
 
