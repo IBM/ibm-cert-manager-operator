@@ -87,6 +87,7 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 	} else {
 		if !equalDeploys(deployment, existingDeploy) {
 			// Update
+			log.V(1).Info("Deploys not equal!!!!!!!!!!!!!!")
 			log.V(2).Info("Updating deployment")
 			if err := client.Update(context.Background(), &deployment); err != nil {
 				return err
@@ -227,7 +228,7 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 
 	firstPodTemplate := first.Spec.Template
 	secondPodTemplate := second.Spec.Template
-	if !reflect.DeepEqual(firstPodTemplate.ObjectMeta.Labels, secondPodTemplate.ObjectMeta.Labels) {
+	if !isSubset(firstPodTemplate.ObjectMeta.Labels, secondPodTemplate.ObjectMeta.Labels) {
 		statusLog.Info("Pod labels not equal",
 			"first", fmt.Sprintf("%v", firstPodTemplate.ObjectMeta.Labels),
 			"second", fmt.Sprintf("%v", secondPodTemplate.ObjectMeta.Labels))
@@ -540,14 +541,18 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 }
 
 func isSubset(first, second map[string]string) bool {
+	log.Info("in subset")
 	for k, v := range first {
-		if val, ok := second[k]; !ok {
+		val, ok := second[k]
+		if !ok {
+			log.Info("couldn't find key", "k", k)
 			return false
-		} else {
-			if v != val {
-				return false
-			}
 		}
+		if v != val {
+			log.Info("val wasn't same", "v", v, "val", val)
+			return false
+		}
+
 	}
 	return true
 }
