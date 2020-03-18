@@ -213,7 +213,7 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 // true otherwise
 func equalDeploys(first, second appsv1.Deployment) bool {
 	statusLog := log.V(1)
-	if !reflect.DeepEqual(first.ObjectMeta.Labels, second.ObjectMeta.Labels) {
+	if !isSubset(first.ObjectMeta.Labels, second.ObjectMeta.Labels) {
 		statusLog.Info("Labels not equal",
 			"first", fmt.Sprintf("%v", first.ObjectMeta.Labels),
 			"second", fmt.Sprintf("%v", second.ObjectMeta.Labels))
@@ -227,7 +227,7 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 
 	firstPodTemplate := first.Spec.Template
 	secondPodTemplate := second.Spec.Template
-	if !reflect.DeepEqual(firstPodTemplate.ObjectMeta.Labels, secondPodTemplate.ObjectMeta.Labels) {
+	if !isSubset(firstPodTemplate.ObjectMeta.Labels, secondPodTemplate.ObjectMeta.Labels) {
 		statusLog.Info("Pod labels not equal",
 			"first", fmt.Sprintf("%v", firstPodTemplate.ObjectMeta.Labels),
 			"second", fmt.Sprintf("%v", secondPodTemplate.ObjectMeta.Labels))
@@ -536,5 +536,21 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	}
 
 	log.V(2).Info("Finished checking for differences between the deployments and found none.", "deployment name", first.Name)
+	return true
+}
+
+func isSubset(first, second map[string]string) bool {
+	for k, v := range first {
+		val, ok := second[k]
+		if !ok {
+			log.V(2).Info("Key doesn't exist in the second map", "k", k)
+			return false
+		}
+		if v != val {
+			log.V(2).Info("Values aren't equal", "v", v, "val", val)
+			return false
+		}
+
+	}
 	return true
 }
