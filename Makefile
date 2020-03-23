@@ -188,7 +188,7 @@ multiarch-image:
 # CSV section
 ############################################################
 csv:
-	@RELEASE=${CSV_VERSION} common/scripts/push_csv.sh
+	common/scripts/push_csv.sh
 
 ############################################################
 # clean section

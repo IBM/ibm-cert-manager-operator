@@ -134,6 +134,10 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 	case res.CertManagerWebhookName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.WebhookImageName + ":" + res.WebhookImageVersion
 		returningDeploy.Spec.Template.Spec.Containers[0].SecurityContext.ReadOnlyRootFilesystem = &res.FalseVar
+		if instance.Spec.OCP311 {
+			log.Info("Ocp 311 spec set")
+			returningDeploy.Spec.Template.Spec.HostNetwork = res.FalseVar
+		}
 	case res.ConfigmapWatcherName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.ConfigmapWatcherImageName + ":" + res.ConfigmapWatcherVersion
 	}
@@ -278,6 +282,11 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 		}
 	} else {
 		statusLog.Info("Volume lengths not equal")
+		return false
+	}
+
+	if firstPodTemplate.Spec.HostNetwork != secondPodTemplate.Spec.HostNetwork {
+		statusLog.Info("Host networks are not equal")
 		return false
 	}
 

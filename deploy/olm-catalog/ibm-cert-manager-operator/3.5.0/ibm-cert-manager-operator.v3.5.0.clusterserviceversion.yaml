@@ -142,6 +142,11 @@ spec:
         path: imageRegistry
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Determines whether it's an ocp 3.11 environment
+        displayName: OCP3111
+        path: ocp311
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
       - description: The namespace where namespace scoped resources referenced by cert-manager clusterissuers must be placed
         displayName: ResourceNamespace
         path: resourceNamespace
