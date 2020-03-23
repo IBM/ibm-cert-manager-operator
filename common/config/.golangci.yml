@@ -199,7 +199,7 @@ issues:
     - line is 181 characters
     - line is 210 characters
     - line is 316 characters
-    - cyclomatic complexity 96 
+    - cyclomatic complexity 97 
 
   exclude-rules:
     # Exclude some linters from running on test files.
