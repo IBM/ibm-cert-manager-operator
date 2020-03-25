@@ -4,6 +4,6 @@ metadata:
   name: default
 spec:
   enableWebhook: true
-  imageRegistry: quay.io
+  imageRegistry: quay.io/opencloudio
 status:
   certManagerStatus: {}
