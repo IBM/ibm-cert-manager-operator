@@ -52,6 +52,8 @@ Information about building and testing the operator.
     kubectl logs -n <namespace> <cert-manager-operator pod name>
     ````
 
+NOTE: cert-manager service (operand) is a singleton and no more than one instance of cert-manager-controller can be run within the same cluster.
+
 ## Licensing
 
 Licensing
