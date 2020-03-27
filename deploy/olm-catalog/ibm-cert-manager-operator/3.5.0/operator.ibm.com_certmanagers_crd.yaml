@@ -31,6 +31,8 @@ spec:
         spec:
           description: CertManagerSpec defines the desired state of CertManager
           properties:
+            disableHostNetwork:
+              type: boolean
             enableWebhook:
               type: boolean
             imagePostFix:
@@ -41,8 +43,6 @@ spec:
                 modifying this file Add custom validation using kubebuilder tags:
                 https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
               type: string
-            ocp311:
-              type: boolean
             resourceNamespace:
               type: string
           type: object
