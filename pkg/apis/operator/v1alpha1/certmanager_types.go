@@ -28,11 +28,11 @@ type CertManagerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	ImageRegistry string `json:"imageRegistry,omitempty"`
-	ImagePostFix  string `json:"imagePostFix,omitempty"`
-	Webhook       bool   `json:"enableWebhook,omitempty"`
-	ResourceNS    string `json:"resourceNamespace,omitempty"`
-	OCP311        bool   `json:"ocp311,omitempty"`
+	ImageRegistry      string `json:"imageRegistry,omitempty"`
+	ImagePostFix       string `json:"imagePostFix,omitempty"`
+	Webhook            bool   `json:"enableWebhook,omitempty"`
+	ResourceNS         string `json:"resourceNamespace,omitempty"`
+	DisableHostNetwork bool   `json:"disableHostNetwork,omitempty"`
 }
 
 // CertManagerStatus defines the observed state of CertManager

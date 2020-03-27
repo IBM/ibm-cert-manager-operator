@@ -134,7 +134,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 	case res.CertManagerWebhookName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.WebhookImageName + ":" + res.WebhookImageVersion
 		returningDeploy.Spec.Template.Spec.Containers[0].SecurityContext.ReadOnlyRootFilesystem = &res.FalseVar
-		if instance.Spec.OCP311 {
+		if instance.Spec.DisableHostNetwork {
 			returningDeploy.Spec.Template.Spec.HostNetwork = res.FalseVar
 		}
 	case res.ConfigmapWatcherName:

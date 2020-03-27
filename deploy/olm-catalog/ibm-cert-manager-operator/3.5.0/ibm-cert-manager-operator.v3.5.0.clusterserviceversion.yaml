@@ -127,6 +127,11 @@ spec:
         name: apiservices.apiregistration.k8s.io
         version: v1
       specDescriptors:
+      - description: Disables the use of hostNetwork by the webhook
+        displayName: DisableHostNetwork
+        path: disableHostNetwork
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
       - description: Enables the webhook component of cert-manager when set to true
         displayName: EnableWebhook
         path: enableWebhook
@@ -140,11 +145,6 @@ spec:
       - description: Sets the image registry to this when deploying cert-manager
         displayName: ImageRegistry
         path: imageRegistry
-        x-descriptors:
-        - 'urn:alm:descriptor:com.tectonic.ui:text'
-      - description: Determines whether it's an ocp 3.11 environment
-        displayName: OCP3111
-        path: ocp311
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:text'
       - description: The namespace where namespace scoped resources referenced by cert-manager clusterissuers must be placed
