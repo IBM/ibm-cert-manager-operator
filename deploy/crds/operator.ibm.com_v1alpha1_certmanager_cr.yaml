@@ -2,6 +2,10 @@ apiVersion: operator.ibm.com/v1alpha1
 kind: CertManager
 metadata:
   name: default
+  labels:
+    app.kubernetes.io/instance: ibm-cert-manager-operator
+    app.kubernetes.io/managed-by: ibm-cert-manager-operator
+    app.kubernetes.io/name: cert-manager
 spec:
   enableWebhook: true
   imageRegistry: quay.io/opencloudio
