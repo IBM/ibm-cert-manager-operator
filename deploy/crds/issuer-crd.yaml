@@ -3,6 +3,10 @@ kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
   name: issuers.certmanager.k8s.io
+  labels:
+    app.kubernetes.io/instance: ibm-cert-manager-operator
+    app.kubernetes.io/managed-by: ibm-cert-manager-operator
+    app.kubernetes.io/name: cert-manager
 spec:
   additionalPrinterColumns:
     - JSONPath: .status.conditions[?(@.type=="Ready")].status

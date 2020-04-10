@@ -3,6 +3,10 @@ kind: Role
 metadata:
   creationTimestamp: null
   name: ibm-cert-manager-access
+  labels:
+    app.kubernetes.io/instance: ibm-cert-manager-operator
+    app.kubernetes.io/managed-by: ibm-cert-manager-operator
+    app.kubernetes.io/name: cert-manager
 rules:
 - apiGroups: 
   - certmanager.k8s.io
