@@ -38,7 +38,7 @@ spec:
                 - s390x
       containers:
         - name: ibm-cert-manager-operator
-          image: quay.io/opencloudio/ibm-cert-manager-operator:3.5.0
+          image: quay.io/opencloudio/ibm-cert-manager-operator:latest
           command:
           - ibm-cert-manager-operator
           args:
