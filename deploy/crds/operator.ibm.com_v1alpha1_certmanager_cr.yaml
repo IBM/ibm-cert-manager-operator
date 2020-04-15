@@ -10,4 +10,4 @@ spec:
   enableWebhook: true
   imageRegistry: quay.io/opencloudio
 status:
-  certManagerStatus: {}
+  certManagerStatus: ''
