@@ -52,6 +52,6 @@ Information about building and testing the operator.
 
 **NOTE:** The certificate manager service (operand) is a singleton. Do not run more than one instance of `cert-manager-controller` within the same cluster.
 
-# SecurityContextConstraints Requirements
+## SecurityContextConstraints Requirements
 
 The cert-manager service supports running under the OpenShift Container Platform default restricted security context constraints.
