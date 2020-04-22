@@ -260,9 +260,8 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		log.Info("RHACM exists")
 		r.updateStatus(instance, "As RHACM is installed on this system, using RHACM cert-manager")
 		return reconcile.Result{}, nil
-	} else {
-		log.Info("RHACM does not exist: " + rhacmErr.Error())
 	}
+	log.Info("RHACM does not exist: " + rhacmErr.Error())
 
 	// Check Deployment itself
 	if err := r.deployments(instance); err != nil {
