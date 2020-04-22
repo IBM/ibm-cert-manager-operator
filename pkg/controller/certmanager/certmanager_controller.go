@@ -252,6 +252,18 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	}
 	r.updateEvent(instance, "All prerequisites for deploying cert-manager service found", corev1.EventTypeNormal, "PrereqsMet")
 
+	//Check RHACM
+	rhacmErr := checkRhacm(r.client)
+	if rhacmErr == nil {
+		// multiclusterhub found, this means RHACM exists
+		// Return and don't requeue
+		log.Info("RHACM exists")
+		r.updateStatus(instance, "As RHACM is installed on this system, using RHACM cert-manager")
+		return reconcile.Result{}, nil
+	} else {
+		log.Info("RHACM does not exist: " + rhacmErr.Error())
+	}
+
 	// Check Deployment itself
 	if err := r.deployments(instance); err != nil {
 		log.Error(err, "Error with deploying cert-manager, requeueing")

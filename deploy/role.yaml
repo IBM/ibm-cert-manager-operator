@@ -258,3 +258,11 @@ rules:
   - subjectaccessreviews
   verbs:
   - '*'
+- apiGroups:
+  - operators.open-cluster-management.io
+  resources:
+  - multiclusterhubs
+  verbs:
+  - get
+  - list
+  - watch
