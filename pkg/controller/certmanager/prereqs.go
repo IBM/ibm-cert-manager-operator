@@ -28,7 +28,9 @@ import (
 	apiextensionclientsetv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -202,4 +204,23 @@ func removeRoles(client client.Client) error {
 		return err
 	}
 	return nil
+}
+
+//CheckRhacm checks if RHACM exists
+func checkRhacm(client client.Client) error {
+
+	multiClusterHubType := &unstructured.Unstructured{}
+	multiClusterHubType.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "operators.open-cluster-management.io",
+		Kind:    "MultiClusterHub",
+		Version: "v1beta1",
+	})
+
+	rhacmErr := client.Get(context.Background(), types.NamespacedName{
+		Namespace: "open-cluster-management",
+		Name:      "multiclusterhub",
+	}, multiClusterHubType)
+
+	return rhacmErr
+
 }

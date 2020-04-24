@@ -216,6 +216,17 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, nil
 	}
 
+	//Check RHACM
+	rhacmErr := checkRhacm(r.client)
+	if rhacmErr == nil {
+		// multiclusterhub found, this means RHACM exists
+		// Return and don't requeue
+		log.Info("RHACM exists")
+		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
+		return reconcile.Result{}, nil
+	}
+	log.Info("RHACM does not exist: " + rhacmErr.Error())
+
 	finalizerName := "certmanager.operators.ibm.com"
 	// Determine if the certmanager crd is going to be deleted
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
