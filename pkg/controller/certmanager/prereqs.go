@@ -213,7 +213,7 @@ func checkRhacm(client client.Client) error {
 	multiClusterHubType.SetGroupVersionKind(schema.GroupVersionKind{
 		Group:   "operators.open-cluster-management.io",
 		Kind:    "MultiClusterHub",
-		Version: "v1alpha1",
+		Version: "v1beta1",
 	})
 
 	rhacmErr := client.Get(context.Background(), types.NamespacedName{

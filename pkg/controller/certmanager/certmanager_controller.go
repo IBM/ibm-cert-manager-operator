@@ -222,7 +222,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		// multiclusterhub found, this means RHACM exists
 		// Return and don't requeue
 		log.Info("RHACM exists")
-		r.updateStatus(instance, "As RHACM is installed on this system, using RHACM cert-manager")
+		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
 		return reconcile.Result{}, nil
 	}
 	log.Info("RHACM does not exist: " + rhacmErr.Error())
