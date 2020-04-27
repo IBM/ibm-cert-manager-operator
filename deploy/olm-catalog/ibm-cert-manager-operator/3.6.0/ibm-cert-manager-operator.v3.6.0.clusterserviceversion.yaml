@@ -16,6 +16,7 @@ metadata:
             "name": "default"
           },
           "spec": {
+            "disableHostNetwork": true,
             "enableWebhook": true,
             "imageRegistry": "quay.io/opencloudio"
           },
