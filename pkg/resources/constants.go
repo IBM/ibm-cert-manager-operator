@@ -81,12 +81,12 @@ var ConfigmapWatcherLabelMap = map[string]string{
 }
 
 // PodAnnotations are the annotations required for a pod
-var PodAnnotations = map[string]string{"openshift.io/scc": "restricted", "productName": "IBM Cloud Platform Common Services", "productID": "068a62892a1e4db39641342e592daa25", "productVersion": "3.3.0", "productMetric": "FREE"}
+var PodAnnotations = map[string]string{"openshift.io/scc": "restricted", "productName": "IBM Cloud Platform Common Services", "productID": "068a62892a1e4db39641342e592daa25", "productVersion": "3.4.0", "productMetric": "FREE"}
 
 var securityAnnotationWebhook = map[string]string{"openshift.io/scc": "hostnetwork",
 	"productName":    "IBM Cloud Platform Common Services",
 	"productID":      "068a62892a1e4db39641342e592daa25",
-	"productVersion": "3.3.0",
+	"productVersion": "3.4.0",
 	"productMetric":  "FREE",
 }
 
@@ -129,13 +129,13 @@ const ConfigmapWatcherName = "configmap-watcher"
 const ImageRegistry = "quay.io"
 
 // ControllerImageVersion is the image version used for the cert-manager-controller
-const ControllerImageVersion = "0.10.3"
+const ControllerImageVersion = "0.10.4"
 
 // WebhookImageVersion is the image version used for the cert-manager-webhook
-const WebhookImageVersion = "0.10.3"
+const WebhookImageVersion = "0.10.4"
 
 // ConfigmapWatcherVersion is the image version used for the configmap-watcher
-const ConfigmapWatcherVersion = "3.3.1"
+const ConfigmapWatcherVersion = "3.3.2"
 
 // ControllerImageName is the image name of the cert-manager-controller
 const ControllerImageName = "icp-cert-manager-controller"
