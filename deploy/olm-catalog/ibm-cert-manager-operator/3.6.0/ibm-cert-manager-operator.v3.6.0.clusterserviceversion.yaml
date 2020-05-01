@@ -427,6 +427,14 @@ spec:
           - subjectaccessreviews
           verbs:
           - '*'
+        - apiGroups:
+          - operators.open-cluster-management.io
+          resources:
+          - multiclusterhubs
+          verbs:
+          - get
+          - list
+          - watch
         serviceAccountName: ibm-cert-manager-operator
       deployments:
       - name: ibm-cert-manager-operator
