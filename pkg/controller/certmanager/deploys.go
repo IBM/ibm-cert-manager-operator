@@ -114,8 +114,8 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 	}
 	switch deploy.Name {
 	case res.CertManagerControllerName:
-		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.ControllerImageName + ":" + res.ControllerImageVersion
-		var acmesolver = "--acme-http01-solver-image=" + imageRegistry + "/" + res.AcmesolverImageName + ":" + res.ControllerImageVersion
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.ControllerImageName, res.ControllerImageVersion, instance.Spec.ImagePostFix, res.ControllerTagEnvVar)
+		var acmesolver = "--acme-http01-solver-image=" + res.GetImageID(imageRegistry, res.AcmesolverImageName, res.ControllerImageVersion, instance.Spec.ImagePostFix, res.AcmeSolverTagEnvVar)
 
 		var resourceNS = res.ResourceNS
 		if instance.Spec.ResourceNS != "" {
@@ -130,19 +130,15 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
 		log.V(3).Info("The args", "args", deploy.Spec.Template.Spec.Containers[0].Args)
 	case res.CertManagerCainjectorName:
-		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.CainjectorImageName + ":" + res.ControllerImageVersion
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.CainjectorImageName, res.ControllerImageVersion, instance.Spec.ImagePostFix, res.CaInjectorTagEnvVar)
 	case res.CertManagerWebhookName:
-		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.WebhookImageName + ":" + res.WebhookImageVersion
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.WebhookImageName, res.WebhookImageVersion, instance.Spec.ImagePostFix, res.WebhookTagEnvVar)
 		returningDeploy.Spec.Template.Spec.Containers[0].SecurityContext.ReadOnlyRootFilesystem = &res.FalseVar
 		if instance.Spec.DisableHostNetwork {
 			returningDeploy.Spec.Template.Spec.HostNetwork = res.FalseVar
 		}
 	case res.ConfigmapWatcherName:
-		returningDeploy.Spec.Template.Spec.Containers[0].Image = imageRegistry + "/" + res.ConfigmapWatcherImageName + ":" + res.ConfigmapWatcherVersion
-	}
-
-	if instance.Spec.ImagePostFix != "" {
-		returningDeploy.Spec.Template.Spec.Containers[0].Image += instance.Spec.ImagePostFix
+		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.ConfigmapWatcherImageName, res.ConfigmapWatcherVersion, instance.Spec.ImagePostFix, res.ConfigMapWatcherTagEnvVar)
 	}
 
 	returningDeploy.Namespace = ns

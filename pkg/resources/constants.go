@@ -126,15 +126,15 @@ const CertManagerWebhookName = "cert-manager-webhook"
 const ConfigmapWatcherName = "configmap-watcher"
 
 // ImageRegistry is the default image registry for the operand deployments
-const ImageRegistry = "quay.io"
+const ImageRegistry = "quay.io/opencloudio"
 
-// ControllerImageVersion is the image version used for the cert-manager-controller
+// ControllerImageVersion is the default image version used for the cert-manager-controller
 const ControllerImageVersion = "0.10.4"
 
-// WebhookImageVersion is the image version used for the cert-manager-webhook
+// WebhookImageVersion is the default image version used for the cert-manager-webhook
 const WebhookImageVersion = "0.10.4"
 
-// ConfigmapWatcherVersion is the image version used for the configmap-watcher
+// ConfigmapWatcherVersion is the default image version used for the configmap-watcher
 const ConfigmapWatcherVersion = "3.3.2"
 
 // ControllerImageName is the image name of the cert-manager-controller
@@ -152,11 +152,29 @@ const WebhookImageName = "icp-cert-manager-webhook"
 // ConfigmapWatcherImageName is the name of the configmap watcher image
 const ConfigmapWatcherImageName = "icp-configmap-watcher"
 
-const controllerImage = ImageRegistry + "/" + ControllerImageName + ":" + ControllerImageVersion
-const acmesolverImage = ImageRegistry + "/" + AcmesolverImageName + ":" + ControllerImageVersion
-const cainjectorImage = ImageRegistry + "/" + CainjectorImageName + ":" + ControllerImageVersion
-const webhookImage = ImageRegistry + "/" + WebhookImageName + ":" + WebhookImageVersion
-const configmapWatcherImage = ImageRegistry + "/" + ConfigmapWatcherImageName + ":" + ConfigmapWatcherVersion
+// ControllerTagEnvVar is the env variable name defined in operator container for Controller Image Tag/SHA. Check operator.yaml
+const ControllerTagEnvVar = "CONTROLLER_IMAGE_TAG_OR_SHA"
+
+// WebhookTagEnvVar is the env variable name defined in operator container for Webhook Image Tag/SHA. Check operator.yaml
+const WebhookTagEnvVar = "WEBHOOK_IMAGE_TAG_OR_SHA"
+
+// CaInjectorTagEnvVar is the env variable name defined in operator container for cainjector Image Tag/SHA. Check operator.yaml
+const CaInjectorTagEnvVar = "CAINJECTOR_IMAGE_TAG_OR_SHA"
+
+// AcmeSolverTagEnvVar is the env variable name defined in operator container for acme-solver Image Tag/SHA. Check operator.yaml
+const AcmeSolverTagEnvVar = "AMCESOLVER_IMAGE_TAG_OR_SHA"
+
+// ConfigMapWatcherTagEnvVar is the env variable name defined in operator container for ConfigMap Watcher Image Tag/SHA. Check operator.yaml
+const ConfigMapWatcherTagEnvVar = "CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA"
+
+// DefaultImagePostfix is set to empty. It indicates any platform suffix that you can append to an image tag
+const DefaultImagePostfix = ""
+
+var controllerImage = GetImageID(ImageRegistry, ControllerImageName, ControllerImageVersion, DefaultImagePostfix, ControllerTagEnvVar)
+var acmesolverImage = GetImageID(ImageRegistry, AcmesolverImageName, ControllerImageVersion, DefaultImagePostfix, AcmeSolverTagEnvVar)
+var cainjectorImage = GetImageID(ImageRegistry, CainjectorImageName, ControllerImageVersion, DefaultImagePostfix, CaInjectorTagEnvVar)
+var webhookImage = GetImageID(ImageRegistry, WebhookImageName, WebhookImageVersion, DefaultImagePostfix, WebhookTagEnvVar)
+var configmapWatcherImage = GetImageID(ImageRegistry, ConfigmapWatcherImageName, ConfigmapWatcherVersion, DefaultImagePostfix, ConfigMapWatcherTagEnvVar)
 
 // ServiceAccount is the name of the default service account to be used by cert-manager services
 const ServiceAccount = "cert-manager"
@@ -209,7 +227,7 @@ const ResourceNS = "--cluster-resource-namespace=ibm-common-services"
 const leaderElectNS = "--leader-election-namespace=cert-manager"
 
 // AcmeSolverArg is the acme solver image to use for the cert-manager-controller
-const AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
+var AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
 
 const webhookNSArg = "--webhook-namespace=" + DeployNamespace
 const webhookCASecretArg = "--webhook-ca-secret=cert-manager-webhook-ca"
