@@ -484,6 +484,16 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
+                - name: CONTROLLER_IMAGE_TAG_OR_SHA
+                  value: "0.10.4"
+                - name: WEBHOOK_IMAGE_TAG_OR_SHA
+                  value: "0.10.4"
+                - name: CAINJECTOR_IMAGE_TAG_OR_SHA
+                  value: "0.10.4"
+                - name: ACMESOLVER_IMAGE_TAG_OR_SHA
+                  value: "0.10.4"
+                - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
+                  value: "3.3.2"
                 image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator

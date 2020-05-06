@@ -17,9 +17,14 @@
 BUILD_LOCALLY ?= 1
 
 # Image URL to use all building/pushing image targets;
-# Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
+# Use your own docker registry and image name for dev/test by overriding the IMG and REGISTRY environment variable.
 IMG ?= ibm-cert-manager-operator
 REGISTRY ?= quay.io/opencloudio
+
+# Set the registry and tag for the operand/operator images
+OPERAND_REGISTRY ?= $(REGISTRY)
+CERT_MANAGER_OPERAND_TAG ?= 0.10.4
+CONFIGMAP_WATCHER_OPERAND_TAG ?= 3.3.2
 
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.
@@ -195,6 +200,40 @@ csv:
 ############################################################
 clean:
 	rm -f build/_output
+
+
+############################################################
+# SHA section
+############################################################
+
+.PHONY: get-all-operand-image-sha
+get-all-operand-image-sha: get-configmap-watcher-image-sha get-acmesolver-image-sha get-cainjector-image-sha get-webhook-image-sha get-controller-image-sha
+	@echo Got SHAs for all operand images
+
+.PHONY: get-controller-image-sha
+get-controller-image-sha:
+	@echo Get SHA for icp-cert-manager-controller:$(CERT_MANAGER_OPERAND_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-controller $(CERT_MANAGER_OPERAND_TAG) CONTROLLER_IMAGE_TAG_OR_SHA
+
+.PHONY: get-webhook-image-sha
+get-webhook-image-sha:
+	@echo Get SHA for icp-cert-manager-webhook:$(CERT_MANAGER_OPERAND_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-webhook $(CERT_MANAGER_OPERAND_TAG) WEBHOOK_IMAGE_TAG_OR_SHA
+
+.PHONY: get-cainjector-image-sha
+get-cainjector-image-sha:
+	@echo Get SHA for icp-cert-manager-cainjector:$(CERT_MANAGER_OPERAND_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-cainjector $(CERT_MANAGER_OPERAND_TAG) CAINJECTOR_IMAGE_TAG_OR_SHA
+
+.PHONY: get-acmesolver-image-sha
+get-acmesolver-image-sha:
+	@echo Get SHA for icp-cert-manager-acmesolver:$(CERT_MANAGER_OPERAND_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-acmesolver $(CERT_MANAGER_OPERAND_TAG) ACMESOLVER_IMAGE_TAG_OR_SHA
+
+.PHONY: get-configmap-watcher-image-sha
+get-configmap-watcher-image-sha:
+	@echo Get SHA for icp-configmap-watcher:$(CONFIGMAP_WATCHER_OPERAND_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-configmap-watcher $(CONFIGMAP_WATCHER_OPERAND_TAG) CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
 
 ############################################################
 # application section
