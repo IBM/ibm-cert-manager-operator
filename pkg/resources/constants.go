@@ -162,7 +162,7 @@ const WebhookTagEnvVar = "WEBHOOK_IMAGE_TAG_OR_SHA"
 const CaInjectorTagEnvVar = "CAINJECTOR_IMAGE_TAG_OR_SHA"
 
 // AcmeSolverTagEnvVar is the env variable name defined in operator container for acme-solver Image Tag/SHA. Check operator.yaml
-const AcmeSolverTagEnvVar = "AMCESOLVER_IMAGE_TAG_OR_SHA"
+const AcmeSolverTagEnvVar = "ACMESOLVER_IMAGE_TAG_OR_SHA"
 
 // ConfigMapWatcherTagEnvVar is the env variable name defined in operator container for ConfigMap Watcher Image Tag/SHA. Check operator.yaml
 const ConfigMapWatcherTagEnvVar = "CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA"
