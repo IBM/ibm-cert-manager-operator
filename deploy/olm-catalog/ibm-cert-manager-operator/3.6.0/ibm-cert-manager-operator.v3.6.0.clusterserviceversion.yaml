@@ -499,8 +499,8 @@ spec:
                 name: ibm-cert-manager-operator
                 resources:
                   limits:
-                    cpu: 20m
-                    memory: 90Mi
+                    cpu: 100m
+                    memory: 150Mi
                   requests:
                     cpu: 10m
                     memory: 50Mi

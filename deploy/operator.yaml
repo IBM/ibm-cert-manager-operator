@@ -68,8 +68,8 @@ spec:
               value: "3.3.2"
           resources:
             limits:
-              cpu: 20m
-              memory: 90Mi
+              cpu: 100m
+              memory: 150Mi
             requests:
               cpu: 10m
               memory: 50Mi
