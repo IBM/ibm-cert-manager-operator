@@ -18,7 +18,7 @@ Linux on IBM Z and LinuxONE
 
 - 3.5.0
 - 3.6.0
-  - Features in this release: RHACM coexistence support, operator-to-operator upgrade, helm-to-operator upgrade, operand image reference using SHA digest, IBM certification.
+  Features in 3.6.0 release: RHACM coexistence support, operator-to-operator upgrade, helm-to-operator upgrade, operand image reference using SHA digest, IBM certification.
 
 ## Prerequisites
 
@@ -29,7 +29,6 @@ Before you install this operator, you need to first install the operator depende
 - For the list of prerequisites for installing the operator, see the IBM Knowledge Center [Preparing to install services documentation](http://ibm.biz/cpcs_opinstprereq).
 
 ## Documentation
-
 
 To install the operator with the IBM Common Services Operator follow the the installation and configuration instructions within the IBM Knowledge Center.
 
@@ -106,7 +105,7 @@ If, as a developer, you are looking to build and test this operator to try out a
 
 - Use the following quick start commands for building and testing the operator:
 
-```
+```bash
 oc login -u <CLUSTER_USER> -p <CLUSTER_PASS> <CLUSTER_IP>:6443
 
 export NAMESPACE=ibm-common-services
@@ -124,14 +123,14 @@ Use the following commands to debug the operator:
 
 - Check the certificate manager CR.
 
-```
+```bash
 kubectl get certmanager
 kubectl describe certmanager <certmanager CR name>
 ```
 
 - Look at the logs of the cert-manager-operator pod for errors
 
-```
+```bash
 kubectl get po -n <namespace>
 kubectl logs -n <namespace> <cert-manager-operator pod name>
 ```
