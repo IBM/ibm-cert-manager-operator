@@ -10,15 +10,14 @@ For more information about the available IBM Cloud Platform Common Services, see
 
 Red Hat OpenShift Container Platform 4.2 or newer installed on one of the following platforms:
 
-Linux x86_64
-Linux on Power (ppc64le)
-Linux on IBM Z and LinuxONE
+- Linux x86_64
+- Linux on Power (ppc64le)
+- Linux on IBM Z and LinuxONE
 
 ## Operator versions
 
 - 3.5.0
 - 3.6.0
-  Features in 3.6.0 release: RHACM coexistence support, operator-to-operator upgrade, helm-to-operator upgrade, operand image reference using SHA digest, IBM certification.
 
 ## Prerequisites
 
@@ -37,7 +36,7 @@ To install the operator with the IBM Common Services Operator follow the the ins
 
 ## SecurityContextConstraints Requirements
 
-The Common UI service supports running with the OpenShift Container Platform 4.3 default restricted Security Context Constraints (SCCs).
+The IBM certificate manager service supports running with the OpenShift Container Platform 4.3 default restricted Security Context Constraints (SCCs).
 
 For more information about the OpenShift Container Platform Security Context Constraints, see [Managing Security Context Constraints](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html).
 
