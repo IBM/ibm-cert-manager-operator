@@ -471,6 +471,9 @@ spec:
                         - amd64
                         - ppc64le
                         - s390x
+              hostIPC: false
+              hostNetwork: false
+              hostPID: false
               containers:
               - args:
                 - --zap-level=1
