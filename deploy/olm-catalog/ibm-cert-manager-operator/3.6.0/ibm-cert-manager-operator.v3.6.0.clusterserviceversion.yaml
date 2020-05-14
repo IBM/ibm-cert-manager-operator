@@ -491,15 +491,15 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
                 - name: CONTROLLER_IMAGE_TAG_OR_SHA
-                  value: "0.10.4"
+                  value: "sha256:6e0d55a5f6953dcbdc49bed267c3dd1f58d83f4e086d87c9b268ec5849345424"
                 - name: WEBHOOK_IMAGE_TAG_OR_SHA
-                  value: "0.10.4"
+                  value: "sha256:f0496402de6210cae682bea83fffd2f4526f748b02e7c18fcc0584d046ff1841"
                 - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-                  value: "0.10.4"
+                  value: "sha256:c3fa077f4b884ce44ae9030eba27ee992897c7cc06cdf4ec57c4b6af525b4bb5"
                 - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-                  value: "0.10.4"
+                  value: "sha256:1796bcf5458ecb57f10b84c302321b2a9ddbb32dd1c1364d51c91476eee05b70"
                 - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-                  value: "3.3.2"
+                  value: "sha256:6f6bd9ae19b9f9ed8c013b889931c01a2fab9051b7ffe90161a089045ba3eaa9"
                 image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
