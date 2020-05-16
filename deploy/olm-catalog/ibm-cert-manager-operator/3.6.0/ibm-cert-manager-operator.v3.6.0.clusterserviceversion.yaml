@@ -2,6 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
+    olm.skipRange: '>=3.5.0 <3.6.0'
     alm-examples: |-
       [
         {
@@ -83,7 +84,7 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:3.6.0
     createdAt: "2020-04-10T10:16:16Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
@@ -500,7 +501,7 @@ spec:
                   value: "sha256:1796bcf5458ecb57f10b84c302321b2a9ddbb32dd1c1364d51c91476eee05b70"
                 - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
                   value: "sha256:6f6bd9ae19b9f9ed8c013b889931c01a2fab9051b7ffe90161a089045ba3eaa9"
-                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator@sha256:697ef3274d8b3ece7d70a14d4e610baa8d69a5b16679e4c23bd82ab2581f5d4f
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources:
