@@ -2,7 +2,7 @@
 
 > **Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
 
-You can use the ibm-cert-manager-operator to install the IBM certificate manager service for the IBM Cloud Platform Common Services. You can use IBM certificate manager service to issue and manage x509 certificates from various sources, such as Let’s Encrypt and Hashicorp Vault, a simple signing key pair, or self-signed. It ensures certificates are valid and up to date and will renew certificates before they expire.
+You can use the ibm-cert-manager-operator to install the IBM certificate manager service for the IBM Cloud Platform Common Services. You can use IBM certificate manager service to issue and manage x509 certificates from various sources, such as Let’s Encrypt and Hashicorp Vault, a simple signing key pair, or self-signed. It ensures that certificates are valid, up to date, and renews certificates before they expire.
 
 For more information about the available IBM Cloud Platform Common Services, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
 
@@ -29,7 +29,7 @@ Before you install this operator, you need to first install the operator depende
 
 ## Documentation
 
-To install the operator with the IBM Common Services Operator follow the the installation and configuration instructions within the IBM Knowledge Center.
+To install the operator with the IBM Common Services Operator follow the installation and configuration instructions within the IBM Knowledge Center.
 
 - If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak. For a list of IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
 - If you are using the operator with an IBM Containerized Software, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall).
@@ -94,9 +94,9 @@ volumes:
 
 ### Developer guide
 
-If, as a developer, you are looking to build and test this operator to try out and learn more about the operator and its capabilities, you can use the following developer guide. This guide provides commands for a quick install and initial validation for running the operator.
+As a developer, if you want to build and test this operator to try out and learn more about the operator and its capabilities, you can use the following developer guide. This guide provides commands for a quick installation and initial validation for running the operator.
 
-> **Important:** The following developer guide is provided as-is and only for trial and education purposes. IBM and IBM Support does not provide any support for the usage of the operator with this developer guide. For the official supported install and usage guide for the operator, see the the IBM Knowledge Center documentation for your IBM Cloud Pak or for IBM Cloud Platform Common Services.
+> **Important:** The following developer guide is provided as-is and only for trial and education purposes. IBM and IBM Support does not provide any support for the usage of the operator with this developer guide. For the official supported instalationl and usage guide for the operator, see the the IBM Knowledge Center documentation for your IBM Cloud Pak or for IBM Cloud Platform Common Services.
 
 ### Quick start guide
 
@@ -114,7 +114,7 @@ export CSV_VERSION=<CSV_VERSION_TO_TEST>
 make install
 ```
 
-- To uninstall the operator installed using `make install`, run `make uninstall`.
+- To uninstall the operator that is installed  by using `make install`, run `make uninstall`.
 
 ### Debugging guide
 
