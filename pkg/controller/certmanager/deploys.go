@@ -135,7 +135,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.WebhookImageName, res.WebhookImageVersion, instance.Spec.ImagePostFix, res.WebhookTagEnvVar)
 		returningDeploy.Spec.Template.Spec.Containers[0].SecurityContext.ReadOnlyRootFilesystem = &res.FalseVar
 		if instance.Spec.DisableHostNetwork == nil {
-			returningDeploy.Spec.Template.Spec.HostNetwork = res.TrueVar //default value
+			returningDeploy.Spec.Template.Spec.HostNetwork = res.FalseVar //default value
 		} else {
 			returningDeploy.Spec.Template.Spec.HostNetwork = !(*instance.Spec.DisableHostNetwork)
 		}
