@@ -8,7 +8,7 @@ For more information about the available IBM Cloud Platform Common Services, see
 
 ## Supported platforms
 
-Red Hat OpenShift Container Platform 4.2 or newer installed on one of the following platforms:
+Red Hat OpenShift Container Platform 4.3 or newer installed on one of the following platforms:
 
 - Linux x86_64
 - Linux on Power (ppc64le)
