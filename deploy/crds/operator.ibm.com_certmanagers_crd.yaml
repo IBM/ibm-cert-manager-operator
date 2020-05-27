@@ -49,6 +49,8 @@ spec:
               type: string
             resourceNamespace:
               type: string
+            version:
+              type: string
           type: object
         status:
           description: CertManagerStatus defines the observed state of CertManager

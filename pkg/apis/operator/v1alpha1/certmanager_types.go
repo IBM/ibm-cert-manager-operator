@@ -32,7 +32,8 @@ type CertManagerSpec struct {
 	ImagePostFix       string `json:"imagePostFix,omitempty"`
 	Webhook            bool   `json:"enableWebhook,omitempty"`
 	ResourceNS         string `json:"resourceNamespace,omitempty"`
-	DisableHostNetwork bool   `json:"disableHostNetwork,omitempty"`
+	DisableHostNetwork *bool  `json:"disableHostNetwork,omitempty"`
+	Version            string `json:"version,omitempty"`
 }
 
 // CertManagerStatus defines the observed state of CertManager
