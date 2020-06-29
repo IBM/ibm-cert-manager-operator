@@ -28,7 +28,7 @@ TYPE=$4
 if [[ $TYPE == "" ]]
 then
    echo "Missing parm. Need image registry, image name, image tag, and env variable indicating operand type. Tye will be OPERATOR for operator image as input"
-   echo "for eg: quay.io/opencloudio icp-cert-manager-controller 0.10.4 CONTROLLER_IMAGE_TAG_OR_SHA"
+   echo "for eg: quay.io/opencloudio icp-cert-manager-controller 0.10.5 CONTROLLER_IMAGE_TAG_OR_SHA"
    exit 1
 fi
 

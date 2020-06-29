@@ -23,7 +23,7 @@ REGISTRY ?= quay.io/opencloudio
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
-CERT_MANAGER_OPERAND_TAG ?= 0.10.4
+CERT_MANAGER_OPERAND_TAG ?= 0.10.5
 CONFIGMAP_WATCHER_OPERAND_TAG ?= 3.3.2
 
 # Github host to use for checking the source tree;
@@ -254,7 +254,8 @@ install: ## Install all resources (CR/CRD's, RBAC and Operator)
 	- kubectl apply -f deploy/access-role.yaml -n ${NAMESPACE}
 	- kubectl apply -f deploy/access-rolebinding.yaml -n ${NAMESPACE}
 	@echo ....... Applying Operator .......
-	- kubectl apply -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
+	- kubectl apply -f deploy/operator.yaml -n ${NAMESPACE}
+	# - kubectl apply -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
 	@echo ....... Creating the Instance .......
 	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl -n ${NAMESPACE} apply -f $${cr}; done
 
@@ -263,7 +264,8 @@ uninstall: ## Uninstall all that all performed in the $ make install
 	@echo ....... Deleting CR .......
 	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl -n ${NAMESPACE} delete -f $${cr}; done
 	@echo ....... Deleting Operator .......
-	- kubectl delete -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
+	- kubectl delete -f deploy/operator.yaml -n ${NAMESPACE}
+	# - kubectl delete -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
 	@echo ....... Deleting CRDs.......
 	- for crd in $(shell ls deploy/crds/*crd.yaml); do kubectl delete -f $${crd}; done
 	@echo ....... Deleting Rules and Service Account .......
