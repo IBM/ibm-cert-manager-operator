@@ -502,7 +502,7 @@ spec:
                   value: sha256:98264fbdd2fe8bd5ebb9b17214b48e4c8c634051bf3fd2ed58170b4b0aaed0a6
                 - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
                   value: sha256:6f6bd9ae19b9f9ed8c013b889931c01a2fab9051b7ffe90161a089045ba3eaa9
-                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator@sha256:e5e18f3b5dbf2204a10c3bc42ea1f9f94349693ff1a81c6d1f01c1d1d806507e
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources:
