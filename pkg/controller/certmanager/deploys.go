@@ -129,8 +129,19 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		args = append(args, acmesolver, resourceNS, leaderElect, webhookNS, webhookDNS)
 		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
 		log.V(3).Info("The args", "args", deploy.Spec.Template.Spec.Containers[0].Args)
+
+		//add resource limits and requests for controller only if present in CR else use default as defined in constants.go
+		if &instance.Spec.CertManagerController.Resources != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.CertManagerController.Resources
+		}
+
 	case res.CertManagerCainjectorName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.CainjectorImageName, res.ControllerImageVersion, instance.Spec.ImagePostFix, res.CaInjectorTagEnvVar)
+		//add resource limits and requests for cainjector only if present in CR else use default as defined in constants.go
+		if &instance.Spec.CertManagerCAInjector.Resources != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.CertManagerCAInjector.Resources
+		}
+
 	case res.CertManagerWebhookName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.WebhookImageName, res.WebhookImageVersion, instance.Spec.ImagePostFix, res.WebhookTagEnvVar)
 		returningDeploy.Spec.Template.Spec.Containers[0].SecurityContext.ReadOnlyRootFilesystem = &res.FalseVar
@@ -139,8 +150,17 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		} else {
 			returningDeploy.Spec.Template.Spec.HostNetwork = !(*instance.Spec.DisableHostNetwork)
 		}
+		//add resource limits and requests for webhook only if present in CR else use default as defined in constants.go
+		if &instance.Spec.CertManagerWebhook.Resources != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.CertManagerWebhook.Resources
+		}
+
 	case res.ConfigmapWatcherName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.ConfigmapWatcherImageName, res.ConfigmapWatcherVersion, instance.Spec.ImagePostFix, res.ConfigMapWatcherTagEnvVar)
+		//add resource limits and requests for configmap-watcher only if present in CR else use default as defined in constants.go
+		if &instance.Spec.ConfigMapWatcher.Resources != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.ConfigMapWatcher.Resources
+		}
 	}
 
 	returningDeploy.Namespace = ns
