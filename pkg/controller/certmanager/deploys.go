@@ -131,15 +131,21 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		log.V(3).Info("The args", "args", deploy.Spec.Template.Spec.Containers[0].Args)
 
 		//add resource limits and requests for controller only if present in CR else use default as defined in constants.go
-		if &instance.Spec.CertManagerController.Resources != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.CertManagerController.Resources
+		if instance.Spec.CertManagerController.Resources.Limits != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Limits = instance.Spec.CertManagerController.Resources.Limits
+		}
+		if instance.Spec.CertManagerController.Resources.Requests != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.CertManagerController.Resources.Requests
 		}
 
 	case res.CertManagerCainjectorName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.CainjectorImageName, res.ControllerImageVersion, instance.Spec.ImagePostFix, res.CaInjectorTagEnvVar)
 		//add resource limits and requests for cainjector only if present in CR else use default as defined in constants.go
-		if &instance.Spec.CertManagerCAInjector.Resources != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.CertManagerCAInjector.Resources
+		if instance.Spec.CertManagerCAInjector.Resources.Limits != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Limits = instance.Spec.CertManagerCAInjector.Resources.Limits
+		}
+		if instance.Spec.CertManagerCAInjector.Resources.Requests != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.CertManagerCAInjector.Resources.Requests
 		}
 
 	case res.CertManagerWebhookName:
@@ -151,15 +157,21 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 			returningDeploy.Spec.Template.Spec.HostNetwork = !(*instance.Spec.DisableHostNetwork)
 		}
 		//add resource limits and requests for webhook only if present in CR else use default as defined in constants.go
-		if &instance.Spec.CertManagerWebhook.Resources != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.CertManagerWebhook.Resources
+		if instance.Spec.CertManagerWebhook.Resources.Limits != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Limits = instance.Spec.CertManagerWebhook.Resources.Limits
+		}
+		if instance.Spec.CertManagerWebhook.Resources.Requests != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.CertManagerWebhook.Resources.Requests
 		}
 
 	case res.ConfigmapWatcherName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.ConfigmapWatcherImageName, res.ConfigmapWatcherVersion, instance.Spec.ImagePostFix, res.ConfigMapWatcherTagEnvVar)
 		//add resource limits and requests for configmap-watcher only if present in CR else use default as defined in constants.go
-		if &instance.Spec.ConfigMapWatcher.Resources != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources = instance.Spec.ConfigMapWatcher.Resources
+		if instance.Spec.ConfigMapWatcher.Resources.Limits != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Limits = instance.Spec.ConfigMapWatcher.Resources.Limits
+		}
+		if instance.Spec.ConfigMapWatcher.Resources.Requests != nil {
+			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.ConfigMapWatcher.Resources.Requests
 		}
 	}
 
