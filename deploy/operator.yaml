@@ -60,15 +60,15 @@ spec:
               value: "ibm-cert-manager-operator"
             # DO NOT DELETE. Add operand image SHAs here. See common/scripts/get_image_sha_digest.sh and make get-all-operand-image-sha
             - name: CONTROLLER_IMAGE_TAG_OR_SHA
-              value: sha256:cf12ad00d4e1a41136b57d28e1580cbeb4b3ee7decd3aef36996846cbdf82325
+              value: 0.10.6
             - name: WEBHOOK_IMAGE_TAG_OR_SHA
-              value: sha256:c0fc6219d4e4f04af4a2d2e9966e584a23cce3fa127ad42680d9a7da45a4be1b
+              value: 0.10.6
             - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-              value: sha256:8d1affe3688b13ddf2844c6f75e54bdb62fa2f3e3be135a4caf7c3b886dc9ab3
+              value: 0.10.6
             - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-              value: sha256:98264fbdd2fe8bd5ebb9b17214b48e4c8c634051bf3fd2ed58170b4b0aaed0a6
+              value: 0.10.6
             - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-              value: sha256:6f6bd9ae19b9f9ed8c013b889931c01a2fab9051b7ffe90161a089045ba3eaa9
+              value: 3.3.3
           resources:
             limits:
               cpu: 100m
