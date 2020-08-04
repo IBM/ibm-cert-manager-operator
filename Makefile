@@ -19,12 +19,12 @@ BUILD_LOCALLY ?= 1
 # Image URL to use all building/pushing image targets;
 # Use your own docker registry and image name for dev/test by overriding the IMG and REGISTRY environment variable.
 IMG ?= ibm-cert-manager-operator
-REGISTRY ?= quay.io/opencloudio
+REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
-CERT_MANAGER_OPERAND_TAG ?= 0.10.5
-CONFIGMAP_WATCHER_OPERAND_TAG ?= 3.3.2
+CERT_MANAGER_OPERAND_TAG ?= 0.10.6
+CONFIGMAP_WATCHER_OPERAND_TAG ?= 3.3.3
 
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.
@@ -41,8 +41,7 @@ export GOBIN ?= $(GOBIN_DEFAULT)
 TESTARGS_DEFAULT := "-v"
 export TESTARGS ?= $(TESTARGS_DEFAULT)
 DEST := $(GOPATH)/src/$(GIT_HOST)/$(BASE_DIR)
-VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
-                 git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)
+VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
 CSV_VERSION ?= $(VERSION)
 
 LOCAL_OS := $(shell uname)
