@@ -81,13 +81,12 @@ var ConfigmapWatcherLabelMap = map[string]string{
 }
 
 // PodAnnotations are the annotations required for a pod
-var PodAnnotations = map[string]string{"openshift.io/scc": "restricted", "productName": "IBM Cloud Platform Common Services", "productID": "068a62892a1e4db39641342e592daa25", "productVersion": "3.4.0", "productMetric": "FREE"}
+var PodAnnotations = map[string]string{"openshift.io/scc": "restricted", "productName": "IBM Cloud Platform Common Services", "productID": "068a62892a1e4db39641342e592daa25", "productMetric": "FREE"}
 
 var securityAnnotationWebhook = map[string]string{"openshift.io/scc": "hostnetwork",
-	"productName":    "IBM Cloud Platform Common Services",
-	"productID":      "068a62892a1e4db39641342e592daa25",
-	"productVersion": "3.4.0",
-	"productMetric":  "FREE",
+	"productName":   "IBM Cloud Platform Common Services",
+	"productID":     "068a62892a1e4db39641342e592daa25",
+	"productMetric": "FREE",
 }
 
 var webhookAnnotation = map[string]string{
