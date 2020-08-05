@@ -17,6 +17,7 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,6 +35,19 @@ type CertManagerSpec struct {
 	ResourceNS         string `json:"resourceNamespace,omitempty"`
 	DisableHostNetwork *bool  `json:"disableHostNetwork,omitempty"`
 	Version            string `json:"version,omitempty"`
+	//CertManagerController includes spec for cert-manager-controller workload
+	CertManagerController CertManagerContainerSpec `json:"certManagerController,omitempty"`
+	//CertManagerWebhook includes spec for cert-manager-webhook workload
+	CertManagerWebhook CertManagerContainerSpec `json:"certManagerWebhook,omitempty"`
+	//CertManagerCAInjector includes spec for cert-manager-cainjector workload
+	CertManagerCAInjector CertManagerContainerSpec `json:"certManagerCAInjector,omitempty"`
+	//ConfigMapWatcher includes spec for icp-configmap-watcher workload
+	ConfigMapWatcher CertManagerContainerSpec `json:"configMapWatcher,omitempty"`
+}
+
+//CertManagerContainerSpec defines the spec related to individual operand containers
+type CertManagerContainerSpec struct {
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // CertManagerStatus defines the observed state of CertManager
