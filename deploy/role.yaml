@@ -259,7 +259,7 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - operators.open-cluster-management.io
+  - operator.open-cluster-management.io
   resources:
   - multiclusterhubs
   verbs:
