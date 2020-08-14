@@ -481,6 +481,16 @@ spec:
                 command:
                 - ibm-cert-manager-operator
                 env:
+                - name: CONTROLLER_IMAGE_TAG_OR_SHA
+                  value: sha256:970c7f3d9b8e846bb04cddb3ad30242310f40ebc5038c3146b452c545c064b98
+                - name: WEBHOOK_IMAGE_TAG_OR_SHA
+                  value: sha256:da87f4a30744082aeaa5825eb8a8401e9aa1c1d65cb720cc19f81706856160f4
+                - name: CAINJECTOR_IMAGE_TAG_OR_SHA
+                  value: sha256:06c6e226fc3436e337c967ebf61500aef1cd00e2412027d03e89ae6e4ec9a62f
+                - name: ACMESOLVER_IMAGE_TAG_OR_SHA
+                  value: sha256:5cab268b7d0df423d7a078d2f0fbc5b9f1182a4d13e3acf20f676ca0211ec951
+                - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
+                  value: sha256:7701bc70027201b9e9b6d91e5f9eb924a9caadd74ec0ba40de6979da58d3a5a2
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
@@ -491,16 +501,6 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                - name: CONTROLLER_IMAGE_TAG_OR_SHA
-                  value: sha256:66bf2088ddb29f5dec85adaef22b2e192843f8fdbc8e203af0f72bb462325551
-                - name: WEBHOOK_IMAGE_TAG_OR_SHA
-                  value: sha256:68d82f5a2649f6b5df916783c7c869bb594b4213010dfda761348bab8fe23d3e
-                - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-                  value: sha256:4a94fb70d5c7d6479869717f50a86a9c85b3e918cc13a882a3a5b5b43cea8ade
-                - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-                  value: sha256:94a464f336b1d3e0aca6c9ac16d537d3642ac77802937999e2c5dd8f0cdaad4d
-                - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-                  value: sha256:7cf856c4ed3e61c256eef3d7312c8358a3f5859029e481fad909d18849db30bd
                 image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
