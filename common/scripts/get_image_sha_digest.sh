@@ -29,8 +29,6 @@ if [[ "$unamestr" == "Darwin" ]] ; then
     }
 fi
 
-FILE=deploy/operator.yaml
-
 # check the input parms
 REGISTRY=$1
 NAME=$2
@@ -67,7 +65,13 @@ echo "$NAME : $SHA"
 #     - name: CONTROLLER_IMAGE_TAG_OR_SHA
 #       value: "sha256:10a844ffaf7733176e927e6c4faa04c2bc4410cf4d4ef61b9ae5240aa62d1456"
 
-CSV_VERSION=$(cat version/version.go | grep "Version =" | awk '{ print $3}' | tr -d '"')
+CSV_VERSION=$(< version/version.go grep "Version =" | awk '{ print $3}' | tr -d '"')
+
+if [[ $CSV_VERSION == "" ]]
+then
+    echo "CSV Version not retrieved"
+    exit 1
+fi
 
 CSV_FILE=deploy/olm-catalog/ibm-cert-manager-operator/${CSV_VERSION}/ibm-cert-manager-operator.v${CSV_VERSION}.clusterserviceversion.yaml
 
@@ -80,6 +84,7 @@ LINE2="\                  value: $SHA"
 $SED -i "/env:/a $LINE1\n$LINE2" "$CSV_FILE"
 
 # Not updating the operands anymore in operator.yaml
+# FILE=deploy/operator.yaml
 # sed -i "/name: $TYPE/{N;d;}" $FILE
 
 # # insert the new SHA lines
