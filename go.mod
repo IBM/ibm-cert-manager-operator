@@ -1,6 +1,6 @@
 module github.com/ibm/ibm-cert-manager-operator
 
-go 1.13
+go 1.14
 
 require (
 	github.com/operator-framework/operator-sdk v0.13.0
