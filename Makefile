@@ -240,10 +240,8 @@ get-configmap-watcher-image-sha:
 
 install: ## Install all resources (CR/CRD's, RBAC and Operator)
 	@echo ....... Set environment variables ......
-	- export DEPLOY_DIR=deploy/crds
-	- export WATCH_NAMESPACE=${NAMESPACE}
-	# @echo ....... Creating namespace .......
-	# - kubectl create namespace ${NAMESPACE}
+	- export NAMESPACE=ibm_common_services
+	- export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
 	@echo ....... Applying CRDS and Operator .......
 	- for crd in $(shell ls deploy/crds/*crd.yaml); do kubectl apply -f $${crd}; done
 	@echo ....... Applying RBAC .......
@@ -259,6 +257,8 @@ install: ## Install all resources (CR/CRD's, RBAC and Operator)
 	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl -n ${NAMESPACE} apply -f $${cr}; done
 
 uninstall: ## Uninstall all that all performed in the $ make install
+	- export NAMESPACE=ibm_common_services
+	- export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
 	@echo ....... Uninstalling .......
 	@echo ....... Deleting CR .......
 	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl -n ${NAMESPACE} delete -f $${cr}; done
