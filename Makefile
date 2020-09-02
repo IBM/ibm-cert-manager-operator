@@ -235,6 +235,14 @@ get-configmap-watcher-image-sha:
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-configmap-watcher $(CONFIGMAP_WATCHER_OPERAND_TAG) CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
 
 ############################################################
+# Bump up CSV version
+############################################################
+
+.PHONY: bump-csv
+bump-csv:
+	@common/scripts/bump_up_csv.sh ${NEW_CSV_VERSION}
+
+############################################################
 # application section
 ############################################################
 
