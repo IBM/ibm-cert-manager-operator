@@ -89,6 +89,11 @@ metadata:
     createdAt: "2020-09-01T21:35:00Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
+  labels:
+    operatorframework.io/arch.amd64: supported
+    operatorframework.io/arch.ppc64le: supported
+    operatorframework.io/arch.s390x: supported
+    operatorframework.io/os.linux: supported
   name: ibm-cert-manager-operator.v3.7.1
   namespace: placeholder
 spec:
