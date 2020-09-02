@@ -235,12 +235,20 @@ get-configmap-watcher-image-sha:
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-configmap-watcher $(CONFIGMAP_WATCHER_OPERAND_TAG) CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
 
 ############################################################
+# Bump up CSV version
+############################################################
+
+.PHONY: bump-csv
+bump-csv:
+	@common/scripts/bump_up_csv.sh ${NEW_CSV_VERSION}
+
+############################################################
 # application section
 ############################################################
 
 install: ## Install all resources (CR/CRD's, RBAC and Operator)
 	@echo ....... Set environment variables ......
-	- export NAMESPACE=ibm_common_services
+	- export NAMESPACE=ibm-common-services
 	- export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
 	# @echo ....... Creating namespace .......
 	# - kubectl create namespace ${NAMESPACE}
@@ -259,7 +267,7 @@ install: ## Install all resources (CR/CRD's, RBAC and Operator)
 	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl -n ${NAMESPACE} apply -f $${cr}; done
 
 uninstall: ## Uninstall all that all performed in the $ make install
-	- export NAMESPACE=ibm_common_services
+	- export NAMESPACE=ibm-common-services
 	- export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
 	@echo ....... Uninstalling .......
 	@echo ....... Deleting CR .......
