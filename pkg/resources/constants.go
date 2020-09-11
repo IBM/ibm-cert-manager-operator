@@ -128,13 +128,13 @@ const ConfigmapWatcherName = "configmap-watcher"
 const ImageRegistry = "quay.io/opencloudio"
 
 // ControllerImageVersion is the default image version used for the cert-manager-controller
-const ControllerImageVersion = "0.10.6"
+const ControllerImageVersion = "0.10.7"
 
 // WebhookImageVersion is the default image version used for the cert-manager-webhook
-const WebhookImageVersion = "0.10.6"
+const WebhookImageVersion = "0.10.7"
 
 // ConfigmapWatcherVersion is the default image version used for the configmap-watcher
-const ConfigmapWatcherVersion = "3.3.3"
+const ConfigmapWatcherVersion = "3.3.4"
 
 // ControllerImageName is the image name of the cert-manager-controller
 const ControllerImageName = "icp-cert-manager-controller"
