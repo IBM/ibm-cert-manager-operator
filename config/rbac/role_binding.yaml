@@ -1,0 +1,16 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-cert-manager-operator
+  labels:
+    app.kubernetes.io/instance: ibm-cert-manager-operator
+    app.kubernetes.io/managed-by: ibm-cert-manager-operator
+    app.kubernetes.io/name: cert-manager
+subjects:
+- kind: ServiceAccount
+  name: ibm-cert-manager-operator
+  namespace: ibm-common-services
+roleRef:
+  kind: ClusterRole
+  name: ibm-cert-manager-operator
+  apiGroup: rbac.authorization.k8s.io
