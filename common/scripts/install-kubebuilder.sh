@@ -15,21 +15,24 @@
 # limitations under the License.
 #
 
-echo ">>> Installing Operator SDK"
-
-arch=$(uname -m)
+echo ">>> Installing kubebuilder"
+version=2.3.1 # latest stable version
+arch=$(uname -m | sed 's/x86_64/amd64/')
 local_os=$(uname)
 if [[ $local_os == "Linux" ]]; then
-    target_os="linux-gnu"
+    target_os="linux"
 elif [[ $local_os == "Darwin" ]]; then
-    target_os="apple-darwin"
+    target_os="darwin"
 else
     echo "This system's OS $local_os isn't recognized/supported"
 fi
 
-# Use version 0.19.2
-RELEASE_VERSION=v0.19.2
-# Download binary
-curl -LO https://github.com/operator-framework/operator-sdk/releases/download/${RELEASE_VERSION}/operator-sdk-${RELEASE_VERSION}-${arch}-${target_os}
-# Install binary
-chmod +x operator-sdk-${RELEASE_VERSION}-${arch}-${target_os} && mkdir -p /usr/local/bin/ && cp operator-sdk-${RELEASE_VERSION}-${arch}-${target_os} /usr/local/bin/operator-sdk && rm operator-sdk-${RELEASE_VERSION}-${arch}-${target_os}
+# download the release
+curl -L "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${version}/kubebuilder_${version}_${target_os}_${arch}.tar.gz" -o /tmp/kubebuilder_${version}_${target_os}_${arch}.tar.gz
+
+# extract the archive
+tar -zxvf /tmp/kubebuilder_${version}_${target_os}_${arch}.tar.gz -C /tmp
+mv /tmp/kubebuilder_${version}_${target_os}_${arch} /tmp/kubebuilder && sudo mv /tmp/kubebuilder /usr/local/
+
+# update your PATH to include /usr/local/kubebuilder/bin
+export PATH=$PATH:/usr/local/kubebuilder/bin

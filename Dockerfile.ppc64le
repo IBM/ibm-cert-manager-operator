@@ -1,3 +1,9 @@
+FROM alpine as qemu
+
+RUN wget -O /qemu-ppc64le-static https://github.com/multiarch/qemu-user-static/releases/latest/download/qemu-ppc64le-static
+
+RUN chmod +x /qemu-ppc64le-static
+
 # Build the manager binary
 FROM golang:1.14.7 as builder
 ARG GOARCH
@@ -38,7 +44,7 @@ LABEL org.label-schema.vendor="IBM" \
 
 WORKDIR /
 COPY --from=builder /workspace/manager .
-
+COPY --from=qemu /qemu-ppc64le-static /usr/bin/
 
 # Add licenses folder
 RUN mkdir /licenses

@@ -1,3 +1,9 @@
+FROM alpine as qemu
+
+RUN wget -O /qemu-s390x-static https://github.com/multiarch/qemu-user-static/releases/latest/download/qemu-s390x-static
+
+RUN chmod +x /qemu-s390x-static
+
 # Build the manager binary
 FROM golang:1.14.7 as builder
 ARG GOARCH
@@ -38,7 +44,7 @@ LABEL org.label-schema.vendor="IBM" \
 
 WORKDIR /
 COPY --from=builder /workspace/manager .
-
+COPY --from=qemu /qemu-s390x-static /usr/bin/
 
 # Add licenses folder
 RUN mkdir /licenses

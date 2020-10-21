@@ -36,6 +36,55 @@ get-cluster-credentials: activate-serviceaccount
 config-docker: get-cluster-credentials
 	@common/scripts/config_docker.sh
 
+# find or download operator-sdk
+# download operator-sdk if necessary
+operator-sdk:
+ifeq (, $(OPERATOR_SDK))
+	@./common/scripts/install-operator-sdk.sh
+OPERATOR_SDK=/usr/local/bin/operator-sdk
+endif
+
+# find or download kubebuilder
+# download kubebuilder if necessary
+kube-builder:
+ifeq (, $(wildcard /usr/local/kubebuilder))
+	@./common/scripts/install-kubebuilder.sh
+endif
+
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
+
+# find or download kustomize
+# download kustomize if necessary
+kustomize:
+ifeq (, $(shell which kustomize))
+	@{ \
+	set -e ;\
+	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$KUSTOMIZE_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+	rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
+	}
+KUSTOMIZE=$(GOBIN)/kustomize
+else
+KUSTOMIZE=$(shell which kustomize)
+endif
+
 ############################################################
 # lint section
 ############################################################
@@ -94,4 +143,19 @@ format-python:
 format-protos:
 	@$(FINDFILES) -name '*.proto' -print0 | $(XARGS) -L 1 prototool format -w
 
-.PHONY: lint-dockerfiles lint-scripts lint-yaml lint-copyright-banner lint-go lint-python lint-helm lint-markdown lint-sass lint-typescript lint-protos lint-all format-go format-python format-protos config-docker
+# Run go vet for this project. More info: https://golang.org/cmd/vet/
+code-vet:
+	@echo go vet
+	go vet $$(go list ./... )
+
+# Run go fmt for this project
+code-fmt:
+	@echo go fmt
+	go fmt $$(go list ./... )
+
+# Run go mod tidy to update dependencies
+code-tidy:
+	@echo go mod tidy
+	go mod tidy -v
+
+.PHONY: code-vet code-fmt code-tidy operator-sdk kube-builder controller-gen kustomize lint-dockerfiles lint-scripts lint-yaml lint-copyright-banner lint-go lint-python lint-helm lint-markdown lint-sass lint-typescript lint-protos lint-all format-go format-python format-protos config-docker
