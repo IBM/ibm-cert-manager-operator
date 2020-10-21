@@ -32,5 +32,5 @@ func removeString(source []string, str string) (result []string) {
 		}
 		result = append(result, sourceString)
 	}
-	return
+	return result
 }
