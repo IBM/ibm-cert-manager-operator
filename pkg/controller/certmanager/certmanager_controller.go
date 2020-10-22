@@ -18,7 +18,11 @@ package certmanager
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+
+	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
@@ -37,6 +41,7 @@ import (
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -216,17 +221,6 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, nil
 	}
 
-	//Check RHACM
-	rhacmErr := checkRhacm(r.client)
-	if rhacmErr == nil {
-		// multiclusterhub found, this means RHACM exists
-		// Return and don't requeue
-		log.Info("RHACM exists")
-		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
-		return reconcile.Result{}, nil
-	}
-	log.Info("RHACM does not exist: " + rhacmErr.Error())
-
 	finalizerName := "certmanager.operators.ibm.com"
 	// Determine if the certmanager crd is going to be deleted
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
@@ -253,6 +247,30 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 
 	log.Info("The namespace", "ns", r.ns)
 	r.updateEvent(instance, "Instance found", corev1.EventTypeNormal, "Initializing")
+
+	// Check if the issuer already exists; if yes, do nothing
+	if err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.CSCAIssuerName, Namespace: res.DeployNamespace}, res.CSCAIssuer); err == nil {
+		log.Info(res.CSCAIssuerName + " exists")
+	} else {
+		// Create the cs-ca-issuer (This is before the RHACM check as we need this issuer to be created even in RHACM systems for other Common Services)
+		err = r.createIssuer(instance, res.CSCAIssuer)
+		if err != nil {
+			log.Error(err, "Error creating CS CA issuer")
+			return reconcile.Result{}, err
+		}
+		log.Info(res.CSCAIssuerName + " successfully created")
+	}
+
+	//Check RHACM
+	rhacmErr := checkRhacm(r.client)
+	if rhacmErr == nil {
+		// multiclusterhub found, this means RHACM exists
+		// Return and don't requeue
+		log.Info("RHACM exists")
+		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
+		return reconcile.Result{}, nil
+	}
+	log.Info("RHACM does not exist: " + rhacmErr.Error())
 
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {
@@ -340,4 +358,21 @@ func (r *ReconcileCertManager) updateStatus(instance *operatorv1alpha1.CertManag
 			log.Error(err, "Error updating instance status")
 		}
 	}
+}
+
+// createIssuer creates CS CA Issuer
+func (r *ReconcileCertManager) createIssuer(instance *operatorv1alpha1.CertManager, issuer *certmgr.Issuer) error {
+
+	// Set CertManager instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, issuer, r.scheme); err != nil {
+		return err
+	}
+
+	// Create the issuer
+	err := r.client.Create(context.TODO(), issuer)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("could not create resource: %v", err)
+	}
+
+	return nil
 }

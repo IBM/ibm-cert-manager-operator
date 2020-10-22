@@ -3,14 +3,15 @@ module github.com/ibm/ibm-cert-manager-operator
 go 1.14
 
 require (
+	github.com/jetstack/cert-manager v0.10.0
 	github.com/operator-framework/operator-sdk v0.13.0
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
-	k8s.io/api v0.0.0
-	k8s.io/apiextensions-apiserver v0.0.0
-	k8s.io/apimachinery v0.0.0
+	k8s.io/api v0.17.0
+	k8s.io/apiextensions-apiserver v0.17.0
+	k8s.io/apimachinery v0.17.0
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/kube-aggregator v0.17.2
 	sigs.k8s.io/controller-runtime v0.4.0
@@ -18,6 +19,7 @@ require (
 
 // Pinned to kubernetes-1.16.2
 replace (
+	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.4-0.20200207053602-7439e774c9e9+incompatible
 	k8s.io/api => k8s.io/api v0.0.0-20191016110408-35e52d86657a
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20191016113550-5357c4baaf65
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20191004115801-a2eda9f80ab8

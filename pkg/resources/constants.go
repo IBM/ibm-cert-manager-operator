@@ -259,3 +259,13 @@ var NamespaceDef = &v1.Namespace{
 		Finalizers: []v1.FinalizerName{"kubernetes"},
 	},
 }
+
+// CSCAIssuerLabelMap is the labels for the CS CA Issuer in map format
+var CSCAIssuerLabelMap = map[string]string{
+	"app.kubernetes.io/name":       "cert-manager",
+	"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+	"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
+}
+
+const CSCAIssuerName = "cs-ca-issuer"
+const CSCASecretName = "cs-ca-certificate-secret"
