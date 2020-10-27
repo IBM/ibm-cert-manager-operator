@@ -1,5 +1,5 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   creationTimestamp: null
   name: ibm-cert-manager-operator
@@ -9,39 +9,9 @@ metadata:
     app.kubernetes.io/name: cert-manager
 rules:
 - apiGroups:
-  - "operator.ibm.com"
-  resources:
-  - certmanagers
-  verbs:
-  - '*'
-- apiGroups:
   - ""
   resources:
-  - pods
-  - services
-  - services/finalizers
-  - endpoints
-  - persistentvolumeclaims
-  - events
   - configmaps
-  - secrets
-  - serviceaccounts
-  - namespaces
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  - daemonsets
-  - replicasets
-  - statefulsets
   verbs:
   - create
   - delete
@@ -66,16 +36,61 @@ rules:
   verbs:
   - update
 - apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - patch
+  - update
+  - delete
+# create service account for cert-manager operands
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - patch
+  - update
+  - delete
+# need access to create replicaset for cert-manager-operator
+- apiGroups:
   - apps
   resources:
   - replicasets
-  - deployments
   verbs:
+  - create
   - get
+  - list
+  - watch
+  - patch
+  - update
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: ibm-cert-manager-operator
+  labels:
+    app.kubernetes.io/instance: ibm-cert-manager-operator
+    app.kubernetes.io/managed-by: ibm-cert-manager-operator
+    app.kubernetes.io/name: cert-manager
+rules:
+# certmanagers resource is Namespace-scoped. Check certmanagers CRD scope field for reference
 - apiGroups:
   - operator.ibm.com
   resources:
-  - '*'
+  - certmanagers
+  - certmanagers/status
+  - certmanagers/finalizers
   verbs:
   - create
   - delete
@@ -89,23 +104,45 @@ rules:
   resources:
   - customresourcedefinitions
   verbs:
-  - '*'
+  - list
+  - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - delete
+  - get
+  - create
+  resourceNames:
+  - certificates.certmanager.k8s.io
+  - issuers.certmanager.k8s.io
+  - clusterissuers.certmanager.k8s.io
+  - orders.certmanager.k8s.io
+  - challenges.certmanager.k8s.io
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - clusterroles
   - clusterrolebindings
-  - roles
   - rolebindings
   verbs:
   - create
   - get
   - list
   - watch
-  - patch
-  - update
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  - rolebindings
+  verbs:
   - delete
-- apiGroups: 
+  resourceNames:
+  - cert-manager-clusterPermission
+  - cert-manager-permission
+- apiGroups:
   - apiregistration.k8s.io
   resources:
   - apiservices
@@ -114,10 +151,16 @@ rules:
   - get
   - list
   - watch
-  - patch
   - update
+- apiGroups:
+  - apiregistration.k8s.io
+  resources:
+  - apiservices
+  verbs:
   - delete
-- apiGroups: 
+  resourceNames:
+  - v1beta1.webhook.certmanager.k8s.io
+- apiGroups:
   - admissionregistration.k8s.io
   resources:
   - mutatingwebhookconfigurations
@@ -129,8 +172,15 @@ rules:
   - watch
   - patch
   - update
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
   - delete
-# In order for cert-manager clusterroles to get these permissions, the operator must have these permissions
+  resourceNames:
+  - cert-manager-webhook
 - apiGroups:
   - certmanager.k8s.io
   resources:
@@ -175,12 +225,12 @@ rules:
   verbs:
   - create
   - patch
-# HTTP01 rules
 - apiGroups:
   - ""
   resources:
   - pods
   - services
+# - serviceaccounts?? present in chun's csv but not here!
   verbs:
   - get
   - list
@@ -204,23 +254,19 @@ rules:
   - deployments
   - statefulsets
   - daemonsets
+  - replicasets
   verbs:
   - '*'
-- apiGroups:
-  - route.openshift.io
-  resources:
-  - routes/custom-host
-  verbs:
-  - create
 - apiGroups:
   - ""
   resources:
   - configmaps
   verbs:
   - get
-  - create
-  - update
-  - patch
+  - watch
+  - list
+  resourceNames:
+  - extension-apiserver-authentication
 - apiGroups:
   - admission.certmanager.k8s.io
   resources:
@@ -232,32 +278,22 @@ rules:
   - '*'
 - apiGroups:
   - security.openshift.io
-  resources:
-  - securitycontextconstraints
   resourceNames:
   - restricted
   - hostnetwork
+  resources:
+  - securitycontextconstraints
   verbs:
   - use
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  - validatingwebhookconfigurations
-  verbs:
-  - '*'
-- apiGroups:
-  - apiregistration.k8s.io
-  resources:
-  - apiservices
-  verbs:
-  - '*'
 - apiGroups:
   - authorization.k8s.io
   resources:
   - subjectaccessreviews
   verbs:
-  - '*'
+  - get
+  - create
+  - list
+  - watch
 - apiGroups:
   - operator.open-cluster-management.io
   resources:

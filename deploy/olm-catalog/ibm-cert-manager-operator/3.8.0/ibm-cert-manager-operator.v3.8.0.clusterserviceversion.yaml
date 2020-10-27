@@ -95,7 +95,7 @@ metadata:
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
   name: ibm-cert-manager-operator.v3.8.0
-  namespace: placeholder
+  namespace: ibm-common-services
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -187,42 +187,12 @@ spec:
     mediatype: image/png
   install:
     spec:
-      clusterPermissions:
+      permissions:
       - rules:
-        - apiGroups:
-          - operator.ibm.com
-          resources:
-          - certmanagers
-          verbs:
-          - '*'
         - apiGroups:
           - ""
           resources:
-          - pods
-          - services
-          - services/finalizers
-          - endpoints
-          - persistentvolumeclaims
-          - events
           - configmaps
-          - secrets
-          - serviceaccounts
-          - namespaces
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - apps
-          resources:
-          - deployments
-          - daemonsets
-          - replicasets
-          - statefulsets
           verbs:
           - create
           - delete
@@ -247,16 +217,38 @@ spec:
           verbs:
           - update
         - apiGroups:
-          - apps
+          - rbac.authorization.k8s.io
           resources:
-          - replicasets
-          - deployments
+          - roles
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        # create service account for cert-manager operands
+        - apiGroups:
+          - ""
+          resources:
+          - serviceaccounts
           verbs:
           - get
+          - list
+          - watch
+          - create
+          - delete
+        serviceAccountName: ibm-cert-manager-operator
+      clusterPermissions:
+      - rules:
+        # certmanagers resource is Namespace-scoped. Check certmanagers CRD scope field for reference
         - apiGroups:
           - operator.ibm.com
           resources:
-          - '*'
+          - certmanagers
+          - certmanagers/status
+          - certmanagers/finalizers
           verbs:
           - create
           - delete
@@ -270,22 +262,44 @@ spec:
           resources:
           - customresourcedefinitions
           verbs:
-          - '*'
+          - list
+          - watch
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - customresourcedefinitions
+          verbs:
+          - delete
+          - get
+          - create
+          resourceNames:
+          - certificates.certmanager.k8s.io
+          - issuers.certmanager.k8s.io
+          - clusterissuers.certmanager.k8s.io
+          - orders.certmanager.k8s.io
+          - challenges.certmanager.k8s.io
         - apiGroups:
           - rbac.authorization.k8s.io
           resources:
           - clusterroles
           - clusterrolebindings
-          - roles
           - rolebindings
           verbs:
           - create
           - get
           - list
           - watch
-          - patch
-          - update
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - clusterroles
+          - clusterrolebindings
+          - rolebindings
+          verbs:
           - delete
+          resourceNames:
+          - cert-manager-clusterPermission
+          - cert-manager-permission
         - apiGroups:
           - apiregistration.k8s.io
           resources:
@@ -295,9 +309,15 @@ spec:
           - get
           - list
           - watch
-          - patch
           - update
+        - apiGroups:
+          - apiregistration.k8s.io
+          resources:
+          - apiservices
+          verbs:
           - delete
+          resourceNames:
+          - v1beta1.webhook.certmanager.k8s.io
         - apiGroups:
           - admissionregistration.k8s.io
           resources:
@@ -310,7 +330,15 @@ spec:
           - watch
           - patch
           - update
+        - apiGroups:
+          - admissionregistration.k8s.io
+          resources:
+          - mutatingwebhookconfigurations
+          - validatingwebhookconfigurations
+          verbs:
           - delete
+          resourceNames:
+          - cert-manager-webhook
         - apiGroups:
           - certmanager.k8s.io
           resources:
@@ -360,6 +388,7 @@ spec:
           resources:
           - pods
           - services
+        # - serviceaccounts?? present in chun's csv but not here!
           verbs:
           - get
           - list
@@ -386,20 +415,15 @@ spec:
           verbs:
           - '*'
         - apiGroups:
-          - route.openshift.io
-          resources:
-          - routes/custom-host
-          verbs:
-          - create
-        - apiGroups:
           - ""
           resources:
           - configmaps
           verbs:
           - get
-          - create
-          - update
-          - patch
+          - watch
+          - list
+          resourceNames:
+          - extension-apiserver-authentication
         - apiGroups:
           - admission.certmanager.k8s.io
           resources:
@@ -419,24 +443,14 @@ spec:
           verbs:
           - use
         - apiGroups:
-          - admissionregistration.k8s.io
-          resources:
-          - mutatingwebhookconfigurations
-          - validatingwebhookconfigurations
-          verbs:
-          - '*'
-        - apiGroups:
-          - apiregistration.k8s.io
-          resources:
-          - apiservices
-          verbs:
-          - '*'
-        - apiGroups:
           - authorization.k8s.io
           resources:
           - subjectaccessreviews
           verbs:
-          - '*'
+          - get
+          - create
+          - list
+          - watch
         - apiGroups:
           - operator.open-cluster-management.io
           resources:
@@ -506,7 +520,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                image: hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/snair/cert-manager-operator:1
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources:
