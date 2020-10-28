@@ -281,7 +281,7 @@ const RhacmNamespace = "open-cluster-management"
 const RhacmCRName = "multiclusterhub"
 
 //RhacmSecretShareCRName is the Secret Share CR Name that copies the cs-ca-secret
-var RhacmSecretShareCRName = "rhacm-cs-ca-secret-share"
+var RhacmSecretShareCRName = "rhacm-cs-ca-certificate-secret-share"
 
 //RhacmGVK identifies the RHACM CRD
 var RhacmGVK = schema.GroupVersionKind{
