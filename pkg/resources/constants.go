@@ -280,7 +280,7 @@ const RhacmNamespace = "open-cluster-management"
 //RhacmCRName is the RHACM CR name
 const RhacmCRName = "multiclusterhub"
 
-//RhacmSecretShareCRName is the Secret Share CR Name that copies the cs-ca-secret
+//RhacmSecretShareCRName is the Secret Share CR Name that copies the cs-ca-certificate-secret
 var RhacmSecretShareCRName = "rhacm-cs-ca-certificate-secret-share"
 
 //RhacmGVK identifies the RHACM CRD
