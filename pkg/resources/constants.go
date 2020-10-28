@@ -289,6 +289,3 @@ var RhacmGVK = schema.GroupVersionKind{
 	Kind:    "MultiClusterHub",
 	Version: "v1",
 }
-
-//RHACM_EXISTS is the flag that indicates if RHACM is installed. By default, it is set to false
-var RHACM_EXISTS = false

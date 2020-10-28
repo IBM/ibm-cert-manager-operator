@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"reflect"
 
+	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -275,15 +276,18 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 			log.Error(err, "Error creating "+res.RhacmSecretShareCRName)
 			return reconcile.Result{}, err
 		}
-		res.RHACM_EXISTS = true
+
 		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
 		return reconcile.Result{}, nil
 	}
 
 	// If operator is invoked again and the multiclusterhub CR doesn't exist anymore, it will still not deploy CS cert-manager
 	// This is as per request from CP4MCM to cover the RHACM upgrade scenario
-	if res.RHACM_EXISTS {
-		log.Info("It looks like RHACM was installed before and now it's removed. Not deploying CS cert-manager as it could be RHACM is upgrading")
+	// Here we are checking if the secretshare CR that we created to copy the secret exists,
+	// then it means that RHACM existed at some time
+	secretShareCRExistsErr := r.client.Get(context.Background(), types.NamespacedName{Name: res.RhacmSecretShareCRName, Namespace: res.DeployNamespace}, &secretshare.SecretShare{})
+	if secretShareCRExistsErr == nil {
+		log.Info("It looks like RHACM was installed before and now it's removed. Not deploying CS cert-manager, as RHACM could be upgrading")
 		return reconcile.Result{}, nil
 	}
 
