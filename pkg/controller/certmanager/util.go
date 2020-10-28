@@ -20,10 +20,11 @@ import (
 	"context"
 	"fmt"
 
-	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 )
 
 func containsString(source []string, str string) bool {

@@ -50,8 +50,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
-	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+
+	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 )
 
 // Change below variables to serve metrics on different host or port.
