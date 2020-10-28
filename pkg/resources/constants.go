@@ -20,6 +20,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // TrueVar the variable representing the boolean value true
@@ -267,5 +268,27 @@ var CSCAIssuerLabelMap = map[string]string{
 	"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
 }
 
+//CSCAIssuerName is the name of the CS CA Issuer
 const CSCAIssuerName = "cs-ca-issuer"
+
+//CSCASecretName is the name of the CA certificate secret
 const CSCASecretName = "cs-ca-certificate-secret"
+
+//RhacmNamespace is the namespace where RHACM is installed
+const RhacmNamespace = "open-cluster-management"
+
+//RhacmCRName is the RHACM CR name
+const RhacmCRName = "multiclusterhub"
+
+//RhacmSecretShareCRName is the Secret Share CR Name that copies the cs-ca-secret
+var RhacmSecretShareCRName = "rhacm-cs-ca-secret-share"
+
+//RhacmGVK identifies the RHACM CRD
+var RhacmGVK = schema.GroupVersionKind{
+	Group:   "operator.open-cluster-management.io",
+	Kind:    "MultiClusterHub",
+	Version: "v1",
+}
+
+//RHACM_EXISTS is the flag that indicates if RHACM is installed. By default, it is set to false
+var RHACM_EXISTS = false

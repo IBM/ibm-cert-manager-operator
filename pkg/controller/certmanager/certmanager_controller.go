@@ -266,11 +266,28 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	if rhacmErr == nil {
 		// multiclusterhub found, this means RHACM exists
 		// Return and don't requeue
-		log.Info("RHACM exists")
+		rhacmClusterIssuerNamespace := res.RhacmNamespace + "-issuer"
+
+		log.Info("RHACM exists. Copying " + res.CSCASecretName + " to namespace " + rhacmClusterIssuerNamespace)
+
+		err := copySecret(r.client, res.CSCASecretName, res.DeployNamespace, rhacmClusterIssuerNamespace, res.RhacmSecretShareCRName)
+		if err != nil {
+			log.Error(err, "Error creating "+res.RhacmSecretShareCRName)
+			return reconcile.Result{}, err
+		}
+		res.RHACM_EXISTS = true
 		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
 		return reconcile.Result{}, nil
 	}
-	log.Info("RHACM does not exist: " + rhacmErr.Error())
+
+	// If operator is invoked again and the multiclusterhub CR doesn't exist anymore, it will still not deploy CS cert-manager
+	// This is as per request from CP4MCM to cover the RHACM upgrade scenario
+	if res.RHACM_EXISTS {
+		log.Info("It looks like RHACM was installed before and now it's removed. Not deploying CS cert-manager as it could be RHACM is upgrading")
+		return reconcile.Result{}, nil
+	}
+
+	log.Info("RHACM does not exist")
 
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {
