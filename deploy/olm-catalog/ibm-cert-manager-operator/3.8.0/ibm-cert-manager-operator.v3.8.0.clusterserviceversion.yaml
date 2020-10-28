@@ -548,10 +548,8 @@ spec:
   - IBM
   - Cloud
   maintainers:
-  - email: swati.nair@ibm.com
-    name: Swati Shridhar Nair
-  - email: tthorpe@us.ibm.com
-    name: Robert T. Thorpe
+  - email: https://www.ibm.com/mysupport/
+    name: IBM Support
   maturity: alpha
   provider:
     name: IBM
