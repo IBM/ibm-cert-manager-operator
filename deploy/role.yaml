@@ -266,3 +266,12 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - ibmcpcs.ibm.com
+  resources:
+  - secretshares
+  verbs:
+  - create
+  - get
+  - list
+  - watch

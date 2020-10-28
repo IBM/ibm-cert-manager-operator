@@ -445,6 +445,15 @@ spec:
           - get
           - list
           - watch
+        - apiGroups:
+          - ibmcpcs.ibm.com
+          resources:
+          - secretshares
+          verbs:
+          - create
+          - get
+          - list
+          - watch
         serviceAccountName: ibm-cert-manager-operator
       deployments:
       - name: ibm-cert-manager-operator
