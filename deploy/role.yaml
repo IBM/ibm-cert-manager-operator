@@ -9,18 +9,6 @@ metadata:
     app.kubernetes.io/name: cert-manager
 rules:
 - apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - monitoring.coreos.com
   resources:
   - servicemonitors
@@ -55,8 +43,6 @@ rules:
   verbs:
   - create
   - get
-  - list
-  - watch
   - patch
   - update
   - delete
@@ -104,22 +90,7 @@ rules:
   resources:
   - customresourcedefinitions
   verbs:
-  - list
-  - watch
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - delete
-  - get
-  - create
-  resourceNames:
-  - certificates.certmanager.k8s.io
-  - issuers.certmanager.k8s.io
-  - clusterissuers.certmanager.k8s.io
-  - orders.certmanager.k8s.io
-  - challenges.certmanager.k8s.io
+  - '*' 
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -147,40 +118,14 @@ rules:
   resources:
   - apiservices
   verbs:
-  - create
-  - get
-  - list
-  - watch
-  - update
-- apiGroups:
-  - apiregistration.k8s.io
-  resources:
-  - apiservices
-  verbs:
-  - delete
-  resourceNames:
-  - v1beta1.webhook.certmanager.k8s.io
+  - '*' 
 - apiGroups:
   - admissionregistration.k8s.io
   resources:
   - mutatingwebhookconfigurations
   - validatingwebhookconfigurations
   verbs:
-  - create
-  - get
-  - list
-  - watch
-  - patch
-  - update
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  - validatingwebhookconfigurations
-  verbs:
-  - delete
-  resourceNames:
-  - cert-manager-webhook
+  - '*' 
 - apiGroups:
   - certmanager.k8s.io
   resources:
@@ -228,9 +173,15 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - serviceaccounts
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - pods
   - services
-# - serviceaccounts?? present in chun's csv but not here!
   verbs:
   - get
   - list
@@ -254,7 +205,6 @@ rules:
   - deployments
   - statefulsets
   - daemonsets
-  - replicasets
   verbs:
   - '*'
 - apiGroups:
@@ -262,11 +212,13 @@ rules:
   resources:
   - configmaps
   verbs:
+  - create
+  - delete
   - get
-  - watch
   - list
-  resourceNames:
-  - extension-apiserver-authentication
+  - update
+  - watch
+  - patch
 - apiGroups:
   - admission.certmanager.k8s.io
   resources:
@@ -290,10 +242,7 @@ rules:
   resources:
   - subjectaccessreviews
   verbs:
-  - get
-  - create
-  - list
-  - watch
+  - '*' 
 - apiGroups:
   - operator.open-cluster-management.io
   resources:
