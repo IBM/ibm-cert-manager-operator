@@ -240,6 +240,16 @@ spec:
           - patch
           - update
           - delete
+        # required to create secretshare CR to copy cs ca cert secret for RHACM
+        - apiGroups:
+          - ibmcpcs.ibm.com
+          resources:
+          - secretshares
+          verbs:
+          - create
+          - get
+          - list
+          - watch
         serviceAccountName: ibm-cert-manager-operator
       clusterPermissions:
       - rules:
@@ -421,15 +431,6 @@ spec:
           resources:
           - multiclusterhubs
           verbs:
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - ibmcpcs.ibm.com
-          resources:
-          - secretshares
-          verbs:
-          - create
           - get
           - list
           - watch

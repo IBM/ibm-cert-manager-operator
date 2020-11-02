@@ -59,6 +59,16 @@ rules:
   - patch
   - update
   - delete
+# required to create secretshare CR to copy cs ca cert secret for RHACM
+- apiGroups:
+  - ibmcpcs.ibm.com
+  resources:
+  - secretshares
+  verbs:
+  - create
+  - get
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -248,15 +258,6 @@ rules:
   resources:
   - multiclusterhubs
   verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ibmcpcs.ibm.com
-  resources:
-  - secretshares
-  verbs:
-  - create
   - get
   - list
   - watch
