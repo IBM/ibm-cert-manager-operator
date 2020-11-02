@@ -95,7 +95,7 @@ metadata:
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
   name: ibm-cert-manager-operator.v3.8.0
-  namespace: ibm-common-services
+  namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -485,7 +485,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/snair/cert-manager-operator:1
+                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources:
