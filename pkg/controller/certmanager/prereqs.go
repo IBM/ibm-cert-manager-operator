@@ -30,7 +30,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -210,15 +209,11 @@ func removeRoles(client client.Client) error {
 func checkRhacm(client client.Client) error {
 
 	multiClusterHubType := &unstructured.Unstructured{}
-	multiClusterHubType.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "operator.open-cluster-management.io",
-		Kind:    "MultiClusterHub",
-		Version: "v1",
-	})
+	multiClusterHubType.SetGroupVersionKind(res.RhacmGVK)
 
 	rhacmErr := client.Get(context.Background(), types.NamespacedName{
-		Namespace: "open-cluster-management",
-		Name:      "multiclusterhub",
+		Namespace: res.RhacmNamespace,
+		Name:      res.RhacmCRName,
 	}, multiClusterHubType)
 
 	return rhacmErr

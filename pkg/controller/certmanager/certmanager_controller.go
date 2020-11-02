@@ -24,6 +24,8 @@ import (
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
+	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
+
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 
@@ -266,11 +268,31 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	if rhacmErr == nil {
 		// multiclusterhub found, this means RHACM exists
 		// Return and don't requeue
-		log.Info("RHACM exists")
+		rhacmClusterIssuerNamespace := res.RhacmNamespace + "-issuer"
+
+		log.Info("RHACM exists. Copying " + res.CSCASecretName + " to namespace " + rhacmClusterIssuerNamespace)
+
+		err := copySecret(r.client, res.CSCASecretName, res.DeployNamespace, rhacmClusterIssuerNamespace, res.RhacmSecretShareCRName)
+		if err != nil {
+			log.Error(err, "Error creating "+res.RhacmSecretShareCRName)
+			return reconcile.Result{}, err
+		}
+
 		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
 		return reconcile.Result{}, nil
 	}
-	log.Info("RHACM does not exist: " + rhacmErr.Error())
+
+	// If operator is invoked again and the multiclusterhub CR doesn't exist anymore, it will still not deploy CS cert-manager
+	// This is as per request from CP4MCM to cover the RHACM upgrade scenario
+	// Here we are checking if the secretshare CR that we created to copy the secret exists,
+	// then it means that RHACM existed at some time
+	secretShareCRExistsErr := r.client.Get(context.Background(), types.NamespacedName{Name: res.RhacmSecretShareCRName, Namespace: res.DeployNamespace}, &secretshare.SecretShare{})
+	if secretShareCRExistsErr == nil {
+		log.Info("It looks like RHACM was installed before and now it's removed. Not deploying CS cert-manager, as RHACM could be upgrading")
+		return reconcile.Result{}, nil
+	}
+
+	log.Info("RHACM does not exist")
 
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {

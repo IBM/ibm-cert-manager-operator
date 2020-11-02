@@ -3,18 +3,17 @@ module github.com/ibm/ibm-cert-manager-operator
 go 1.14
 
 require (
+	github.com/IBM/ibm-secretshare-operator v1.2.2
 	github.com/jetstack/cert-manager v0.10.0
 	github.com/operator-framework/operator-sdk v0.13.0
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
-	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
-	k8s.io/api v0.17.0
-	k8s.io/apiextensions-apiserver v0.17.0
-	k8s.io/apimachinery v0.17.0
+	k8s.io/api v0.18.2
+	k8s.io/apiextensions-apiserver v0.18.2
+	k8s.io/apimachinery v0.18.2
 	k8s.io/client-go v12.0.0+incompatible
-	k8s.io/kube-aggregator v0.17.2
-	sigs.k8s.io/controller-runtime v0.4.0
+	k8s.io/kube-aggregator v0.17.3
+	sigs.k8s.io/controller-runtime v0.6.0
 )
 
 // Pinned to kubernetes-1.16.2
@@ -41,4 +40,5 @@ replace (
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.0.0-20191016115753-cf0698c3a16b
 	k8s.io/metrics => k8s.io/metrics v0.0.0-20191016113814-3b1a734dba6e
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.0.0-20191016112829-06bb3c9d77c9
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.4.0
 )
