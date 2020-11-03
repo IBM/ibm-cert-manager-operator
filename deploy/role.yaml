@@ -67,8 +67,6 @@ rules:
   verbs:
   - create
   - get
-  - list
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -249,5 +247,13 @@ rules:
   - multiclusterhubs
   verbs:
   - get
+  - list
+  - watch
+# required to list/watch at cluster level as operator cache needs it due to cluster-scoped operator
+- apiGroups:
+  - ibmcpcs.ibm.com
+  resources:
+  - secretshares
+  verbs:
   - list
   - watch
