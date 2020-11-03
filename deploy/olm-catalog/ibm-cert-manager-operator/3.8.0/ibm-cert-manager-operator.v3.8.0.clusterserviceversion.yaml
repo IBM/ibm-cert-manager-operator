@@ -187,50 +187,8 @@ spec:
     mediatype: image/png
   install:
     spec:
-      clusterPermissions:
+      permissions:
       - rules:
-        - apiGroups:
-          - operator.ibm.com
-          resources:
-          - certmanagers
-          verbs:
-          - '*'
-        - apiGroups:
-          - ""
-          resources:
-          - pods
-          - services
-          - services/finalizers
-          - endpoints
-          - persistentvolumeclaims
-          - events
-          - configmaps
-          - secrets
-          - serviceaccounts
-          - namespaces
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - apps
-          resources:
-          - deployments
-          - daemonsets
-          - replicasets
-          - statefulsets
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
         - apiGroups:
           - monitoring.coreos.com
           resources:
@@ -247,16 +205,61 @@ spec:
           verbs:
           - update
         - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - roles
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        # create service account for cert-manager operands
+        - apiGroups:
+          - ""
+          resources:
+          - serviceaccounts
+          verbs:
+          - get
+          - update
+          - patch
+          - create
+          - delete
+        # need access to create replicaset for cert-manager-operator
+        - apiGroups:
           - apps
           resources:
           - replicasets
-          - deployments
           verbs:
+          - create
           - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        # required to create secretshare CR to copy cs ca cert secret for RHACM
+        - apiGroups:
+          - ibmcpcs.ibm.com
+          resources:
+          - secretshares
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+        serviceAccountName: ibm-cert-manager-operator
+      clusterPermissions:
+      - rules:
+        # certmanagers resource is Namespace-scoped. Check certmanagers CRD scope field for reference
         - apiGroups:
           - operator.ibm.com
           resources:
-          - '*'
+          - certmanagers
+          - certmanagers/status
+          - certmanagers/finalizers
           verbs:
           - create
           - delete
@@ -276,41 +279,26 @@ spec:
           resources:
           - clusterroles
           - clusterrolebindings
-          - roles
           - rolebindings
           verbs:
           - create
           - get
           - list
           - watch
-          - patch
-          - update
           - delete
         - apiGroups:
           - apiregistration.k8s.io
           resources:
           - apiservices
           verbs:
-          - create
-          - get
-          - list
-          - watch
-          - patch
-          - update
-          - delete
+          - '*'
         - apiGroups:
           - admissionregistration.k8s.io
           resources:
           - mutatingwebhookconfigurations
           - validatingwebhookconfigurations
           verbs:
-          - create
-          - get
-          - list
-          - watch
-          - patch
-          - update
-          - delete
+          - '*'
         - apiGroups:
           - certmanager.k8s.io
           resources:
@@ -358,6 +346,13 @@ spec:
         - apiGroups:
           - ""
           resources:
+          - serviceaccounts
+          verbs:
+          - list
+          - watch
+        - apiGroups:
+          - ""
+          resources:
           - pods
           - services
           verbs:
@@ -386,19 +381,16 @@ spec:
           verbs:
           - '*'
         - apiGroups:
-          - route.openshift.io
-          resources:
-          - routes/custom-host
-          verbs:
-          - create
-        - apiGroups:
           - ""
           resources:
           - configmaps
           verbs:
-          - get
           - create
+          - delete
+          - get
+          - list
           - update
+          - watch
           - patch
         - apiGroups:
           - admission.certmanager.k8s.io
@@ -419,19 +411,6 @@ spec:
           verbs:
           - use
         - apiGroups:
-          - admissionregistration.k8s.io
-          resources:
-          - mutatingwebhookconfigurations
-          - validatingwebhookconfigurations
-          verbs:
-          - '*'
-        - apiGroups:
-          - apiregistration.k8s.io
-          resources:
-          - apiservices
-          verbs:
-          - '*'
-        - apiGroups:
           - authorization.k8s.io
           resources:
           - subjectaccessreviews
@@ -442,15 +421,6 @@ spec:
           resources:
           - multiclusterhubs
           verbs:
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - ibmcpcs.ibm.com
-          resources:
-          - secretshares
-          verbs:
-          - create
           - get
           - list
           - watch
