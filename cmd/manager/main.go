@@ -116,15 +116,15 @@ func main() {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		Namespace:          namespace,
 		MapperProvider:     restmapper.NewDynamicRESTMapper,
 		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
 	})
+
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}
-	log.Info(fmt.Sprintf("Watch namespace: %s", namespace))
+
 	log.Info("Registering Components.")
 
 	// Setup Scheme for all resources

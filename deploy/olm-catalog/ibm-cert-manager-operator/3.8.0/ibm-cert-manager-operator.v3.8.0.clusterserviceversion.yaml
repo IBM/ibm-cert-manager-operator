@@ -285,17 +285,7 @@ spec:
           - get
           - list
           - watch
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resources:
-          - clusterroles
-          - clusterrolebindings
-          - rolebindings
-          verbs:
           - delete
-          resourceNames:
-          - cert-manager-clusterPermission
-          - cert-manager-permission
         - apiGroups:
           - apiregistration.k8s.io
           resources:
