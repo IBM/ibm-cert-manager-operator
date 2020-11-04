@@ -248,8 +248,8 @@ bump-csv:
 
 install: ## Install all resources (CR/CRD's, RBAC and Operator)
 	@echo ....... Set environment variables ......
-	- export NAMESPACE=ibm-common-services
-	- export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
+	# - export NAMESPACE=ibm-common-services
+	# - export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
 	# @echo ....... Creating namespace .......
 	# - kubectl create namespace ${NAMESPACE}
 	@echo ....... Applying CRDS and Operator .......
@@ -265,8 +265,6 @@ install: ## Install all resources (CR/CRD's, RBAC and Operator)
 	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl -n ${NAMESPACE} apply -f $${cr}; done
 
 uninstall: ## Uninstall all that all performed in the $ make install
-	- export NAMESPACE=ibm-common-services
-	- export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
 	@echo ....... Uninstalling .......
 	@echo ....... Deleting CR .......
 	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl -n ${NAMESPACE} delete -f $${cr}; done
