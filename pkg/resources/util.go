@@ -61,3 +61,12 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 
 	return imageID
 }
+
+// GetDeployNamespace returns the namespace cert manager needs to be deployed in
+func GetDeployNamespace() string {
+	// If running locally or installMode is All-Namespaces use "ibm-common-services"
+	if PodNamespace == "" || PodNamespace == "openshift-operators" {
+		return DefaultNamespace
+	}
+	return PodNamespace
+}

@@ -9,7 +9,6 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: ibm-cert-manager-operator
-  namespace: ibm-common-services
 roleRef:
   kind: Role
   name: ibm-cert-manager-operator

@@ -17,6 +17,8 @@
 package resources
 
 import (
+	"os"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,8 +108,15 @@ const CainjectorLabels = "app=ibm-cert-manager-cainjector"
 // ConfigmapWatcherLabels is a string of the configmap-watcher's labels
 const ConfigmapWatcherLabels = "app.kubernetes.io/name=configmap-watcher"
 
+// DefaultNamespace is the namespace the cert-manager services will be deployed in if the operator is deployed in all namespaces or locally
+const DefaultNamespace = "ibm-common-services"
+
+// PodNamespace is the namespace the the operator is getting deployed (set in an env var)
+var PodNamespace = os.Getenv("POD_NAMESPACE")
+
 // DeployNamespace is the namespace the cert-manager services will be deployed in
-const DeployNamespace = "ibm-common-services"
+var DeployNamespace = GetDeployNamespace()
+
 const pullPolicy = v1.PullIfNotPresent
 
 // CertManagerControllerName is the name of the container/pod/deployment for cert-manager-controller
@@ -222,14 +231,15 @@ var readinessExecActionConfigmapWatcher = v1.ExecAction{
 const WebhookServingSecret = "cert-manager-webhook-tls"
 
 // ResourceNS is the resource namespace arg for cert-manager-controller
-const ResourceNS = "--cluster-resource-namespace=ibm-common-services"
+var ResourceNS = "--cluster-resource-namespace=" + DeployNamespace
 
 const leaderElectNS = "--leader-election-namespace=cert-manager"
 
 // AcmeSolverArg is the acme solver image to use for the cert-manager-controller
 var AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
 
-const webhookNSArg = "--webhook-namespace=" + DeployNamespace
+var webhookNSArg = "--webhook-namespace=" + DeployNamespace
+
 const webhookCASecretArg = "--webhook-ca-secret=cert-manager-webhook-ca"
 const webhookServingSecretArg = "--webhook-serving-secret=" + WebhookServingSecret
 
