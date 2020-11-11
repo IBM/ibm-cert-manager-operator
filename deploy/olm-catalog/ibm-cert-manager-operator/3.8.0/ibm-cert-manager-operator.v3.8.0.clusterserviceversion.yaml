@@ -80,7 +80,7 @@ metadata:
           }
         }
       ]
-    capabilities: Basic Install
+    capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
     containerImage: quay.io/opencloudio/ibm-cert-manager-operator:3.8.0
@@ -470,15 +470,15 @@ spec:
                 - ibm-cert-manager-operator
                 env:
                 - name: CONTROLLER_IMAGE_TAG_OR_SHA
-                  value: sha256:4001c04db43ab82dc817a492ad70e854c93c69262343c632cc139fce9e8e2f1c
+                  value: sha256:453536a7c4c635515c04c8921f4f007b73ee3c11fbb46c04c906f31bd12e8c1a
                 - name: WEBHOOK_IMAGE_TAG_OR_SHA
-                  value: sha256:5e0f720d60895da4e4e180ff5800a250c7c343751baeb98da2f1b4fc5ba822fe
+                  value: sha256:66b4e21badc55da4c0f040d03a81f0b16e8b1c1c1b18ff5d80f6a673cc6b7126
                 - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-                  value: sha256:9a26551eda6ccf29189eda03a1f627c0322851192403957b8e451b2160a0ff3f
+                  value: sha256:2d33c86811557b1331e2be5a4a9ad8a41490eacdf81c66fc6320a1f7a2d62ee3
                 - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-                  value: sha256:dbfe5438764287b6b88d78496301572a8e1c14f99ce965c671a1230048be158a
+                  value: sha256:7b15278ddf5e145c8a736e2e9cac853809bd4bb9150356dc5a52fb575c024733
                 - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-                  value: sha256:3a121947b08416bb919235f228a3b2552b06741efbd5eae35176cc018836c0b9
+                  value: sha256:650bebbc615c0f34951f2a5b9b0df106f53a00766739772a05b5afa84685e455
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
