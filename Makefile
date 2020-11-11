@@ -23,8 +23,8 @@ REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.c
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
-CERT_MANAGER_OPERAND_TAG ?= 0.10.7
-CONFIGMAP_WATCHER_OPERAND_TAG ?= 3.3.4
+CERT_MANAGER_OPERAND_TAG ?= 0.10.8
+CONFIGMAP_WATCHER_OPERAND_TAG ?= 3.3.5
 
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.

@@ -35,7 +35,7 @@ rules:
   - patch
   - update
   - delete
-# create service account for cert-manager operands
+# create service account for cert-manager operands in the deploy namespace
 - apiGroups:
   - ""
   resources:
@@ -78,7 +78,8 @@ metadata:
     app.kubernetes.io/managed-by: ibm-cert-manager-operator
     app.kubernetes.io/name: cert-manager
 rules:
-# certmanagers resource is Namespace-scoped. Check certmanagers CRD scope field for reference
+# required as certmanagers resource is cluster-scoped. 
+# Can't make the CR namespace-scoped as the operator needs permission to deploy cluster-scoped resources
 - apiGroups:
   - operator.ibm.com
   resources:
@@ -93,12 +94,15 @@ rules:
   - patch
   - update
   - watch
+# required by operator to perform operations on CRDs (all the cert-manager operand CRDs)
 - apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
   verbs:
   - '*' 
+# operator creates clusterrole, clusterrolebinding for the cert-manager operands. 
+# creates rolebinding as cert-manager-webhook needs to access a configmap in kube-system, so it needs to create a rolebinding in kube-system
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -111,12 +115,14 @@ rules:
   - list
   - watch
   - delete
+# operator deploys cert-manager-webhook apiservice
 - apiGroups:
   - apiregistration.k8s.io
   resources:
   - apiservices
   verbs:
   - '*' 
+# operator needs to create mutatingwebhookconfigurations, validatingwebhookconfigurations as a part of webhook resources
 - apiGroups:
   - admissionregistration.k8s.io
   resources:
@@ -124,6 +130,10 @@ rules:
   - validatingwebhookconfigurations
   verbs:
   - '*' 
+# operator needs cluster-wide access to all the below resources because these are a part of clusterrole for operands
+# to create a clusterrole with the below permissions, the creator must also have those permissions, in this case, the operator
+
+# cert-manager service needs to perform all operations on cert-manager resources in any namespace
 - apiGroups:
   - certmanager.k8s.io
   resources:
@@ -150,6 +160,7 @@ rules:
   - orders/finalizers
   verbs:
   - update
+# cert-manager service needs permission to perform operations on secrets associated with the certs(eg: perform renewal, etc.)
 - apiGroups:
   - ""
   resources:
@@ -161,6 +172,7 @@ rules:
   - create
   - update
   - delete
+# cert-manager service needs access to create and patch events for cert-manager resources
 - apiGroups:
   - ""
   resources:
@@ -168,6 +180,7 @@ rules:
   verbs:
   - create
   - patch
+# only list/watch permission to service-accounts
 - apiGroups:
   - ""
   resources:
@@ -175,6 +188,7 @@ rules:
   verbs:
   - list
   - watch
+# cert-manager service needs this for HTTP01 rules
 - apiGroups:
   - ""
   resources:
@@ -186,6 +200,7 @@ rules:
   - watch
   - create
   - delete
+# cert-manager service needs this to support inject ca bundle injection in ingresses
 - apiGroups:
   - extensions
   resources:
@@ -197,6 +212,8 @@ rules:
   - create
   - delete
   - update
+# needed by cert-manager service to support pod-refresh after cert renewal feature
+# also needed by configmap-watcher
 - apiGroups:
   - apps
   resources:
@@ -205,6 +222,7 @@ rules:
   - daemonsets
   verbs:
   - '*'
+# need access to configmaps by both cert-manager and configmap-watcher service
 - apiGroups:
   - ""
   resources:
@@ -217,6 +235,7 @@ rules:
   - update
   - watch
   - patch
+# needed by cert-manager-webhook for cert-manager resources admission 
 - apiGroups:
   - admission.certmanager.k8s.io
   resources:
@@ -226,6 +245,7 @@ rules:
   - certificaterequests
   verbs:
   - '*'
+
 - apiGroups:
   - security.openshift.io
   resourceNames:
@@ -235,12 +255,14 @@ rules:
   - securitycontextconstraints
   verbs:
   - use
+
 - apiGroups:
   - authorization.k8s.io
   resources:
   - subjectaccessreviews
   verbs:
   - '*' 
+# needed by the operator to detect RHACM is installed
 - apiGroups:
   - operator.open-cluster-management.io
   resources:
@@ -249,7 +271,7 @@ rules:
   - get
   - list
   - watch
-# required to list/watch at cluster level as operator cache needs it due to cluster-scoped operator
+# required by the operator to list/watch at cluster level as operator cache needs it due to cluster-scoped operator
 - apiGroups:
   - ibmcpcs.ibm.com
   resources:
