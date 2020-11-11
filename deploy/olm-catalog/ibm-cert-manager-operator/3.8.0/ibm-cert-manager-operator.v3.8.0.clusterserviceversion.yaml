@@ -214,7 +214,6 @@ spec:
           - patch
           - update
           - delete
-        # create service account for cert-manager operands
         - apiGroups:
           - ""
           resources:
@@ -225,7 +224,6 @@ spec:
           - patch
           - create
           - delete
-        # need access to create replicaset for cert-manager-operator
         - apiGroups:
           - apps
           resources:
@@ -238,7 +236,6 @@ spec:
           - patch
           - update
           - delete
-        # required to create secretshare CR to copy cs ca cert secret for RHACM
         - apiGroups:
           - ibmcpcs.ibm.com
           resources:
@@ -249,7 +246,6 @@ spec:
         serviceAccountName: ibm-cert-manager-operator
       clusterPermissions:
       - rules:
-        # certmanagers resource is Namespace-scoped. Check certmanagers CRD scope field for reference
         - apiGroups:
           - operator.ibm.com
           resources:
@@ -420,7 +416,6 @@ spec:
           - get
           - list
           - watch
-        # required to list/watch at cluster level as operator cache needs it due to cluster-scoped operator
         - apiGroups:
           - ibmcpcs.ibm.com
           resources:
