@@ -245,7 +245,7 @@ rules:
   - certificaterequests
   verbs:
   - '*'
-
+# needed by the operator to enable/disable hostNetwork for cert-manager-webhook
 - apiGroups:
   - security.openshift.io
   resourceNames:
@@ -255,7 +255,7 @@ rules:
   - securitycontextconstraints
   verbs:
   - use
-
+# needed by cert-manager-webhook for api server authorization/authentication
 - apiGroups:
   - authorization.k8s.io
   resources:
