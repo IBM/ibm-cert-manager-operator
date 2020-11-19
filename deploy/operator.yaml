@@ -40,7 +40,7 @@ spec:
       hostPID: false
       containers:
         - name: ibm-cert-manager-operator
-          image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+          image: quay.io/opencloudio/ibm-cert-manager-operator:3.8.1
           command:
           - ibm-cert-manager-operator
           args:
