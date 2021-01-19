@@ -40,7 +40,7 @@ spec:
       hostPID: false
       containers:
         - name: ibm-cert-manager-operator
-          image: quay.io/opencloudio/ibm-cert-manager-operator:3.8.1
+          image: quay.io/opencloudio/ibm-cert-manager-operator:3.9.0
           command:
           - ibm-cert-manager-operator
           args:
@@ -59,15 +59,15 @@ spec:
               value: "ibm-cert-manager-operator"
             # DO NOT DELETE. Add operand image SHAs here. See common/scripts/get_image_sha_digest.sh and make get-all-operand-image-sha
             - name: CONTROLLER_IMAGE_TAG_OR_SHA
-              value: 0.10.8
+              value: 0.11.0
             - name: WEBHOOK_IMAGE_TAG_OR_SHA
-              value: 0.10.8
+              value: 0.11.0
             - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-              value: 0.10.8
+              value: 0.11.0
             - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-              value: 0.10.8
+              value: 0.11.0
             - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-              value: 3.3.5
+              value: 3.4.0
           resources:
             limits:
               cpu: 100m
