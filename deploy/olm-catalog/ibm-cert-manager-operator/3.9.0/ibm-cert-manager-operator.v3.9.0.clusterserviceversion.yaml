@@ -465,15 +465,15 @@ spec:
                 - ibm-cert-manager-operator
                 env:
                 - name: CONTROLLER_IMAGE_TAG_OR_SHA
-                  value: sha256:453536a7c4c635515c04c8921f4f007b73ee3c11fbb46c04c906f31bd12e8c1a
+                  value: sha256:e3a7dcf3cd3da99c3c0664832ff9d2eb3960dd5e5241f3203e74cc3257ad4479
                 - name: WEBHOOK_IMAGE_TAG_OR_SHA
-                  value: sha256:66b4e21badc55da4c0f040d03a81f0b16e8b1c1c1b18ff5d80f6a673cc6b7126
+                  value: sha256:58c973caade95c529e0b48796b9bb289be8c0c5ccead7a9861015e6f8252c4c5
                 - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-                  value: sha256:2d33c86811557b1331e2be5a4a9ad8a41490eacdf81c66fc6320a1f7a2d62ee3
+                  value: sha256:04f0cd6075297214675a5334b5b9cd89b5680ab81e3a82f7fb4f545d7aef5a6b
                 - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-                  value: sha256:7b15278ddf5e145c8a736e2e9cac853809bd4bb9150356dc5a52fb575c024733
+                  value: sha256:6fee845dec5dbfeb71773774cae30cd7e71288e88ae51b004584e1f4c5a0a3f0
                 - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-                  value: sha256:650bebbc615c0f34951f2a5b9b0df106f53a00766739772a05b5afa84685e455
+                  value: sha256:c18d7319fa0ce509adce3a5eaf9113209be003f72ab85726c668614648e4ad5e
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
@@ -488,7 +488,7 @@ spec:
                       fieldPath: metadata.namespace
                 - name: OPERATOR_NAME
                   value: ibm-cert-manager-operator
-                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                image: quay.io/opencloudio/ibm-cert-manager-operator:3.9.0
                 imagePullPolicy: Always
                 name: ibm-cert-manager-operator
                 resources:
