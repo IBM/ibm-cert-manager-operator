@@ -29,35 +29,29 @@ var log = logf.Log.WithName("resource_utils")
 func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, envVarName string) string {
 	reqLogger := log.WithValues("Func", "GetImageID")
 
-	var imageSuffix string
+	var imageID string
 
 	//Check if the env var exists, if yes, check whether it's a SHA or tag and use accordingly; if no, use the default image version
-	imageTagOrSHA := os.Getenv(envVarName)
+	imageID = os.Getenv(envVarName)
 
-	if len(imageTagOrSHA) > 0 {
-		//check if it is a SHA or tag and prepend appropriately
-		if strings.HasPrefix(imageTagOrSHA, "sha256:") {
-			reqLogger.Info("Using SHA digest value from environment variable for image " + imageName)
-			imageSuffix = "@" + imageTagOrSHA
-		} else {
-			reqLogger.Info("Using tag value from environment variable for image " + imageName)
-			imageSuffix = ":" + imageTagOrSHA
+	if len(image) > 0 {
+		reqLogger.Info("Using env var for operand image: " + imageName)
+
+		if !strings.Contains(image, "sha256:") {
+			// if tag, append imagePostfix to the tag if set in CR
 			if imagePostfix != "" {
-				imageSuffix += imagePostfix
+				imageID += imagePostfix
 			}
 		}
 	} else {
 		//Use default value
-		reqLogger.Info("Using default tag value for image " + imageName)
-		imageSuffix = ":" + defaultImageVersion
+		reqLogger.Info("Using default tag value for operand image " + imageName)
+		imageID = imageRegistry + "/" + imageName + ":" + defaultImageVersion
+
 		if imagePostfix != "" {
-			imageSuffix += imagePostfix
+			imageID += imagePostfix
 		}
 	}
-
-	imageID := imageRegistry + "/" + imageName + imageSuffix
-
-	reqLogger.Info("imageID: " + imageID)
 
 	return imageID
 }
