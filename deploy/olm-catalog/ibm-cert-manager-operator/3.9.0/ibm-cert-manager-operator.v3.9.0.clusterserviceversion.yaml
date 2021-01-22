@@ -473,7 +473,7 @@ spec:
                 - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
                   value: quay.io/opencloudio/icp-cert-manager-acmesolver@sha256:6fee845dec5dbfeb71773774cae30cd7e71288e88ae51b004584e1f4c5a0a3f0
                 - name: ICP_CONFIGMAP_WATCHER_IMAGE
-                  value: quay.io/opencloudio/icp-confimap-watcher@sha256:c18d7319fa0ce509adce3a5eaf9113209be003f72ab85726c668614648e4ad5e
+                  value: quay.io/opencloudio/icp-configmap-watcher@sha256:c18d7319fa0ce509adce3a5eaf9113209be003f72ab85726c668614648e4ad5e
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:

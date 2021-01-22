@@ -34,10 +34,10 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 	//Check if the env var exists, if yes, check whether it's a SHA or tag and use accordingly; if no, use the default image version
 	imageID = os.Getenv(envVarName)
 
-	if len(image) > 0 {
+	if len(imageID) > 0 {
 		reqLogger.Info("Using env var for operand image: " + imageName)
 
-		if !strings.Contains(image, "sha256:") {
+		if !strings.Contains(imageID, "sha256:") {
 			// if tag, append imagePostfix to the tag if set in CR
 			if imagePostfix != "" {
 				imageID += imagePostfix
