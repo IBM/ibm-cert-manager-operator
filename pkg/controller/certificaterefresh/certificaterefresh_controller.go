@@ -123,7 +123,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, nil
 	}
 
-	if listOfCAs == nil || len(listOfCAs) == 0 {
+	if len(listOfCAs) == 0 {
 		log.Info("List of CAs empty. No leaf certificates to refresh")
 		return reconcile.Result{}, nil
 	}
@@ -288,7 +288,7 @@ func (r *ReconcileCertificateRefresh) findLeafSecrets(issuedBy string, namespace
 				leafSecret, err := r.getSecret(&cert)
 				if err != nil {
 					if errors.IsNotFound(err) {
-						//log.Error(err, "Secret not found for cert "+cert.Name)
+						log.V(2).Info("Secret not found for cert " + cert.Name)
 						continue
 					}
 					break
@@ -320,7 +320,7 @@ type isCACertificatePredicate struct{}
 // Intended to be used with certificates.
 func (isCACertificatePredicate) Update(e event.UpdateEvent) bool {
 	reqCert := (e.ObjectOld).(*certmgr.Certificate)
-	if !(reqCert.Spec.IsCA && reqCert.Spec.IsCA == true) {
+	if !(reqCert.Spec.IsCA && reqCert.Spec.IsCA) {
 		return false
 	}
 
@@ -332,7 +332,7 @@ func (isCACertificatePredicate) Update(e event.UpdateEvent) bool {
 
 func (isCACertificatePredicate) Create(e event.CreateEvent) bool {
 	reqCert := (e.Object).(*certmgr.Certificate)
-	if !(reqCert.Spec.IsCA && reqCert.Spec.IsCA == true) {
+	if !(reqCert.Spec.IsCA && reqCert.Spec.IsCA) {
 		return false
 	}
 
