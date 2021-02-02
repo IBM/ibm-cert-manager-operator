@@ -423,6 +423,14 @@ spec:
           verbs:
           - list
           - watch
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
+          - list
+          - watch
         serviceAccountName: ibm-cert-manager-operator
       deployments:
       - name: ibm-cert-manager-operator
