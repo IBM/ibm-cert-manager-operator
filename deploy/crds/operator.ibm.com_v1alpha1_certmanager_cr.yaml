@@ -15,5 +15,7 @@ spec:
   refreshCertsBasedOnCA:
   - certName: cs-ca-certificate
     namespace: ibm-common-services
+  - certName: mongodb-root-ca-cert
+    namespace: ibm-common-services
 status:
   certManagerStatus: ''

@@ -305,7 +305,16 @@ var RhacmGVK = schema.GroupVersionKind{
 const DefaultEnableCertRefresh = true
 
 // DefaultCAList is the default CA for which the leaf certs need to be refreshed
-var DefaultCAList = operatorv1alpha1.CACertificate{CertName: "cs-ca-certificate", Namespace: "ibm-common-services"}
+var DefaultCAList = []operatorv1alpha1.CACertificate{
+	{
+		CertName:  "cs-ca-certificate",
+		Namespace: "ibm-common-services",
+	},
+	{
+		CertName:  "mongodb-root-ca-cert",
+		Namespace: "ibm-common-services",
+	},
+}
 
 // CertManager instance name
 const CertManagerInstanceName = "default"

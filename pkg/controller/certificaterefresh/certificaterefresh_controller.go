@@ -112,7 +112,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	if instance.Spec.EnableCertRefresh == nil {
 		//default value
 		enableCertRefresh = res.DefaultEnableCertRefresh
-		listOfCAs = append(listOfCAs, res.DefaultCAList)
+		listOfCAs = res.DefaultCAList
 	} else {
 		enableCertRefresh = *instance.Spec.EnableCertRefresh
 		listOfCAs = instance.Spec.RefreshCertsBasedOnCA
@@ -288,7 +288,7 @@ func (r *ReconcileCertificateRefresh) findLeafSecrets(issuedBy string, namespace
 				leafSecret, err := r.getSecret(&cert)
 				if err != nil {
 					if errors.IsNotFound(err) {
-						log.Error(err, "Secret not found for cert "+cert.Name)
+						//log.Error(err, "Secret not found for cert "+cert.Name)
 						continue
 					}
 					break
