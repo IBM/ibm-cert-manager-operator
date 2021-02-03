@@ -332,11 +332,8 @@ func (isCACertificatePredicate) Update(e event.UpdateEvent) bool {
 
 func (isCACertificatePredicate) Create(e event.CreateEvent) bool {
 	reqCert := (e.Object).(*certmgr.Certificate)
-	if !reqCert.Spec.IsCA {
-		return false
-	}
 
-	return true
+	return reqCert.Spec.IsCA
 }
 
 func (isCACertificatePredicate) Delete(e event.DeleteEvent) bool {
