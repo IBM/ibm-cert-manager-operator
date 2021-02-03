@@ -167,7 +167,7 @@ spec:
                 type: boolean
               enableCertRefresh:
                 description: EnableCertRefresh is a flag that can be set to enable
-                  the leaf certificates based on a root CA
+                  the refresh of leaf certificates based on a root CA
                 type: boolean
               enableWebhook:
                 type: boolean
@@ -180,8 +180,9 @@ spec:
                   https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
                 type: string
               refreshCertsBasedOnCA:
-                description: RefreshCertsBasedOnCA is a list of CA certificate names
-                  for which you want its leaf certificates to be refreshed
+                description: RefreshCertsBasedOnCA is a list of CA certificate names.
+                  Leaf certificates created from the CA will be refreshed when the
+                  CA is refreshed.
                 items:
                   properties:
                     certName:

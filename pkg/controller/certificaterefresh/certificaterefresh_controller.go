@@ -320,7 +320,7 @@ type isCACertificatePredicate struct{}
 // Intended to be used with certificates.
 func (isCACertificatePredicate) Update(e event.UpdateEvent) bool {
 	reqCert := (e.ObjectOld).(*certmgr.Certificate)
-	if !(reqCert.Spec.IsCA && reqCert.Spec.IsCA) {
+	if !reqCert.Spec.IsCA {
 		return false
 	}
 
@@ -332,7 +332,7 @@ func (isCACertificatePredicate) Update(e event.UpdateEvent) bool {
 
 func (isCACertificatePredicate) Create(e event.CreateEvent) bool {
 	reqCert := (e.Object).(*certmgr.Certificate)
-	if !(reqCert.Spec.IsCA && reqCert.Spec.IsCA) {
+	if !reqCert.Spec.IsCA {
 		return false
 	}
 
