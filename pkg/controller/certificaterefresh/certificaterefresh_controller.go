@@ -108,43 +108,11 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 
 	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
 	// If fields exist, don't do anything
-
 	if cert.Name == res.CSCACertName && cert.Namespace == res.DeployNamespace && (cert.Spec.Duration == nil || cert.Spec.RenewBefore == nil) {
-
-		patch := client.MergeFrom(cert.DeepCopy())
-		cert.Spec.Duration = &metav1.Duration{Duration: time.Hour * 24 * 365 * 2}
-		cert.Spec.RenewBefore = &metav1.Duration{Duration: time.Hour * 24 * 30}
-
-		if err := r.client.Patch(context.TODO(), cert, patch); err != nil {
+		if err := r.setCSCACertificateDuration(cert); err != nil {
 			return reconcile.Result{}, err
 		}
-
-		log.Info("CS CA Certificate duration set to 2 years and renewal set to 30 days before expiration ")
-
-		// Get secret corresponding to the CA certificate
-		if cscaSecret, err := r.getSecret(cert); err == nil {
-			//delete secret to refresh it with the new duration: bug in v0.10 cert-manager; resolved from v0.15
-			err = r.client.Delete(context.TODO(), cscaSecret)
-		}
-
-		if err != nil {
-			if errors.IsNotFound(err) {
-				// secret is not created yet, or secret is deleted; will be created later and it will pick the new duration/renewBefore values set
-				//no need to requeue
-				return reconcile.Result{}, nil
-			}
-			// updating it to nil and requeueing so that we again attempt to set the duration/renewBefore and delete the secret
-			patch := client.MergeFrom(cert.DeepCopy())
-			cert.Spec.Duration = nil
-			cert.Spec.RenewBefore = nil
-
-			if err := r.client.Patch(context.TODO(), cert, patch); err != nil {
-				log.Info("Error patching the certificate")
-				return reconcile.Result{}, err
-			}
-			log.Info("Error retrieving/deleting cs-ca-certificate-secret; resetting duration/renewBefore ")
-			return reconcile.Result{}, err
-		}
+		return reconcile.Result{}, nil
 	}
 
 	// Fetch the CertManager instance to check the enableCertRefresh flag
@@ -352,6 +320,48 @@ func (r *ReconcileCertificateRefresh) getAllNamespaces() (*corev1.NamespaceList,
 	err := r.client.List(context.TODO(), nsList, &client.ListOptions{})
 
 	return nsList, err
+}
+
+//setCSCACertificateDuration sets duration of cs-ca-certificate to 2 years
+func (r *ReconcileCertificateRefresh) setCSCACertificateDuration(cert *certmgr.Certificate) error {
+
+	patch := client.MergeFrom(cert.DeepCopy())
+	cert.Spec.Duration = &metav1.Duration{Duration: time.Hour * 24 * 365 * 2}
+	cert.Spec.RenewBefore = &metav1.Duration{Duration: time.Hour * 24 * 30}
+
+	if err := r.client.Patch(context.TODO(), cert, patch); err != nil {
+		return err
+	}
+
+	log.Info("CS CA Certificate duration set to 2 years and renewal set to 30 days before expiration ")
+
+	// Get secret corresponding to the CA certificate
+	cscaSecret, err := r.getSecret(cert)
+	if err == nil {
+		//delete secret to refresh it with the new duration: bug in v0.10 cert-manager; resolved from v0.15
+		err = r.client.Delete(context.TODO(), cscaSecret)
+	}
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// secret is not created yet, or secret is deleted; will be created later and it will pick the new duration/renewBefore values set
+			//no need to requeue
+			return nil
+		}
+		// updating it to nil and requeueing so that we again attempt to set the duration/renewBefore and delete the secret
+		patch := client.MergeFrom(cert.DeepCopy())
+		cert.Spec.Duration = nil
+		cert.Spec.RenewBefore = nil
+
+		if err := r.client.Patch(context.TODO(), cert, patch); err != nil {
+			log.Info("Error patching the certificate")
+			return err
+		}
+		log.Info("Error retrieving/deleting cs-ca-certificate-secret; resetting duration/renewBefore ")
+		return err
+	}
+
+	return nil
 }
 
 // isCACertificatePredicate implements a predicate verifying that
