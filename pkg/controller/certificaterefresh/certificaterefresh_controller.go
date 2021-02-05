@@ -108,11 +108,8 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 
 	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
 	// If fields exist, don't do anything
-	if cert.Name == res.CSCACertName && cert.Namespace == res.DeployNamespace && (cert.Spec.Duration == nil || cert.Spec.RenewBefore == nil) {
-		if err := r.setCSCACertificateDuration(cert); err != nil {
-			return reconcile.Result{}, err
-		}
-		return reconcile.Result{}, nil
+	if err := r.setCSCACertificateDuration(cert); err != nil {
+		return reconcile.Result{}, err
 	}
 
 	// Fetch the CertManager instance to check the enableCertRefresh flag
@@ -324,6 +321,14 @@ func (r *ReconcileCertificateRefresh) getAllNamespaces() (*corev1.NamespaceList,
 
 //setCSCACertificateDuration sets duration of cs-ca-certificate to 2 years
 func (r *ReconcileCertificateRefresh) setCSCACertificateDuration(cert *certmgr.Certificate) error {
+
+	if cert.Name != res.CSCACertName || cert.Namespace != res.DeployNamespace {
+		return nil
+	}
+
+	if cert.Spec.Duration != nil && cert.Spec.RenewBefore != nil {
+		return nil
+	}
 
 	patch := client.MergeFrom(cert.DeepCopy())
 	cert.Spec.Duration = &metav1.Duration{Duration: time.Hour * 24 * 365 * 2}
