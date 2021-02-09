@@ -20,7 +20,8 @@ metadata:
             "disableHostNetwork": true,
             "enableWebhook": true,
             "imageRegistry": "quay.io/opencloudio",
-            "version": "3.9.0"
+            "version": "3.9.0",
+            "enableCertRefresh": true
           },
           "status": {
             "certManagerStatus": ""
@@ -59,7 +60,9 @@ metadata:
               "kind": "Issuer"
             },
             "commonName": "cs-ca-certificate",
-            "isCA": true
+            "isCA": true,
+            "duration": "17520h0m0s",
+            "renewBefore": "720h0m0s"
           }
         }
       ]

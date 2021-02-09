@@ -282,6 +282,9 @@ var CSCAIssuerLabelMap = map[string]string{
 //CSCAIssuerName is the name of the CS CA Issuer
 const CSCAIssuerName = "cs-ca-issuer"
 
+//CSCACertName is the name of the CS CA certificate
+const CSCACertName = "cs-ca-certificate"
+
 //CSCASecretName is the name of the CA certificate secret
 const CSCASecretName = "cs-ca-certificate-secret"
 
@@ -308,11 +311,11 @@ const DefaultEnableCertRefresh = true
 var DefaultCAList = []operatorv1alpha1.CACertificate{
 	{
 		CertName:  "cs-ca-certificate",
-		Namespace: "ibm-common-services",
+		Namespace: DeployNamespace,
 	},
 	{
 		CertName:  "mongodb-root-ca-cert",
-		Namespace: "ibm-common-services",
+		Namespace: DeployNamespace,
 	},
 }
 

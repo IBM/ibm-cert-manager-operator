@@ -12,10 +12,7 @@ spec:
   imageRegistry: quay.io/opencloudio
   version: "3.9.0"
   enableCertRefresh: true
-  refreshCertsBasedOnCA:
-  - certName: cs-ca-certificate
-    namespace: ibm-common-services
-  - certName: mongodb-root-ca-cert
-    namespace: ibm-common-services
+  duration: 17520h0m0s
+  renewBefore: 720h0m0s
 status:
   certManagerStatus: ''

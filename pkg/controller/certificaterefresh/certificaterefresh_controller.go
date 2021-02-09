@@ -18,6 +18,7 @@ package certificaterefresh
 
 import (
 	"context"
+	"time"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
@@ -25,7 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 
-	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -92,9 +93,28 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling CertificateRefresh")
 
+	// Get the certificate that invoked reconciliation is a CA in the listOfCAs
+
+	cert := &certmgr.Certificate{}
+	err := r.client.Get(context.TODO(), request.NamespacedName, cert)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile req
+			// Return and don't requeue
+			return reconcile.Result{}, nil
+		}
+		return reconcile.Result{}, err
+	}
+
+	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
+	// If fields exist, don't do anything
+	if err := r.setCSCACertificateDuration(cert); err != nil {
+		return reconcile.Result{}, err
+	}
+
 	// Fetch the CertManager instance to check the enableCertRefresh flag
 	instance := &operatorv1alpha1.CertManager{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.CertManagerInstanceName, Namespace: ""}, instance)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.CertManagerInstanceName, Namespace: ""}, instance)
 
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -112,10 +132,8 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	if instance.Spec.EnableCertRefresh == nil {
 		//default value
 		enableCertRefresh = res.DefaultEnableCertRefresh
-		listOfCAs = res.DefaultCAList
 	} else {
 		enableCertRefresh = *instance.Spec.EnableCertRefresh
-		listOfCAs = instance.Spec.RefreshCertsBasedOnCA
 	}
 
 	if !enableCertRefresh {
@@ -123,25 +141,16 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, nil
 	}
 
+	//set the list of CAs that need their leaf certs refreshed
+	listOfCAs = res.DefaultCAList
+	listOfCAs = append(listOfCAs, instance.Spec.RefreshCertsBasedOnCA...)
+
 	if len(listOfCAs) == 0 {
 		log.Info("List of CAs empty. No leaf certificates to refresh")
 		return reconcile.Result{}, nil
 	}
 
 	log.Info("Flag EnableCertRefresh is set to true!")
-
-	// Check the certificate that invoked reconciliation is a CA in the listOfCAs
-
-	cert := &certmgr.Certificate{}
-	err = r.client.Get(context.TODO(), request.NamespacedName, cert)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile req
-			// Return and don't requeue
-			return reconcile.Result{}, nil
-		}
-		return reconcile.Result{}, err
-	}
 
 	found := false
 	for _, caCert := range listOfCAs {
@@ -308,6 +317,56 @@ func (r *ReconcileCertificateRefresh) getAllNamespaces() (*corev1.NamespaceList,
 	err := r.client.List(context.TODO(), nsList, &client.ListOptions{})
 
 	return nsList, err
+}
+
+//setCSCACertificateDuration sets duration of cs-ca-certificate to 2 years
+func (r *ReconcileCertificateRefresh) setCSCACertificateDuration(cert *certmgr.Certificate) error {
+
+	if cert.Name != res.CSCACertName || cert.Namespace != res.DeployNamespace {
+		return nil
+	}
+
+	if cert.Spec.Duration != nil && cert.Spec.RenewBefore != nil {
+		return nil
+	}
+
+	patch := client.MergeFrom(cert.DeepCopy())
+	cert.Spec.Duration = &metav1.Duration{Duration: time.Hour * 24 * 365 * 2}
+	cert.Spec.RenewBefore = &metav1.Duration{Duration: time.Hour * 24 * 30}
+
+	if err := r.client.Patch(context.TODO(), cert, patch); err != nil {
+		return err
+	}
+
+	log.Info("CS CA Certificate duration set to 2 years and renewal set to 30 days before expiration ")
+
+	// Get secret corresponding to the CA certificate
+	cscaSecret, err := r.getSecret(cert)
+	if err == nil {
+		//delete secret to refresh it with the new duration: bug in v0.10 cert-manager; resolved from v0.15
+		err = r.client.Delete(context.TODO(), cscaSecret)
+	}
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// secret is not created yet, or secret is deleted; will be created later and it will pick the new duration/renewBefore values set
+			//no need to requeue
+			return nil
+		}
+		// updating it to nil and requeueing so that we again attempt to set the duration/renewBefore and delete the secret
+		patch := client.MergeFrom(cert.DeepCopy())
+		cert.Spec.Duration = nil
+		cert.Spec.RenewBefore = nil
+
+		if err := r.client.Patch(context.TODO(), cert, patch); err != nil {
+			log.Info("Error patching the certificate")
+			return err
+		}
+		log.Info("Error retrieving/deleting cs-ca-certificate-secret; resetting duration/renewBefore ")
+		return err
+	}
+
+	return nil
 }
 
 // isCACertificatePredicate implements a predicate verifying that
