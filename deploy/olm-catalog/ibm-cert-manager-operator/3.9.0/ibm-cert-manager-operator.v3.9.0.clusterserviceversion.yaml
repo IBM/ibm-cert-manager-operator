@@ -89,11 +89,6 @@ spec:
       kind: Certificate
       name: certificates.certmanager.k8s.io
       version: v1alpha1
-    - description: Represents a cluster issuer
-      displayName: Cluster Issuer
-      kind: ClusterIssuer
-      name: clusterissuers.certmanager.k8s.io
-      version: v1alpha1
     - description: Represents an issuer
       displayName: Issuer
       kind: Issuer
