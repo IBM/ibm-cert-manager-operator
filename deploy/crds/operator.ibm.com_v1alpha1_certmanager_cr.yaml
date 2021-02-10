@@ -12,7 +12,5 @@ spec:
   imageRegistry: quay.io/opencloudio
   version: "3.9.0"
   enableCertRefresh: true
-  duration: 17520h0m0s
-  renewBefore: 720h0m0s
 status:
   certManagerStatus: ''
