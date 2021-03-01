@@ -464,16 +464,16 @@ spec:
                 command:
                 - ibm-cert-manager-operator
                 env:
-                - name: CONTROLLER_IMAGE_TAG_OR_SHA
-                  value: sha256:453536a7c4c635515c04c8921f4f007b73ee3c11fbb46c04c906f31bd12e8c1a
-                - name: WEBHOOK_IMAGE_TAG_OR_SHA
-                  value: sha256:66b4e21badc55da4c0f040d03a81f0b16e8b1c1c1b18ff5d80f6a673cc6b7126
-                - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-                  value: sha256:2d33c86811557b1331e2be5a4a9ad8a41490eacdf81c66fc6320a1f7a2d62ee3
-                - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-                  value: sha256:7b15278ddf5e145c8a736e2e9cac853809bd4bb9150356dc5a52fb575c024733
-                - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-                  value: sha256:650bebbc615c0f34951f2a5b9b0df106f53a00766739772a05b5afa84685e455
+                - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-controller@sha256:453536a7c4c635515c04c8921f4f007b73ee3c11fbb46c04c906f31bd12e8c1a
+                - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-webhook@sha256:66b4e21badc55da4c0f040d03a81f0b16e8b1c1c1b18ff5d80f6a673cc6b7126
+                - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-cainjector@sha256:2d33c86811557b1331e2be5a4a9ad8a41490eacdf81c66fc6320a1f7a2d62ee3
+                - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-acmesolver@sha256:7b15278ddf5e145c8a736e2e9cac853809bd4bb9150356dc5a52fb575c024733
+                - name: ICP_CONFIGMAP_WATCHER_IMAGE
+                  value: quay.io/opencloudio/icp-configmap-watcher@sha256:650bebbc615c0f34951f2a5b9b0df106f53a00766739772a05b5afa84685e455
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:

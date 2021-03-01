@@ -58,16 +58,16 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-cert-manager-operator"
             # DO NOT DELETE. Add operand image SHAs here. See common/scripts/get_image_sha_digest.sh and make get-all-operand-image-sha
-            - name: CONTROLLER_IMAGE_TAG_OR_SHA
-              value: 0.10.8
-            - name: WEBHOOK_IMAGE_TAG_OR_SHA
-              value: 0.10.8
-            - name: CAINJECTOR_IMAGE_TAG_OR_SHA
-              value: 0.10.8
-            - name: ACMESOLVER_IMAGE_TAG_OR_SHA
-              value: 0.10.8
-            - name: CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
-              value: 3.3.5
+            - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
+              value: quay.io/opencloudio/icp-cert-manager-controller:0.10.8
+            - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
+              value: quay.io/opencloudio/icp-cert-manager-webhook:0.10.8
+            - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
+              value: quay.io/opencloudio/icp-cert-manager-cainjector:0.10.8
+            - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
+              value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.10.8
+            - name: ICP_CONFIGMAP_WATCHER_IMAGE
+              value: quay.io/opencloudio/icp-configmap-watcher:3.3.5
           resources:
             limits:
               cpu: 100m
