@@ -29,7 +29,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: beta.kubernetes.io/arch
+              - key: kubernetes.io/arch
                 operator: In
                 values:
                 - amd64
@@ -40,7 +40,7 @@ spec:
       hostPID: false
       containers:
         - name: ibm-cert-manager-operator
-          image: quay.io/opencloudio/ibm-cert-manager-operator:3.8.1
+          image: quay.io/opencloudio/ibm-cert-manager-operator:3.8.2
           command:
           - ibm-cert-manager-operator
           args:
