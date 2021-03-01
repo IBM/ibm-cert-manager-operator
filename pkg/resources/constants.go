@@ -161,29 +161,29 @@ const WebhookImageName = "icp-cert-manager-webhook"
 // ConfigmapWatcherImageName is the name of the configmap watcher image
 const ConfigmapWatcherImageName = "icp-configmap-watcher"
 
-// ControllerTagEnvVar is the env variable name defined in operator container for Controller Image Tag/SHA. Check operator.yaml
-const ControllerTagEnvVar = "CONTROLLER_IMAGE_TAG_OR_SHA"
+// ControllerImageEnvVar is the env variable name defined in operator container for Controller Image. Check operator.yaml
+const ControllerImageEnvVar = "ICP_CERT_MANAGER_CONTROLLER_IMAGE"
 
-// WebhookTagEnvVar is the env variable name defined in operator container for Webhook Image Tag/SHA. Check operator.yaml
-const WebhookTagEnvVar = "WEBHOOK_IMAGE_TAG_OR_SHA"
+// WebhookImageEnvVar is the env variable name defined in operator container for Webhook Image. Check operator.yaml
+const WebhookImageEnvVar = "ICP_CERT_MANAGER_WEBHOOK_IMAGE"
 
-// CaInjectorTagEnvVar is the env variable name defined in operator container for cainjector Image Tag/SHA. Check operator.yaml
-const CaInjectorTagEnvVar = "CAINJECTOR_IMAGE_TAG_OR_SHA"
+// CaInjectorImageEnvVar is the env variable name defined in operator container for cainjector Image. Check operator.yaml
+const CaInjectorImageEnvVar = "ICP_CERT_MANAGER_CAINJECTOR_IMAGE"
 
-// AcmeSolverTagEnvVar is the env variable name defined in operator container for acme-solver Image Tag/SHA. Check operator.yaml
-const AcmeSolverTagEnvVar = "ACMESOLVER_IMAGE_TAG_OR_SHA"
+// AcmeSolverImageEnvVar is the env variable name defined in operator container for acme-solver Image. Check operator.yaml
+const AcmeSolverImageEnvVar = "ICP_CERT_MANAGER_ACMESOLVER_IMAGE"
 
-// ConfigMapWatcherTagEnvVar is the env variable name defined in operator container for ConfigMap Watcher Image Tag/SHA. Check operator.yaml
-const ConfigMapWatcherTagEnvVar = "CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA"
+// ConfigMapWatcherImageEnvVar is the env variable name defined in operator container for ConfigMap Watcher Image. Check operator.yaml
+const ConfigMapWatcherImageEnvVar = "ICP_CONFIGMAP_WATCHER_IMAGE"
 
 // DefaultImagePostfix is set to empty. It indicates any platform suffix that you can append to an image tag
 const DefaultImagePostfix = ""
 
-var controllerImage = GetImageID(ImageRegistry, ControllerImageName, ControllerImageVersion, DefaultImagePostfix, ControllerTagEnvVar)
-var acmesolverImage = GetImageID(ImageRegistry, AcmesolverImageName, ControllerImageVersion, DefaultImagePostfix, AcmeSolverTagEnvVar)
-var cainjectorImage = GetImageID(ImageRegistry, CainjectorImageName, ControllerImageVersion, DefaultImagePostfix, CaInjectorTagEnvVar)
-var webhookImage = GetImageID(ImageRegistry, WebhookImageName, WebhookImageVersion, DefaultImagePostfix, WebhookTagEnvVar)
-var configmapWatcherImage = GetImageID(ImageRegistry, ConfigmapWatcherImageName, ConfigmapWatcherVersion, DefaultImagePostfix, ConfigMapWatcherTagEnvVar)
+var controllerImage = GetImageID(ImageRegistry, ControllerImageName, ControllerImageVersion, DefaultImagePostfix, ControllerImageEnvVar)
+var acmesolverImage = GetImageID(ImageRegistry, AcmesolverImageName, ControllerImageVersion, DefaultImagePostfix, AcmeSolverImageEnvVar)
+var cainjectorImage = GetImageID(ImageRegistry, CainjectorImageName, ControllerImageVersion, DefaultImagePostfix, CaInjectorImageEnvVar)
+var webhookImage = GetImageID(ImageRegistry, WebhookImageName, WebhookImageVersion, DefaultImagePostfix, WebhookImageEnvVar)
+var configmapWatcherImage = GetImageID(ImageRegistry, ConfigmapWatcherImageName, ConfigmapWatcherVersion, DefaultImagePostfix, ConfigMapWatcherImageEnvVar)
 
 // ServiceAccount is the name of the default service account to be used by cert-manager services
 const ServiceAccount = "cert-manager"
