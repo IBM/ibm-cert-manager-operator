@@ -183,7 +183,7 @@ push-image-s390x: $(CONFIG_DOCKER_TARGET) build-image-s390x
 images: push-image-amd64 push-image-ppc64le push-image-s390x multiarch-image
 
 multiarch-image:
-	@curl -L -o /tmp/manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
+	@curl -L -o /tmp/manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
 	@chmod +x /tmp/manifest-tool
 	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG) --ignore-missing
 	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG):$(VERSION) --ignore-missing
@@ -199,40 +199,6 @@ csv:
 ############################################################
 clean:
 	rm -f build/_output
-
-
-############################################################
-# SHA section
-############################################################
-
-.PHONY: get-all-operand-image-sha
-get-all-operand-image-sha: get-configmap-watcher-image-sha get-acmesolver-image-sha get-cainjector-image-sha get-webhook-image-sha get-controller-image-sha
-	@echo Got SHAs for all operand images
-
-.PHONY: get-controller-image-sha
-get-controller-image-sha:
-	@echo Get SHA for icp-cert-manager-controller:$(CERT_MANAGER_OPERAND_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-controller $(CERT_MANAGER_OPERAND_TAG) CONTROLLER_IMAGE_TAG_OR_SHA
-
-.PHONY: get-webhook-image-sha
-get-webhook-image-sha:
-	@echo Get SHA for icp-cert-manager-webhook:$(CERT_MANAGER_OPERAND_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-webhook $(CERT_MANAGER_OPERAND_TAG) WEBHOOK_IMAGE_TAG_OR_SHA
-
-.PHONY: get-cainjector-image-sha
-get-cainjector-image-sha:
-	@echo Get SHA for icp-cert-manager-cainjector:$(CERT_MANAGER_OPERAND_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-cainjector $(CERT_MANAGER_OPERAND_TAG) CAINJECTOR_IMAGE_TAG_OR_SHA
-
-.PHONY: get-acmesolver-image-sha
-get-acmesolver-image-sha:
-	@echo Get SHA for icp-cert-manager-acmesolver:$(CERT_MANAGER_OPERAND_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-cert-manager-acmesolver $(CERT_MANAGER_OPERAND_TAG) ACMESOLVER_IMAGE_TAG_OR_SHA
-
-.PHONY: get-configmap-watcher-image-sha
-get-configmap-watcher-image-sha:
-	@echo Get SHA for icp-configmap-watcher:$(CONFIGMAP_WATCHER_OPERAND_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-configmap-watcher $(CONFIGMAP_WATCHER_OPERAND_TAG) CONFIGMAP_WATCHER_IMAGE_TAG_OR_SHA
 
 ############################################################
 # Bump up CSV version
