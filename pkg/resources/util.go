@@ -27,7 +27,6 @@ var log = logf.Log.WithName("resource_utils")
 
 //GetImageID constructs image IDs for operands: either <IMAGE_NAME>:<IMAGE_TAG> or <IMAGE_NAME>@<IMAGE_SHA>
 func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, envVarName string) string {
-	reqLogger := log.WithValues("Func", "GetImageID")
 
 	var imageID string
 
@@ -35,7 +34,7 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 	imageID = os.Getenv(envVarName)
 
 	if len(imageID) > 0 {
-		reqLogger.Info("Using env var for operand image: " + imageName)
+		log.V(2).Info("Using env var for operand image: " + imageName)
 
 		if !strings.Contains(imageID, "sha256:") {
 			// if tag, append imagePostfix to the tag if set in CR
@@ -45,7 +44,7 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 		}
 	} else {
 		//Use default value
-		reqLogger.Info("Using default tag value for operand image " + imageName)
+		log.V(2).Info("Using default tag value for operand image " + imageName)
 		imageID = imageRegistry + "/" + imageName + ":" + defaultImageVersion
 
 		if imagePostfix != "" {

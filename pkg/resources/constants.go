@@ -19,6 +19,7 @@ package resources
 import (
 	"os"
 
+	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -281,6 +282,9 @@ var CSCAIssuerLabelMap = map[string]string{
 //CSCAIssuerName is the name of the CS CA Issuer
 const CSCAIssuerName = "cs-ca-issuer"
 
+//CSCACertName is the name of the CS CA certificate
+const CSCACertName = "cs-ca-certificate"
+
 //CSCASecretName is the name of the CA certificate secret
 const CSCASecretName = "cs-ca-certificate-secret"
 
@@ -299,3 +303,21 @@ var RhacmGVK = schema.GroupVersionKind{
 	Kind:    "MultiClusterHub",
 	Version: "v1",
 }
+
+// DefaultEnableCertRefresh is set to true
+const DefaultEnableCertRefresh = true
+
+// DefaultCAList is the default CA for which the leaf certs need to be refreshed
+var DefaultCAList = []operatorv1alpha1.CACertificate{
+	{
+		CertName:  "cs-ca-certificate",
+		Namespace: DeployNamespace,
+	},
+	{
+		CertName:  "mongodb-root-ca-cert",
+		Namespace: DeployNamespace,
+	},
+}
+
+// CertManager instance name
+const CertManagerInstanceName = "default"

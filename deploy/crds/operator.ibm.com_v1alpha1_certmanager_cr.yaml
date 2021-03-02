@@ -11,5 +11,6 @@ spec:
   enableWebhook: true
   imageRegistry: quay.io/opencloudio
   version: "3.8.2"
+  enableCertRefresh: true
 status:
   certManagerStatus: ''

@@ -279,3 +279,12 @@ rules:
   verbs:
   - list
   - watch
+# required by the certificate refresh controller to find certificates based on clusterissuer
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
