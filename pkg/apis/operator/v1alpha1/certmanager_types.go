@@ -43,6 +43,17 @@ type CertManagerSpec struct {
 	CertManagerCAInjector CertManagerContainerSpec `json:"certManagerCAInjector,omitempty"`
 	//ConfigMapWatcher includes spec for icp-configmap-watcher workload
 	ConfigMapWatcher CertManagerContainerSpec `json:"configMapWatcher,omitempty"`
+
+	//EnableCertRefresh is a flag that can be set to enable the refresh of leaf certificates based on a root CA
+	EnableCertRefresh *bool `json:"enableCertRefresh,omitempty"`
+
+	//RefreshCertsBasedOnCA is a list of CA certificate names. Leaf certificates created from the CA will be refreshed when the CA is refreshed.
+	RefreshCertsBasedOnCA []CACertificate `json:"refreshCertsBasedOnCA,omitempty"`
+}
+
+type CACertificate struct {
+	CertName  string `json:"certName"`
+	Namespace string `json:"namespace"`
 }
 
 //CertManagerContainerSpec defines the spec related to individual operand containers

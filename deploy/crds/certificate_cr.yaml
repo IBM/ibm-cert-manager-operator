@@ -13,3 +13,5 @@ spec:
   secretName: cs-ca-certificate-secret
   isCA: true
   commonName: cs-ca-certificate
+  duration: 17520h0m0s
+  renewBefore: 720h0m0s
