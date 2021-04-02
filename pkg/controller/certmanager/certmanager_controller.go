@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"strings"
 
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
@@ -267,19 +266,6 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 			return reconcile.Result{}, err
 		}
 
-		// Check if the issuer already exists; if yes, do nothing
-		if err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.CSCAIssuerName, Namespace: res.DeployNamespace}, res.CSCAIssuer); err == nil {
-			log.Info(res.CSCAIssuerName + " exists")
-		} else {
-			// Create the cs-ca-issuer
-			err = r.createIssuer(instance, res.CSCAIssuer)
-			if err != nil {
-				log.Error(err, "Error creating CS CA issuer")
-				return reconcile.Result{}, err
-			}
-			log.Info(res.CSCAIssuerName + " successfully created")
-		}
-
 		// Return and don't requeue
 		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
 		return reconcile.Result{}, nil
@@ -312,23 +298,6 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "Failed")
 		r.updateStatus(instance, "Error deploying cert-manager")
 		return reconcile.Result{Requeue: true}, nil
-	}
-
-	// Check if the issuer already exists; if yes, do nothing
-	if err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.CSCAIssuerName, Namespace: res.DeployNamespace}, res.CSCAIssuer); err == nil {
-		log.Info(res.CSCAIssuerName + " exists")
-	} else {
-		// Create the cs-ca-issuer
-		err = r.createIssuer(instance, res.CSCAIssuer)
-		if err != nil {
-			if strings.Contains(err.Error(), "Internal error occurred: failed calling webhook") {
-				log.Info("Warning: Cert-manager service is coming up, cs-ca-issuer will be created once the webhook connection is set up")
-			} else {
-				log.Error(err, "Error creating CS CA issuer")
-			}
-			return reconcile.Result{}, err
-		}
-		log.Info(res.CSCAIssuerName + " successfully created")
 	}
 
 	r.updateEvent(instance, "Deployed cert-manager successfully", corev1.EventTypeNormal, "Deployed")
