@@ -22,14 +22,14 @@ CSV_FILE=$3
 
 # replace operator image
 yq -i eval ".spec.install.spec.deployments[0].spec.template.spec.containers[0].image = \"${REGISTRY}/${IMG}-amd64:dev\"" \
-	${CSV_FILE}
+	"${CSV_FILE}"
 
 # replace operand images
 yq -i eval ".spec.install.spec.deployments[0].spec.template.spec.containers[0].env[0].value = \"${REGISTRY}/icp-cert-manager-controller:dev\"" \
-	${CSV_FILE}
+	"${CSV_FILE}"
 yq -i eval ".spec.install.spec.deployments[0].spec.template.spec.containers[0].env[1].value = \"${REGISTRY}/icp-cert-manager-webhook:dev\"" \
-	${CSV_FILE}
+	"${CSV_FILE}"
 yq -i eval ".spec.install.spec.deployments[0].spec.template.spec.containers[0].env[2].value = \"${REGISTRY}/icp-cert-manager-cainjector:dev\"" \
-	${CSV_FILE}
+	"${CSV_FILE}"
 yq -i eval ".spec.install.spec.deployments[0].spec.template.spec.containers[0].env[3].value = \"${REGISTRY}/icp-cert-manager-acmesolver:dev\"" \
-	${CSV_FILE}
+	"${CSV_FILE}"
