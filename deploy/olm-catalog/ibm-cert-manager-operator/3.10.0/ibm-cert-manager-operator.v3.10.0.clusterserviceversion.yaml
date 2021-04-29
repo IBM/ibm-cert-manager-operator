@@ -411,13 +411,13 @@ spec:
                       - ibm-cert-manager-operator
                     env:
                       - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-                        value: hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom/icp-cert-manager-controller:dev
+                        value: quay.io/opencloudio/icp-cert-manager-controller:0.12.0
                       - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-                        value: hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom/icp-cert-manager-webhook:dev
+                        value: quay.io/opencloudio/icp-cert-manager-webhook:0.12.0
                       - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-                        value: hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom/icp-cert-manager-cainjector:dev
+                        value: quay.io/opencloudio/icp-cert-manager-cainjector:0.12.0
                       - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-                        value: hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom/icp-cert-manager-acmesolver:dev
+                        value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.12.0
                       - name: ICP_CONFIGMAP_WATCHER_IMAGE
                         value: quay.io/opencloudio/icp-configmap-watcher:3.5.0
                       - name: WATCH_NAMESPACE
@@ -434,7 +434,7 @@ spec:
                             fieldPath: metadata.namespace
                       - name: OPERATOR_NAME
                         value: ibm-cert-manager-operator
-                    image: hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom/ibm-cert-manager-operator-amd64:dev
+                    image: quay.io/opencloudio/ibm-cert-manager-operator:3.10.0
                     imagePullPolicy: Always
                     name: ibm-cert-manager-operator
                     resources:
