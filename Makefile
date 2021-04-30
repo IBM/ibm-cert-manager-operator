@@ -69,10 +69,6 @@ endif
 
 all: fmt check test coverage build images
 
-ifneq ("$(realpath $(DEST))", "$(realpath $(PWD))")
-    $(error Please run 'make' from $(DEST). Current directory is $(PWD))
-endif
-
 include common/Makefile.common.mk
 
 ############################################################
@@ -259,5 +255,37 @@ uninstall: ## Uninstall all that all performed in the $ make install
 	- kubectl delete -f deploy/role.yaml -n ${NAMESPACE}
 	# @echo ....... Deleting namespace .......
 	# - kubectl delete namespace ${NAMESPACE}
+
+############################################################
+# local dev section
+############################################################
+
+push-image-dev:
+	make build-image-amd64 VERSION=dev
+	docker push $(REGISTRY)/$(IMG)-amd64:dev
+
+dev-csv:
+	@common/scripts/replace-dev-images.sh \
+		$(REGISTRY) \
+		$(IMG) \
+		deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/ibm-cert-manager-operator.v${VERSION}.clusterserviceversion.yaml
+
+# deploys CSV using currently installed OLM on the cluster
+# change pullPolicy value in pkg/resources/constants.go to always pull operands
+run-csv:
+	operator-sdk run packagemanifests \
+		--operator-version ${VERSION} \
+		--operator-namespace ibm-common-services \
+		--olm-namespace openshift-operator-lifecycle-manager
+		
+	oc apply -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
+
+cleanup-csv:
+	oc delete -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
+
+	operator-sdk cleanup packagemanifests \
+		--operator-version ${VERSION} \
+		--operator-namespace ibm-common-services \
+		--olm-namespace openshift-operator-lifecycle-manager
 
 .PHONY: all work build check lint test coverage images multiarch-image
