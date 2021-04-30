@@ -141,9 +141,30 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, nil
 	}
 
+	// build default list of CAs, which are owned by Foundational Services
+	defaultCAList := make([]operatorv1alpha1.CACertificate, 0)
+	allNamespaces, err := r.getAllNamespaces()
+	if err != nil {
+		log.Error(err, "Error listing all namespaces - requeue the request")
+		return reconcile.Result{}, err
+	}
+
+	log.Info("##### DEBUG #####, building default list of CAs to refresh")
+	for _, ns := range allNamespaces.Items {
+		for _, name := range res.DefaultCANames {
+			defaultCAList = append(defaultCAList, operatorv1alpha1.CACertificate{
+				CertName:  name,
+				Namespace: ns.GetName(),
+			})
+		}
+	}
+
 	//set the list of CAs that need their leaf certs refreshed
-	listOfCAs = res.DefaultCAList
+	// listOfCAs = res.DefaultCAList
+	listOfCAs = defaultCAList
 	listOfCAs = append(listOfCAs, instance.Spec.RefreshCertsBasedOnCA...)
+
+	log.Info("##### DEBUG #####, listOfCAs: %v")
 
 	if len(listOfCAs) == 0 {
 		log.Info("List of CAs empty. No leaf certificates to refresh")
@@ -200,12 +221,6 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 			log.Error(err, "Error reading the leaf certificates for issuer - requeue the request")
 			return reconcile.Result{}, err
 		}
-	}
-
-	allNamespaces, err := r.getAllNamespaces()
-	if err != nil {
-		log.Error(err, "Error listing all namespaces - requeue the request")
-		return reconcile.Result{}, err
 	}
 
 	for _, clusterissuer := range clusterissuers {
