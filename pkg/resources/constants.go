@@ -306,22 +306,14 @@ var RhacmGVK = schema.GroupVersionKind{
 // DefaultEnableCertRefresh is set to true
 const DefaultEnableCertRefresh = true
 
-// DefaultCAList is the default CA for which the leaf certs need to be refreshed
-// var DefaultCAList = []operatorv1alpha1.CACertificate{
-// 	{
-// 		CertName:  "cs-ca-certificate",
-// 		Namespace: DeployNamespace,
-// 	},
-// 	{
-// 		CertName:  "mongodb-root-ca-cert",
-// 		Namespace: DeployNamespace,
-// 	},
-// }
+// DefaultCANames is the default CA names for which the leaf certs need to be refreshed
 var DefaultCANames = []string{"cs-ca-certificate", "mongodb-root-ca-cert"}
 
 // CertManager instance name
 const CertManagerInstanceName = "default"
 
+// OdlmDeploymentName is the deployment name of ODLM
 const OdlmDeploymentName = "operand-deployment-lifecycle-manager"
 
+// ProductName is the name of Common Services
 const ProductName = "IBM Cloud Pak Foundational Services"

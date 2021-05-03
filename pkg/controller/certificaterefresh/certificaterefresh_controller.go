@@ -146,7 +146,6 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	}
 
 	//set the list of CAs that need their leaf certs refreshed
-	// listOfCAs = res.DefaultCAList
 	listOfCAs = r.buildDefaultCAList()
 	listOfCAs = append(listOfCAs, instance.Spec.RefreshCertsBasedOnCA...)
 
