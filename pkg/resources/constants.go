@@ -321,3 +321,7 @@ var DefaultCANames = []string{"cs-ca-certificate", "mongodb-root-ca-cert"}
 
 // CertManager instance name
 const CertManagerInstanceName = "default"
+
+const OdlmDeploymentName = "operand-deployment-lifecycle-manager"
+
+const ProductName = "IBM Cloud Pak Foundational Services"

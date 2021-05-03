@@ -18,6 +18,7 @@ package certificaterefresh
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
@@ -25,6 +26,7 @@ import (
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -54,7 +56,8 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileCertificateRefresh{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
+	return &ReconcileCertificateRefresh{client: mgr.GetClient(), kubeclient: kubeclient, scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -81,8 +84,9 @@ var _ reconcile.Reconciler = &ReconcileCertificateRefresh{}
 type ReconcileCertificateRefresh struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client     client.Client
+	kubeclient kubernetes.Interface
+	scheme     *runtime.Scheme
 }
 
 // Reconcile reads that state of the cluster for a Certificate object and makes changes based on the state read
@@ -141,30 +145,12 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, nil
 	}
 
-	// build default list of CAs, which are owned by Foundational Services
-	defaultCAList := make([]operatorv1alpha1.CACertificate, 0)
-	allNamespaces, err := r.getAllNamespaces()
-	if err != nil {
-		log.Error(err, "Error listing all namespaces - requeue the request")
-		return reconcile.Result{}, err
-	}
-
-	log.Info("##### DEBUG #####, building default list of CAs to refresh")
-	for _, ns := range allNamespaces.Items {
-		for _, name := range res.DefaultCANames {
-			defaultCAList = append(defaultCAList, operatorv1alpha1.CACertificate{
-				CertName:  name,
-				Namespace: ns.GetName(),
-			})
-		}
-	}
-
 	//set the list of CAs that need their leaf certs refreshed
 	// listOfCAs = res.DefaultCAList
-	listOfCAs = defaultCAList
+	listOfCAs = r.buildDefaultCAList()
 	listOfCAs = append(listOfCAs, instance.Spec.RefreshCertsBasedOnCA...)
 
-	log.Info("##### DEBUG #####, listOfCAs: %v")
+	log.V(2).Info("refreshCertsBasedOnCA list: ", listOfCAs)
 
 	if len(listOfCAs) == 0 {
 		log.Info("List of CAs empty. No leaf certificates to refresh")
@@ -223,6 +209,12 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
+	allNamespaces, err := r.getAllNamespaces()
+	if err != nil {
+		log.Error(err, "Error listing all namespaces - requeue the request")
+		return reconcile.Result{}, err
+	}
+
 	for _, clusterissuer := range clusterissuers {
 		for _, ns := range allNamespaces.Items {
 			clusterLeafSecrets, err := r.findLeafSecrets(clusterissuer.Name, ns.Name)
@@ -259,6 +251,32 @@ func (r *ReconcileCertificateRefresh) getSecret(cert *certmgr.Certificate) (*cor
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: cert.Namespace}, secret)
 
 	return secret, err
+}
+
+func (r *ReconcileCertificateRefresh) buildDefaultCAList() []operatorv1alpha1.CACertificate {
+	defaultCAs := make([]operatorv1alpha1.CACertificate, 0)
+
+	log.Info(fmt.Sprintf("Finding all namespaces where %s is deployed", res.ProductName))
+	odlmDeployments, err := r.kubeclient.AppsV1().Deployments("").List(metav1.ListOptions{
+		FieldSelector: fmt.Sprintf("metadata.name=%s", res.OdlmDeploymentName),
+	})
+	if err != nil {
+		log.Error(err, "Error listing ODLM deployments")
+		return defaultCAs
+	}
+
+	log.Info("Building default list of CA certificates for leaf certificate refresh")
+
+	for _, d := range odlmDeployments.Items {
+		for _, name := range res.DefaultCANames {
+			defaultCAs = append(defaultCAs, operatorv1alpha1.CACertificate{
+				CertName:  name,
+				Namespace: d.GetNamespace(),
+			})
+		}
+	}
+
+	return defaultCAs
 }
 
 // findIssuersBasedOnCA finds issuers that are based on the given CA secret
