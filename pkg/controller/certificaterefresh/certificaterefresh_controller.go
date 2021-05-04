@@ -24,9 +24,10 @@ import (
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/apimachinery/pkg/fields"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -56,8 +57,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
-	return &ReconcileCertificateRefresh{client: mgr.GetClient(), kubeclient: kubeclient, scheme: mgr.GetScheme()}
+	return &ReconcileCertificateRefresh{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -84,9 +84,8 @@ var _ reconcile.Reconciler = &ReconcileCertificateRefresh{}
 type ReconcileCertificateRefresh struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client     client.Client
-	kubeclient kubernetes.Interface
-	scheme     *runtime.Scheme
+	client client.Client
+	scheme *runtime.Scheme
 }
 
 // Reconcile reads that state of the cluster for a Certificate object and makes changes based on the state read
@@ -149,7 +148,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	listOfCAs = r.buildDefaultCAList()
 	listOfCAs = append(listOfCAs, instance.Spec.RefreshCertsBasedOnCA...)
 
-	log.V(2).Info("refreshCertsBasedOnCA list: ", listOfCAs)
+	log.V(2).Info("refreshCertsBasedOnCA list: ", "", listOfCAs)
 
 	if len(listOfCAs) == 0 {
 		log.Info("List of CAs empty. No leaf certificates to refresh")
@@ -168,7 +167,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 
 	if !found {
 		//if certificate not in the list, disregard i.e. return and don't requeue
-		log.Info("Certificate is not a CA/doesn't need its leaf certs refreshed. Disregarding.", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+		log.Info("Certificate doesn't need its leaf certs refreshed. Disregarding.", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
 		return reconcile.Result{}, nil
 	}
 
@@ -256,8 +255,12 @@ func (r *ReconcileCertificateRefresh) buildDefaultCAList() []operatorv1alpha1.CA
 	defaultCAs := make([]operatorv1alpha1.CACertificate, 0)
 
 	log.Info(fmt.Sprintf("Finding all namespaces where %s is deployed", res.ProductName))
-	odlmDeployments, err := r.kubeclient.AppsV1().Deployments("").List(metav1.ListOptions{
-		FieldSelector: fmt.Sprintf("metadata.name=%s", res.OdlmDeploymentName),
+
+	odlmDeployments := &appsv1.DeploymentList{}
+	err := r.client.List(context.TODO(), odlmDeployments, &client.ListOptions{
+		FieldSelector: fields.SelectorFromSet(fields.Set{
+			"metadata.name": res.OdlmDeploymentName,
+		}),
 	})
 	if err != nil {
 		log.Error(err, "Error listing ODLM deployments")
