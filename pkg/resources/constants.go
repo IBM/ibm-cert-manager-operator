@@ -19,7 +19,6 @@ package resources
 import (
 	"os"
 
-	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -307,17 +306,14 @@ var RhacmGVK = schema.GroupVersionKind{
 // DefaultEnableCertRefresh is set to true
 const DefaultEnableCertRefresh = true
 
-// DefaultCAList is the default CA for which the leaf certs need to be refreshed
-var DefaultCAList = []operatorv1alpha1.CACertificate{
-	{
-		CertName:  "cs-ca-certificate",
-		Namespace: DeployNamespace,
-	},
-	{
-		CertName:  "mongodb-root-ca-cert",
-		Namespace: DeployNamespace,
-	},
-}
+// DefaultCANames is the default CA names for which the leaf certs need to be refreshed
+var DefaultCANames = []string{"cs-ca-certificate", "mongodb-root-ca-cert"}
 
 // CertManager instance name
 const CertManagerInstanceName = "default"
+
+// OdlmDeploymentName is the deployment name of ODLM
+const OdlmDeploymentName = "operand-deployment-lifecycle-manager"
+
+// ProductName is the name of Common Services
+const ProductName = "IBM Cloud Pak Foundational Services"

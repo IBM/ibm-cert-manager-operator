@@ -18,13 +18,16 @@ package certificaterefresh
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/fields"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -142,8 +145,10 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	}
 
 	//set the list of CAs that need their leaf certs refreshed
-	listOfCAs = res.DefaultCAList
+	listOfCAs = r.buildDefaultCAList()
 	listOfCAs = append(listOfCAs, instance.Spec.RefreshCertsBasedOnCA...)
+
+	log.V(2).Info("refreshCertsBasedOnCA list: ", "", listOfCAs)
 
 	if len(listOfCAs) == 0 {
 		log.Info("List of CAs empty. No leaf certificates to refresh")
@@ -162,7 +167,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 
 	if !found {
 		//if certificate not in the list, disregard i.e. return and don't requeue
-		log.Info("Certificate is not a CA/doesn't need its leaf certs refreshed. Disregarding.", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+		log.Info("Certificate doesn't need its leaf certs refreshed. Disregarding.", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
 		return reconcile.Result{}, nil
 	}
 
@@ -244,6 +249,36 @@ func (r *ReconcileCertificateRefresh) getSecret(cert *certmgr.Certificate) (*cor
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: cert.Namespace}, secret)
 
 	return secret, err
+}
+
+func (r *ReconcileCertificateRefresh) buildDefaultCAList() []operatorv1alpha1.CACertificate {
+	defaultCAs := make([]operatorv1alpha1.CACertificate, 0)
+
+	log.Info(fmt.Sprintf("Finding all namespaces where %s is deployed", res.ProductName))
+
+	odlmDeployments := &appsv1.DeploymentList{}
+	err := r.client.List(context.TODO(), odlmDeployments, &client.ListOptions{
+		FieldSelector: fields.SelectorFromSet(fields.Set{
+			"metadata.name": res.OdlmDeploymentName,
+		}),
+	})
+	if err != nil {
+		log.Error(err, "Error listing ODLM deployments")
+		return defaultCAs
+	}
+
+	log.Info("Building default list of CA certificates for leaf certificate refresh")
+
+	for _, d := range odlmDeployments.Items {
+		for _, name := range res.DefaultCANames {
+			defaultCAs = append(defaultCAs, operatorv1alpha1.CACertificate{
+				CertName:  name,
+				Namespace: d.GetNamespace(),
+			})
+		}
+	}
+
+	return defaultCAs
 }
 
 // findIssuersBasedOnCA finds issuers that are based on the given CA secret

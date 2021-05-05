@@ -24,6 +24,7 @@ import (
 	"runtime"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
@@ -40,6 +41,7 @@ import (
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	"github.com/spf13/pflag"
 	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	apiextensionv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -162,6 +164,16 @@ func main() {
 	if err := secretshare.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
+	}
+
+	// build index for cache that controller client reads from
+	// necessary for filtering objects by FieldSelector
+	cache := mgr.GetCache()
+	indexFunc := func(obj k8sruntime.Object) []string {
+		return []string{obj.(*appsv1.Deployment).Name}
+	}
+	if err := cache.IndexField(&appsv1.Deployment{}, "metadata.name", indexFunc); err != nil {
+		panic(err)
 	}
 
 	// Setup all Controllers
