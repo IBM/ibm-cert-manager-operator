@@ -100,7 +100,13 @@ rules:
   resources:
   - customresourcedefinitions
   verbs:
-  - '*' 
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 # operator creates clusterrole, clusterrolebinding for the cert-manager operands. 
 # creates rolebinding as cert-manager-webhook needs to access a configmap in kube-system, so it needs to create a rolebinding in kube-system
 - apiGroups:
@@ -121,7 +127,13 @@ rules:
   resources:
   - apiservices
   verbs:
-  - '*' 
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch 
 # operator needs to create mutatingwebhookconfigurations, validatingwebhookconfigurations as a part of webhook resources
 - apiGroups:
   - admissionregistration.k8s.io
@@ -129,7 +141,13 @@ rules:
   - mutatingwebhookconfigurations
   - validatingwebhookconfigurations
   verbs:
-  - '*' 
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch 
 # operator needs cluster-wide access to all the below resources because these are a part of clusterrole for operands
 # to create a clusterrole with the below permissions, the creator must also have those permissions, in this case, the operator
 
@@ -144,7 +162,13 @@ rules:
   - clusterissuers
   - issuers
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - certmanager.k8s.io
   resources:
@@ -221,7 +245,13 @@ rules:
   - statefulsets
   - daemonsets
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 # need access to configmaps by both cert-manager and configmap-watcher service
 - apiGroups:
   - ""
@@ -244,7 +274,13 @@ rules:
   - issuers
   - certificaterequests
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 # needed by the operator to enable/disable hostNetwork for cert-manager-webhook
 - apiGroups:
   - security.openshift.io
@@ -261,7 +297,13 @@ rules:
   resources:
   - subjectaccessreviews
   verbs:
-  - '*' 
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch 
 # needed by the operator to detect RHACM is installed
 - apiGroups:
   - operator.open-cluster-management.io

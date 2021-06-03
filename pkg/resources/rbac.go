@@ -42,7 +42,7 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 			Resources: []string{"secrets", "configmaps"},
 		},
 		{
-			Verbs:     []string{"*"},
+			Verbs:     []string{"create", "delete", "get", "list", "patch", "update", "watch"},
 			APIGroups: []string{"certmanager.k8s.io"},
 			Resources: []string{"certificates", "issuers", "clusterissuers", "orders", "challenges"},
 		},
@@ -78,17 +78,17 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 			Resources: []string{"ingresses"},
 		},
 		{
-			Verbs:     []string{"*"},
+			Verbs:     []string{"create", "delete", "get", "list", "patch", "update", "watch"},
 			APIGroups: []string{"apps"},
 			Resources: []string{"deployments", "statefulsets", "daemonsets"},
 		},
 		{
-			Verbs:     []string{"*"},
+			Verbs:     []string{"create", "delete", "get", "list", "patch", "update", "watch"},
 			APIGroups: []string{"apiextensions.k8s.io"},
 			Resources: []string{"customresourcedefinitions"},
 		},
 		{
-			Verbs:     []string{"*"},
+			Verbs:     []string{"create", "delete", "get", "list", "patch", "update", "watch"},
 			APIGroups: []string{"admission.certmanager.k8s.io"},
 			Resources: []string{"certificates", "clusterissuers", "issuers", "certificaterequests"},
 		},
@@ -99,17 +99,17 @@ var DefaultClusterRole = &rbacv1.ClusterRole{
 			ResourceNames: []string{"restricted", "hostnetwork"},
 		},
 		{
-			Verbs:     []string{"*"},
+			Verbs:     []string{"create", "delete", "get", "list", "patch", "update", "watch"},
 			APIGroups: []string{"admissionregistration.k8s.io"},
 			Resources: []string{"mutatingwebhookconfigurations", "validatingwebhookconfigurations"},
 		},
 		{
-			Verbs:     []string{"*"},
+			Verbs:     []string{"create", "delete", "get", "list", "patch", "update", "watch"},
 			APIGroups: []string{"apiregistration.k8s.io"},
 			Resources: []string{"apiservices"},
 		},
 		{
-			Verbs:     []string{"*"},
+			Verbs:     []string{"create", "delete", "get", "list", "patch", "update", "watch"},
 			APIGroups: []string{"authorization.k8s.io"},
 			Resources: []string{"subjectaccessreviews"},
 		},

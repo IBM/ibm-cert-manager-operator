@@ -203,7 +203,13 @@ spec:
               resources:
                 - customresourcedefinitions
               verbs:
-                - '*'
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
                 - rbac.authorization.k8s.io
               resources:
@@ -221,14 +227,26 @@ spec:
               resources:
                 - apiservices
               verbs:
-                - '*'
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
                 - admissionregistration.k8s.io
               resources:
                 - mutatingwebhookconfigurations
                 - validatingwebhookconfigurations
               verbs:
-                - '*'
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
                 - certmanager.k8s.io
               resources:
@@ -239,7 +257,13 @@ spec:
                 - clusterissuers
                 - issuers
               verbs:
-                - '*'
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
                 - certmanager.k8s.io
               resources:
@@ -309,7 +333,13 @@ spec:
                 - statefulsets
                 - daemonsets
               verbs:
-                - '*'
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
                 - ""
               resources:
@@ -330,7 +360,13 @@ spec:
                 - issuers
                 - certificaterequests
               verbs:
-                - '*'
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
                 - security.openshift.io
               resourceNames:
@@ -345,7 +381,13 @@ spec:
               resources:
                 - subjectaccessreviews
               verbs:
-                - '*'
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
                 - operator.open-cluster-management.io
               resources:
