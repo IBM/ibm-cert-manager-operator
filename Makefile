@@ -281,7 +281,7 @@ run-csv:
 	oc apply -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
 
 cleanup-csv:
-	oc delete -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
+	oc delete -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml --ignore-not-found
 
 	operator-sdk cleanup packagemanifests \
 		--operator-version ${VERSION} \
