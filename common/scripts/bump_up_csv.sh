@@ -46,11 +46,11 @@ NEW_CSV_VERSION=${1}
 DEPLOY_DIR=${DEPLOY_DIR:-deploy}
 BUNDLE_DIR=${BUNDLE_DIR:-deploy/olm-catalog/${OPERATOR_NAME}}
 # get the version number for the current/last CSV
-LAST_CSV_DIR=$(find "${BUNDLE_DIR}" -maxdepth 1 -type d | sort | tail -1)
+LAST_CSV_DIR=$(find "${BUNDLE_DIR}" -maxdepth 1 -type d | sort -V | tail -1)
 LAST_CSV_VERSION=$(basename "${LAST_CSV_DIR}")
 NEW_CSV_DIR=${LAST_CSV_DIR//${LAST_CSV_VERSION}/${NEW_CSV_VERSION}}
 
-PREVIOUS_CSV_DIR=$(find "${BUNDLE_DIR}" -maxdepth 1 -type d | sort | tail -2 | head -1)
+PREVIOUS_CSV_DIR=$(find "${BUNDLE_DIR}" -maxdepth 1 -type d | sort -V | tail -2 | head -1)
 PREVIOUS_CSV_VERSION=$(basename "${PREVIOUS_CSV_DIR}")
 
 if [ "${LAST_CSV_VERSION}" == "${NEW_CSV_VERSION}" ]; then
