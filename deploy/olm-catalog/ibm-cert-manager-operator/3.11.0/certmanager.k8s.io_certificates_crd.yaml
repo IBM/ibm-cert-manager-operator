@@ -39,7 +39,7 @@ spec:
           jsonPath: .metadata.creationTimestamp
           name: Age
           type: date
-        - jsonPath: .metadata.notAfter
+        - jsonPath: .status.notAfter
           name: Expiration
           type: string
       name: v1alpha1

@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"reflect"
 
-	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	certmgr "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"

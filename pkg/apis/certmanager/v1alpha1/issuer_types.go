@@ -18,7 +18,7 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	apiext "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1" // TODO: investigate changing to v1
+	apiext "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1" // TODO: investigate changing to v1
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -597,6 +597,7 @@ const (
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status"
 // +kubebuilder:resource:path=clusterissuers,scope=Cluster
 type ClusterIssuer struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -619,6 +620,7 @@ type ClusterIssuerList struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Issuer is the Schema for the issuers API
+// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status"
 // +kubebuilder:resource:path=issuers,scope=Namespaced
 type Issuer struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -639,5 +641,5 @@ type IssuerList struct {
 }
 
 func init() {
-	SchemeBuilder.Register(&Issuer{}, &IssuerList{})
+	SchemeBuilder.Register(&Issuer{}, &IssuerList{}, &ClusterIssuer{}, &ClusterIssuerList{})
 }
