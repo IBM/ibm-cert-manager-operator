@@ -51,6 +51,31 @@ spec:
         kind: Certificate
         name: certificates.certmanager.k8s.io
         version: v1alpha1
+      - description: Represents a certificateRequest
+        displayName: CertificateRequest
+        kind: CertificateRequest
+        name: certificaterequests.certmanager.k8s.io
+        version: v1alpha1
+      - description: Represents a Issuer
+        displayName: Issuer
+        kind: Issuer
+        name: issuers.certmanager.k8s.io
+        version: v1alpha1
+      - description: Represents a clusterissuer
+        displayName: ClusterIssuer
+        kind: ClusterIssuer
+        name: clusterissuers.certmanager.k8s.io
+        version: v1alpha1
+      - description: Represents an order
+        displayName: Order
+        kind: Order
+        name: orders.certmanager.k8s.io
+        version: v1alpha1
+      - description: Represents a challenge
+        displayName: Challenge
+        kind: Challenge
+        name: challenges.certmanager.k8s.io
+        version: v1alpha1
       - description: CertManager is the Schema for the certmanagers API
         kind: CertManager
         name: certmanagers.operator.ibm.com
