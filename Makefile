@@ -262,6 +262,13 @@ uninstall: ## Uninstall all that all performed in the $ make install
 # local dev section
 ############################################################
 
+# updates auto-generate code and CRD yamls
+update-generated:
+	operator-sdk generate k8s
+	operator-sdk generate crds
+	common/scripts/patch-metadata.sh
+	cp deploy/crds/certmanager* deploy/olm-catalog/ibm-cert-manager-operator/3.11.0/
+
 push-image-dev:
 	make build-image-amd64 VERSION=dev
 	docker push $(REGISTRY)/$(IMG)-amd64:dev
