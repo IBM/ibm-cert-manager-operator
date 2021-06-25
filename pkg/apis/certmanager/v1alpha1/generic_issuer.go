@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// nolint // copied from v0.10.0 jetstack cert-manager
+// nolint // preserving original code from v0.10.0 jetstack as much as possible
 package v1alpha1
 
 import (

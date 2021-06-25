@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+// nolint // preserving original code from v0.10.0 jetstack as much as possible
 package v1alpha1
 
 import (

@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+// nolint // preserving original code from v0.10.0 jetstack as much as possible
 package v1alpha1
 
 import (
@@ -165,11 +166,11 @@ type ACMEIssuer struct {
 	// +optional
 	Solvers []ACMEChallengeSolver `json:"solvers,omitempty"`
 
-	// DEPRECATED: HTTP-01 config //nolint
+	// DEPRECATED: HTTP-01 config
 	// +optional
 	HTTP01 *ACMEIssuerHTTP01Config `json:"http01,omitempty"`
 
-	// DEPRECATED: DNS-01 config //nolint
+	// DEPRECATED: DNS-01 config
 	// +optional
 	DNS01 *ACMEIssuerDNS01Config `json:"dns01,omitempty"`
 }
