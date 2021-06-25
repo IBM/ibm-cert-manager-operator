@@ -165,11 +165,11 @@ type ACMEIssuer struct {
 	// +optional
 	Solvers []ACMEChallengeSolver `json:"solvers,omitempty"`
 
-	// DEPRECATED: HTTP-01 config
+	// DEPRECATED: HTTP-01 config //nolint
 	// +optional
 	HTTP01 *ACMEIssuerHTTP01Config `json:"http01,omitempty"`
 
-	// DEPRECATED: DNS-01 config
+	// DEPRECATED: DNS-01 config //nolint
 	// +optional
 	DNS01 *ACMEIssuerDNS01Config `json:"dns01,omitempty"`
 }

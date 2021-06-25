@@ -61,7 +61,7 @@ type OrderSpec struct {
 	//
 	// This field will be removed when support for solver config specified on
 	// the Certificate under certificate.spec.acme has been removed.
-	// DEPRECATED: this field will be removed in future. Solver configuration
+	// DEPRECATED: this field will be removed in future. Solver configuration //nolint
 	// must instead be provided on ACME Issuer resources.
 	// +optional
 	Config []DomainSolverConfig `json:"config,omitempty"`

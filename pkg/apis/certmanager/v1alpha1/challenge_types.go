@@ -53,7 +53,7 @@ type ChallengeSpec struct {
 	// Config specifies the solver configuration for this challenge.
 	// Only **one** of 'config' or 'solver' may be specified, and if both are
 	// specified then no action will be performed on the Challenge resource.
-	// DEPRECATED: the 'solver' field should be specified instead
+	// DEPRECATED: the 'solver' field should be specified instead //nolint
 	// +optional
 	Config *SolverConfig `json:"config,omitempty"`
 
