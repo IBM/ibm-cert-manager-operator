@@ -19,7 +19,6 @@ BUILD_LOCALLY ?= 1
 # Image URL to use all building/pushing image targets;
 # Use your own docker registry and image name for dev/test by overriding the IMG and REGISTRY environment variable.
 IMG ?= ibm-cert-manager-operator
-REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
@@ -148,7 +147,9 @@ local:
 
 ifeq ($(BUILD_LOCALLY),0)
     export CONFIG_DOCKER_TARGET = config-docker
-config-docker:
+	REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
+else
+	REGISTRY ?= "hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/ibmcom"
 endif
 
 
@@ -260,6 +261,13 @@ uninstall: ## Uninstall all that all performed in the $ make install
 # local dev section
 ############################################################
 
+# updates auto-generate code and CRD yamls
+update-generated:
+	operator-sdk generate k8s
+	operator-sdk generate crds
+	common/scripts/patch-metadata.sh
+	cp deploy/crds/certmanager* deploy/olm-catalog/ibm-cert-manager-operator/3.11.0/
+
 push-image-dev:
 	make build-image-amd64 VERSION=dev
 	docker push $(REGISTRY)/$(IMG)-amd64:dev
@@ -281,7 +289,7 @@ run-csv:
 	oc apply -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
 
 cleanup-csv:
-	oc delete -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
+	oc delete -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml --ignore-not-found
 
 	operator-sdk cleanup packagemanifests \
 		--operator-version ${VERSION} \

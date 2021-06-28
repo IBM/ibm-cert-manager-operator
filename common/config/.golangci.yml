@@ -40,7 +40,7 @@ linters:
     - govet
     - ineffassign
     - interfacer
-    - misspell
+    # - misspell
     - staticcheck
     - structcheck
     - stylecheck

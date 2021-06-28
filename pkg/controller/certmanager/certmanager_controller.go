@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"reflect"
 
-	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	certmgr "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
@@ -34,7 +34,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	apiextensionsAPIv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	apiextensionsAPIv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -135,7 +135,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch changes to custom resource defintions that are owned by this operator - in case of deletion or changes
-	err = c.Watch(&source.Kind{Type: &apiextensionsAPIv1beta1.CustomResourceDefinition{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &apiextensionsAPIv1.CustomResourceDefinition{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &operatorv1alpha1.CertManager{},
 	})
