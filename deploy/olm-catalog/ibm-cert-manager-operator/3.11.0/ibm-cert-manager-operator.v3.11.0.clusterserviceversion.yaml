@@ -2,7 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    olm.skipRange: '>=3.9.0 <3.11.0'
+    olm.skipRange: '<3.11.0'
     alm-examples: |-
       [
         {
