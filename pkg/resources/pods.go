@@ -20,11 +20,34 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+var podAffinity = &corev1.Affinity{
+	NodeAffinity: &corev1.NodeAffinity{
+		RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+			NodeSelectorTerms: []corev1.NodeSelectorTerm{
+				{
+					MatchExpressions: []corev1.NodeSelectorRequirement{
+						{
+							Key:      "kubernetes.io/arch",
+							Operator: "In",
+							Values: []string{
+								"amd64",
+								"ppc64le",
+								"s390x",
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
 var podSecurity = &corev1.PodSecurityContext{
 	RunAsNonRoot: &runAsNonRoot,
 }
 
 var certManagerControllerPod = corev1.PodSpec{
+	Affinity:           podAffinity,
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
@@ -33,6 +56,7 @@ var certManagerControllerPod = corev1.PodSpec{
 }
 
 var certManagerWebhookPod = corev1.PodSpec{
+	Affinity:           podAffinity,
 	HostNetwork:        TrueVar,
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
@@ -52,6 +76,7 @@ var certManagerWebhookPod = corev1.PodSpec{
 }
 
 var certManagerCainjectorPod = corev1.PodSpec{
+	Affinity:           podAffinity,
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
@@ -60,6 +85,7 @@ var certManagerCainjectorPod = corev1.PodSpec{
 }
 
 var configmapWatcherPod = corev1.PodSpec{
+	Affinity:           podAffinity,
 	ServiceAccountName: ServiceAccount,
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
