@@ -229,11 +229,11 @@ func checkRhacm(client client.Client) (string, string, error) {
 		return "", mchNamespace, err
 	}
 	if !isFound {
-		return "", mchNamespace, errors.New("Could not find status of MultiClusterHub")
+		return "", mchNamespace, errors.New("could not find status of MultiClusterHub")
 	}
 	val, ok := mchStatus["currentVersion"]
 	if !ok {
-		return "", mchNamespace, errors.New("Could not find currentVersion in MultiClusterHub CR")
+		return "", mchNamespace, errors.New("could not find currentVersion in MultiClusterHub CR")
 	}
 	version := val.(string)
 
