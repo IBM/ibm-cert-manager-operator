@@ -22,9 +22,7 @@ import (
 	"reflect"
 
 	certmgr "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
-	"k8s.io/apimachinery/pkg/types"
-
-	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
+	"golang.org/x/mod/semver"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
@@ -251,34 +249,37 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	r.updateEvent(instance, "Instance found", corev1.EventTypeNormal, "Initializing")
 
 	//Check RHACM
-	rhacmErr := checkRhacm(r.client)
-	if rhacmErr == nil {
-		// multiclusterhub found, this means RHACM exists
-
-		// create a secretshare CR to copy clusterissuer secret to the rhacm issuer ns
-		rhacmClusterIssuerNamespace := res.RhacmNamespace + "-issuer"
-
-		log.Info("RHACM exists. Copying " + res.CSCASecretName + " to namespace " + rhacmClusterIssuerNamespace)
-
-		err := copySecret(r.client, res.CSCASecretName, res.DeployNamespace, rhacmClusterIssuerNamespace, res.RhacmSecretShareCRName)
-		if err != nil {
-			log.Error(err, "Error creating "+res.RhacmSecretShareCRName)
-			return reconcile.Result{}, err
-		}
-
-		// Return and don't requeue
-		r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
-		return reconcile.Result{}, nil
+	rhacmVersion, rhacmNamespace, rhacmErr := checkRhacm(r.client)
+	if rhacmErr != nil {
+		// will continue since RHACM most likely not installed
+		// logging error in case there is some other issue
+		log.Error(rhacmErr, "Error trying to check for RHACM")
 	}
+	if rhacmVersion != "" {
+		rhacmVersion = "v" + rhacmVersion
+		deployOperand := semver.Compare(rhacmVersion, "v2.3")
+		log.Info("Detected RHACM is deployed")
+		log.Info("RHACM version: " + rhacmVersion)
+		log.Info("RHACM namespace: " + rhacmNamespace)
 
-	// If operator is invoked again and the multiclusterhub CR doesn't exist anymore, it will still not deploy CS cert-manager
-	// This is as per request from CP4MCM to cover the RHACM upgrade scenario
-	// Here we are checking if the secretshare CR that we created to copy the secret exists,
-	// then it means that RHACM existed at some time
-	secretShareCRExistsErr := r.client.Get(context.Background(), types.NamespacedName{Name: res.RhacmSecretShareCRName, Namespace: res.DeployNamespace}, &secretshare.SecretShare{})
-	if secretShareCRExistsErr == nil {
-		log.Info("It looks like RHACM was installed before and now it's removed. Not deploying CS cert-manager, as RHACM could be upgrading")
-		return reconcile.Result{}, nil
+		if deployOperand < 0 {
+			log.Info("RHACM version is less than 2.3, so not deploying operand")
+			// multiclusterhub found, this means RHACM exists
+
+			// create a secretshare CR to copy clusterissuer secret to the rhacm issuer ns
+			rhacmClusterIssuerNamespace := rhacmNamespace + "-issuer"
+
+			log.Info("RHACM exists. Copying " + res.CSCASecretName + " to namespace " + rhacmClusterIssuerNamespace)
+			err := copySecret(r.client, res.CSCASecretName, res.DeployNamespace, rhacmClusterIssuerNamespace, res.RhacmSecretShareCRName)
+			if err != nil {
+				log.Error(err, "Error creating "+res.RhacmSecretShareCRName)
+				return reconcile.Result{}, err
+			}
+
+			// Return and don't requeue
+			r.updateStatus(instance, "IBM Cloud Platform Common Services cert-manager not installed. Red Hat Advanced Cluster Management for Kubernetes cert-manager is already installed and is in use by Common Services")
+			return reconcile.Result{}, nil
+		}
 	}
 
 	log.Info("RHACM does not exist")

@@ -205,17 +205,37 @@ func removeRoles(client client.Client) error {
 	return nil
 }
 
-//CheckRhacm checks if RHACM exists
-func checkRhacm(client client.Client) error {
+//CheckRhacm checks if RHACM exists and returns RHACM version and namespace
+func checkRhacm(client client.Client) (string, string, error) {
 
-	multiClusterHubType := &unstructured.Unstructured{}
-	multiClusterHubType.SetGroupVersionKind(res.RhacmGVK)
+	multiClusterHubList := &unstructured.UnstructuredList{}
+	multiClusterHubList.SetGroupVersionKind(res.RhacmGVK)
 
-	rhacmErr := client.Get(context.Background(), types.NamespacedName{
-		Namespace: res.RhacmNamespace,
-		Name:      res.RhacmCRName,
-	}, multiClusterHubType)
+	err := client.List(context.Background(), multiClusterHubList)
+	if err != nil {
+		return "", "", err
+	}
 
-	return rhacmErr
+	// there should only be one MultiClusterHub CR in a cluster
+	multiClusterHub := multiClusterHubList.Items[0]
+	mchNamespace := multiClusterHub.GetNamespace()
+	if mchNamespace == "" {
+		mchNamespace = res.RhacmNamespace
+	}
 
+	// get the currentVersion value from the CR's status
+	mchStatus, isFound, err := unstructured.NestedMap(multiClusterHub.Object, "status")
+	if err != nil {
+		return "", mchNamespace, err
+	}
+	if !isFound {
+		return "", mchNamespace, errors.New("could not find status of MultiClusterHub")
+	}
+	val, ok := mchStatus["currentVersion"]
+	if !ok {
+		return "", mchNamespace, errors.New("could not find currentVersion in MultiClusterHub CR")
+	}
+	version := val.(string)
+
+	return version, mchNamespace, nil
 }

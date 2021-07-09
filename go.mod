@@ -4,10 +4,10 @@ go 1.14
 
 require (
 	github.com/IBM/ibm-secretshare-operator v1.2.2
-	github.com/jetstack/cert-manager v0.10.0
 	github.com/operator-framework/operator-sdk v0.13.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
+	golang.org/x/mod v0.1.1-0.20191105210325-c90efee705ee
 	k8s.io/api v0.18.2
 	k8s.io/apiextensions-apiserver v0.18.2
 	k8s.io/apimachinery v0.18.2
