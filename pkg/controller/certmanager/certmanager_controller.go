@@ -267,7 +267,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 			// multiclusterhub found, this means RHACM exists
 
 			// create a secretshare CR to copy clusterissuer secret to the rhacm issuer ns
-			rhacmClusterIssuerNamespace := res.RhacmNamespace + "-issuer"
+			rhacmClusterIssuerNamespace := rhacmNamespace + "-issuer"
 
 			log.Info("RHACM exists. Copying " + res.CSCASecretName + " to namespace " + rhacmClusterIssuerNamespace)
 			err := copySecret(r.client, res.CSCASecretName, res.DeployNamespace, rhacmClusterIssuerNamespace, res.RhacmSecretShareCRName)
