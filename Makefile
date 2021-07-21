@@ -266,7 +266,7 @@ update-generated:
 	operator-sdk generate k8s
 	operator-sdk generate crds
 	common/scripts/patch-metadata.sh
-	cp deploy/crds/certmanager* deploy/olm-catalog/ibm-cert-manager-operator/3.11.0/
+	cp deploy/crds/certmanager* deploy/olm-catalog/ibm-cert-manager-operator/$(VERSION)/
 
 push-image-dev:
 	make build-image-amd64 VERSION=dev
