@@ -10,4 +10,4 @@ scorecard:
     - olm:
         cr-manifest:
           - "deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml"
-        csv-path: "deploy/olm-catalog/ibm-cert-manager-operator/3.11.0/ibm-cert-manager-operator.v3.11.0.clusterserviceversion.yaml"
+        csv-path: "deploy/olm-catalog/ibm-cert-manager-operator/3.12.0/ibm-cert-manager-operator.v3.12.0.clusterserviceversion.yaml"
