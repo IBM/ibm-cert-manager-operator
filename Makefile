@@ -282,10 +282,9 @@ dev-csv:
 # change pullPolicy value in pkg/resources/constants.go to always pull operands
 run-csv:
 	operator-sdk run packagemanifests \
-		--version ${VERSION} \
-		--namespace ibm-common-services \
-		--install-mode SingleNamespace=ibm-common-services \
-		./deploy
+		--operator-version ${VERSION} \
+		--operator-namespace ibm-common-services \
+		--olm-namespace openshift-operator-lifecycle-manager
 		
 	oc apply -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
 
@@ -293,6 +292,8 @@ cleanup-csv:
 	oc delete -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml --ignore-not-found
 
 	operator-sdk cleanup ${IMG} \
-		--namespace ibm-common-services \
+		--operator-version ${VERSION} \
+		--operator-namespace ibm-common-services \
+		--olm-namespace openshift-operator-lifecycle-manager
 
 .PHONY: all work build check lint test coverage images multiarch-image
