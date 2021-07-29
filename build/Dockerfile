@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:0ccb9988abbc72d383258d58a7f519a10b637d472f28fbca6eb5fab79ba82a6b
+FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:7735715721f161dea5603092c040b5eb89ab101044617f67288a866d0f9d0aaa
 
 ENV OPERATOR=/usr/local/bin/ibm-cert-manager-operator \
     USER_UID=1001 \
