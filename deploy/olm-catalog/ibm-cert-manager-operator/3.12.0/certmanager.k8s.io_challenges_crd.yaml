@@ -51,7 +51,7 @@ spec:
                   description: AuthzURL is the URL to the ACME Authorization resource that this challenge is a part of.
                   type: string
                 config:
-                  description: 'Config specifies the solver configuration for this challenge. Only **one** of ''config'' or ''solver'' may be specified, and if both are specified then no action will be performed on the Challenge resource. DEPRECATED: the ''solver'' field should be specified instead'
+                  description: 'Config specifies the solver configuration for this challenge. Only **one** of ''config'' or ''solver'' may be specified, and if both are specified then no action will be performed on the Challenge resource. DEPRECATED: the ''solver'' field should be specified instead //nolint'
                   properties:
                     dns01:
                       description: DNS01 contains DNS01 challenge solving configuration
