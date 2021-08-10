@@ -65,6 +65,11 @@ type ClusterIssuerList struct {
 // referenced as part of `issuerRef` fields.
 // It is scoped to a single namespace and can therefore only be referenced by
 // resources within the same namespace.
+// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status"
+// +kubebuilder:printcolumn:name="Status",priority=1,type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].message"
+// +kubebuilder:printcolumn:name="Age",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:resource:categories=cert-manager,path=issuers,scope=Namespaced
+// +kubebuilder:subresource:status
 type Issuer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

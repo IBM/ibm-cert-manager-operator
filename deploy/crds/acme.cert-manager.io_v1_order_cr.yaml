@@ -1,7 +1,0 @@
-apiVersion: acme.cert-manager.io/v1
-kind: Order
-metadata:
-  name: example-order
-spec:
-  # Add fields here
-  size: 3

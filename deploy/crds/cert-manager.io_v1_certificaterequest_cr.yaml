@@ -1,7 +1,0 @@
-apiVersion: cert-manager.io/v1
-kind: CertificateRequest
-metadata:
-  name: example-certificaterequest
-spec:
-  # Add fields here
-  size: 3
