@@ -2,8 +2,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: certificates.cert-manager.io
-  annotations:
-    api-approved.kubernetes.io: unapproved
   labels:
     app.kubernetes.io/instance: ibm-cert-manager-operator
     app.kubernetes.io/managed-by: ibm-cert-manager-operator
@@ -11,6 +9,8 @@ metadata:
 spec:
   group: cert-manager.io
   names:
+    categories:
+    - cert-manager
     kind: Certificate
     listKind: CertificateList
     plural: certificates

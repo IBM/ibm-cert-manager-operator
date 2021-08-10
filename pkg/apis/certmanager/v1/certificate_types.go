@@ -39,7 +39,7 @@ import (
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].message",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC."
 // +kubebuilder:printcolumn:name="Expiration",type="string",JSONPath=".status.notAfter"
-// +kubebuilder:resource:path=certificates,shortName=cert;certs,scope=Namespaced
+// +kubebuilder:resource:path=certificates,shortName=cert;certs,categories=cert-manager,scope=Namespaced
 type Certificate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
