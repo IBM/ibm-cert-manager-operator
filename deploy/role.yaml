@@ -153,6 +153,20 @@ rules:
 
 # cert-manager service needs to perform all operations on cert-manager resources in any namespace
 - apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - issuers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+- apiGroups:
   - certmanager.k8s.io
   resources:
   - certificates
