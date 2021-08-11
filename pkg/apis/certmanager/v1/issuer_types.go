@@ -348,3 +348,7 @@ const (
 	// should prevent attempts to sign certificates.
 	IssuerConditionReady IssuerConditionType = "Ready"
 )
+
+func init() {
+	SchemeBuilder.Register(&Issuer{}, &IssuerList{}, &ClusterIssuer{}, &ClusterIssuerList{})
+}
