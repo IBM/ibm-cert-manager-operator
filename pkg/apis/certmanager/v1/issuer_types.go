@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// nolint // preserving original code from v1.4.0 jetstack as much as possible
 package v1
 
 import (
