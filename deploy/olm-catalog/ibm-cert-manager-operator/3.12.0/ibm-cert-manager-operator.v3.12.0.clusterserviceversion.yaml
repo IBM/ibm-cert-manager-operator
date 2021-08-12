@@ -31,7 +31,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:3.12.0
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
     createdAt: "2021-07-21T16:51:00Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
