@@ -24,39 +24,6 @@ import (
 )
 
 // +genclient
-// +genclient:nonNamespaced
-// +k8s:openapi-gen=true
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:storageversion
-
-// A ClusterIssuer represents a certificate issuing authority which can be
-// referenced as part of `issuerRef` fields.
-// It is similar to an Issuer, however it is cluster-scoped and therefore can
-// be referenced by resources that exist in *any* namespace, not just the same
-// namespace as the referent.
-type ClusterIssuer struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	// Desired state of the ClusterIssuer resource.
-	Spec IssuerSpec `json:"spec"`
-
-	// Status of the ClusterIssuer. This is set and managed automatically.
-	// +optional
-	Status IssuerStatus `json:"status"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// ClusterIssuerList is a list of Issuers
-type ClusterIssuerList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata"`
-
-	Items []ClusterIssuer `json:"items"`
-}
-
-// +genclient
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:storageversion
@@ -350,5 +317,5 @@ const (
 )
 
 func init() {
-	SchemeBuilder.Register(&Issuer{}, &IssuerList{}, &ClusterIssuer{}, &ClusterIssuerList{})
+	SchemeBuilder.Register(&Issuer{}, &IssuerList{})
 }
