@@ -213,21 +213,7 @@ spec:
                 - cert-manager.io
               resources:
                 - certificates
-                - certificaterequests
-                - clusterissuers
                 - issuers
-              verbs:
-                - create
-                - delete
-                - get
-                - list
-                - patch
-                - update
-                - watch
-            - apiGroups:
-                - acme.cert-manager.io
-              resources:
-                - orders
               verbs:
                 - create
                 - delete
