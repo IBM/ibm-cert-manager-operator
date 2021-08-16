@@ -156,14 +156,14 @@ config-docker:
 endif
 
 
-build-image-amd64: build-amd64
+build-image-amd64: $(CONFIG_DOCKER_TARGET) build-amd64
 	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) -f build/Dockerfile .
 
-build-image-ppc64le: build-ppc64le
+build-image-ppc64le: $(CONFIG_DOCKER_TARGET) build-ppc64le
 	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
 	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) -f build/Dockerfile.ppc64le .
 
-build-image-s390x: build-s390x
+build-image-s390x: $(CONFIG_DOCKER_TARGET) build-s390x
 	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
 	@docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) -f build/Dockerfile.s390x .
 
