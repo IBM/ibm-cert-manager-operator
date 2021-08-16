@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:7735715721f161dea5603092c040b5eb89ab101044617f67288a866d0f9d0aaa
+FROM hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/build-images/ubi8-minimal:latest-amd64
 
 ENV OPERATOR=/usr/local/bin/ibm-cert-manager-operator \
     USER_UID=1001 \
