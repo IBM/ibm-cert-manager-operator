@@ -1,6 +1,6 @@
 module github.com/ibm/ibm-cert-manager-operator
 
-go 1.14
+go 1.16
 
 require (
 	github.com/IBM/ibm-secretshare-operator v1.2.2

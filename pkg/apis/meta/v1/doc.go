@@ -14,8 +14,7 @@
 // limitations under the License.
 //
 
-package version
-
-var (
-	Version = "3.13.0"
-)
+// Package v1 contains API Schema definitions for the meta v1 API group
+// +k8s:deepcopy-gen=package,register
+// +groupName=meta.cert-manager.io
+package v1

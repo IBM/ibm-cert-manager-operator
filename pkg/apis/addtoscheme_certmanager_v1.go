@@ -14,8 +14,13 @@
 // limitations under the License.
 //
 
-package version
+package apis
 
-var (
-	Version = "3.13.0"
+import (
+	v1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
 )
+
+func init() {
+	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
+	AddToSchemes = append(AddToSchemes, v1.SchemeBuilder.AddToScheme)
+}

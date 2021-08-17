@@ -14,8 +14,13 @@
 // limitations under the License.
 //
 
-package version
+package controller
 
-var (
-	Version = "3.13.0"
+import (
+	"github.com/ibm/ibm-cert-manager-operator/pkg/controller/issuer"
 )
+
+func init() {
+	// AddToManagerFuncs is a list of functions to create controllers and add them to a manager.
+	AddToManagerFuncs = append(AddToManagerFuncs, issuer.Add)
+}
