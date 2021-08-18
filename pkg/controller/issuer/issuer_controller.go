@@ -120,6 +120,9 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 	reqLogger.Info("### DEBUG ### Creating v1 Issuer", "Issuer.Namespace", instance.Namespace, "Issuer.Name", instance.Name)
 
 	annotations := instance.Annotations
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
 	annotations["ibm-cert-manager-operator-generated"] = "true"
 
 	v1Issuer := certmanagerv1.Issuer{

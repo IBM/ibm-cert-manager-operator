@@ -121,6 +121,9 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 	reqLogger.Info("### DEBUG ### Creating v1 Certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", instance.Name)
 
 	annotations := instance.Annotations
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
 	annotations["ibm-cert-manager-operator-generated"] = "true"
 
 	certificate := certmanagerv1.Certificate{
