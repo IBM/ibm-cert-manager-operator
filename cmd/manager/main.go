@@ -48,6 +48,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
@@ -60,6 +61,8 @@ var (
 	metricsHost               = "0.0.0.0"
 	metricsPort         int32 = 8383
 	operatorMetricsPort int32 = 8686
+	probeHost                 = "0.0.0.0"
+	probePort           int32 = 8081
 )
 var log = logf.Log.WithName("cmd")
 
@@ -116,8 +119,9 @@ func main() {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		MapperProvider:     restmapper.NewDynamicRESTMapper,
-		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
+		MapperProvider:         restmapper.NewDynamicRESTMapper,
+		MetricsBindAddress:     fmt.Sprintf("%s:%d", metricsHost, metricsPort),
+		HealthProbeBindAddress: fmt.Sprintf("%s:%d", probeHost, probePort),
 	})
 
 	if err != nil {
@@ -210,6 +214,15 @@ func main() {
 		if err == metrics.ErrServiceMonitorNotPresent {
 			log.Info("Install prometheus-operator in your cluster to create ServiceMonitor objects", "error", err.Error())
 		}
+	}
+
+	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		log.Error(err, "unable to set up health check")
+		os.Exit(1)
+	}
+	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+		log.Error(err, "unable to set up ready check")
+		os.Exit(1)
 	}
 
 	log.Info("Starting the Cmd.")
