@@ -22,6 +22,26 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+var ServiceAccountsToCreate = &corev1.ServiceAccountList{
+	Items: []corev1.ServiceAccount{*DefaultServiceAccount, *CAInjectorServiceAccount},
+}
+
+var RolesToCreate = &rbacv1.RoleList{
+	Items: []rbacv1.Role{*CAInjectorRole},
+}
+
+var RoleBindingsToCreate = &rbacv1.RoleBindingList{
+	Items: []rbacv1.RoleBinding{*CAInjectorRoleBinding},
+}
+
+var ClusterRolesToCreate = &rbacv1.ClusterRoleList{
+	Items: []rbacv1.ClusterRole{*DefaultClusterRole, *CAInjectorClusterRole},
+}
+
+var ClusterRoleBindingsToCreate = &rbacv1.ClusterRoleBindingList{
+	Items: []rbacv1.ClusterRoleBinding{*DefaultClusterRoleBinding, *CAInjectorClusterRoleBinding},
+}
+
 // DefaultServiceAccount is the service account used by cert-manager service
 var DefaultServiceAccount = &corev1.ServiceAccount{
 	ObjectMeta: metav1.ObjectMeta{
@@ -133,6 +153,121 @@ var DefaultClusterRoleBinding = &rbacv1.ClusterRoleBinding{
 		APIGroup: "rbac.authorization.k8s.io",
 		Kind:     "ClusterRole",
 		Name:     ClusterRoleName,
+	},
+}
+
+var CAInjectorServiceAccount = &corev1.ServiceAccount{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "ibm-cert-manager-cainjector",
+	},
+}
+
+var CAInjectorRole = &rbacv1.Role{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "ibm-cert-manager-cainjector:leaderelection",
+		Namespace: "ibm-common-services",
+	},
+	Rules: []rbacv1.PolicyRule{
+		{
+			Verbs:         []string{"get", "update", "patch"},
+			APIGroups:     []string{""},
+			Resources:     []string{"configmaps"},
+			ResourceNames: []string{"cert-manager-cainjector-leader-election", "cert-manager-cainjector-leader-election-core"},
+		},
+		{
+			Verbs:     []string{"create"},
+			APIGroups: []string{""},
+			Resources: []string{"configmaps"},
+		},
+		{
+			Verbs:         []string{"get", "update", "patch"},
+			APIGroups:     []string{"coordination.k8s.io"},
+			Resources:     []string{"leases"},
+			ResourceNames: []string{"cert-manager-cainjector-leader-election", "cert-manager-cainjector-leader-election-core"},
+		},
+		{
+			Verbs:     []string{"create"},
+			APIGroups: []string{"coordination.k8s.io"},
+			Resources: []string{"leases"},
+		},
+	},
+}
+
+var CAInjectorRoleBinding = &rbacv1.RoleBinding{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "ibm-cert-manager-cainjector:leaderelection",
+		Namespace: "ibm-common-services",
+	},
+	Subjects: []rbacv1.Subject{
+		{
+			Kind: "ServiceAccount",
+			Name: "ibm-cert-manager-cainjector",
+		},
+	},
+	RoleRef: rbacv1.RoleRef{
+		APIGroup: "rbac.authorization.k8s.io",
+		Kind:     "Role",
+		Name:     "ibm-cert-manager-cainjector:leaderelection",
+	},
+}
+
+var CAInjectorClusterRole = &rbacv1.ClusterRole{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "ibm-cert-manager-cainjector",
+	},
+	Rules: []rbacv1.PolicyRule{
+		{
+			Verbs:     []string{"get", "list", "watch"},
+			APIGroups: []string{"cert-manager.io"},
+			Resources: []string{"certificates"},
+		},
+		{
+			Verbs:     []string{"get", "list", "watch"},
+			APIGroups: []string{""},
+			Resources: []string{"secrets"},
+		},
+		{
+			Verbs:     []string{"get", "create", "update", "patch"},
+			APIGroups: []string{""},
+			Resources: []string{"events"},
+		},
+		{
+			Verbs:     []string{"get", "list", "watch", "update"},
+			APIGroups: []string{"admissionregistration.k8s.io"},
+			Resources: []string{"validatingwebhookconfigurations", "mutatingwebhookconfigurations"},
+		},
+		{
+			Verbs:     []string{"get", "list", "watch", "update"},
+			APIGroups: []string{"apiregistration.k8s.io"},
+			Resources: []string{"apiservices"},
+		},
+		{
+			Verbs:     []string{"get", "list", "watch", "update"},
+			APIGroups: []string{"apiextensions.k8s.io"},
+			Resources: []string{"customresourcedefinitions"},
+		},
+		{
+			Verbs:     []string{"get", "list", "watch", "update"},
+			APIGroups: []string{"auditregistration.k8s.io"},
+			Resources: []string{"auditsinks"},
+		},
+	},
+}
+
+var CAInjectorClusterRoleBinding = &rbacv1.ClusterRoleBinding{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "ibm-cert-manager-cainjector",
+	},
+	Subjects: []rbacv1.Subject{
+		{
+			Kind: "ServiceAccount",
+			Name: "ibm-cert-manager-cainjector",
+		},
+	},
+	RoleRef: rbacv1.RoleRef{
+		APIGroup: "rbac.authorization.k8s.io",
+		Kind:     "ClusterRole",
+		Name:     "ibm-cert-manager-cainjector",
 	},
 }
 

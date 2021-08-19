@@ -344,3 +344,31 @@ rules:
   - get
   - list
   - watch
+
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "create", "update", "patch"]
+
+- apiGroups: ["auditregistration.k8s.io"]
+  resources: ["auditsinks"]
+  verbs: ["get", "list", "watch", "update"]
+
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  resourceNames: ["cert-manager-cainjector-leader-election", "cert-manager-cainjector-leader-election-core"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create"]
+
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - delete
