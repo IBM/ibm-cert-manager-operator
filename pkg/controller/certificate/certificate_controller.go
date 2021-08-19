@@ -137,14 +137,14 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 		},
 		Spec: certmanagerv1.CertificateSpec{
 			CommonName: instance.Spec.CommonName,
-			Duration:   &metav1.Duration{Duration: instance.Spec.Duration.Duration},
+			Duration:   instance.Spec.Duration,
 			IssuerRef: cmmeta.ObjectReference{
 				Name:  instance.Spec.IssuerRef.Name,
 				Kind:  instance.Spec.IssuerRef.Kind,
 				Group: instance.Spec.IssuerRef.Group,
 			},
 			IsCA:        instance.Spec.IsCA,
-			RenewBefore: &metav1.Duration{Duration: instance.Spec.RenewBefore.Duration},
+			RenewBefore: instance.Spec.RenewBefore,
 			SecretName:  instance.Spec.SecretName,
 		},
 	}
