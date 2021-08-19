@@ -77,7 +77,7 @@ var certManagerWebhookPod = corev1.PodSpec{
 
 var certManagerCainjectorPod = corev1.PodSpec{
 	Affinity:           podAffinity,
-	ServiceAccountName: ServiceAccount,
+	ServiceAccountName: "ibm-cert-manager-cainjector",
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
 		cainjectorContainer,

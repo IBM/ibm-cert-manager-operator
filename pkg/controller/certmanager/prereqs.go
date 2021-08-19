@@ -49,8 +49,14 @@ func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, clien
 	if clusterRoleErr := createClusterRole(instance, scheme, client); clusterRoleErr != nil {
 		return clusterRoleErr
 	}
+	if roleErr := createRole(instance, scheme, client); roleErr != nil {
+		return roleErr
+	}
 	if clusterRoleBindingErr := createClusterRoleBinding(instance, scheme, client, ns); clusterRoleBindingErr != nil {
 		return clusterRoleBindingErr
+	}
+	if roleBindingErr := createRB(instance, scheme, client, ns); roleBindingErr != nil {
+		return roleBindingErr
 	}
 	if serviceAccountErr := createServiceAccount(instance, scheme, client, ns); serviceAccountErr != nil {
 		return serviceAccountErr
@@ -58,38 +64,88 @@ func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, clien
 	return nil
 }
 
-func createClusterRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
-	log.V(2).Info("Creating cluster role")
-	clusterRole := &rbacv1.ClusterRole{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRole)
-	if err != nil && apiErrors.IsNotFound(err) {
-		res.DefaultClusterRole.ResourceVersion = ""
-
-		if err := controllerutil.SetControllerReference(instance, res.DefaultClusterRole, scheme); err != nil {
-			log.Error(err, "Error setting controller reference on clusterrole")
+func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+	log.V(0).Info("Creating roles")
+	for _, r := range res.RolesToCreate.Items {
+		log.V(0).Info("Creating role " + r.Name)
+		role := &rbacv1.Role{}
+		err := client.Get(context.Background(), types.NamespacedName{Name: r.Name, Namespace: r.Namespace}, role)
+		if err != nil && apiErrors.IsNotFound(err) {
+			r.ResourceVersion = ""
+			if err := controllerutil.SetControllerReference(instance, &r, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on role")
+			}
+			err := client.Create(context.Background(), &r)
+			if err != nil {
+				return err
+			}
 		}
-		err := client.Create(context.Background(), res.DefaultClusterRole)
-		if err != nil {
-			return err
+	}
+	return nil
+}
+
+func createClusterRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+	log.V(0).Info("Creating cluster roles")
+	for _, r := range res.ClusterRolesToCreate.Items {
+		log.V(0).Info("Creating cluster role " + r.Name)
+		clusterRole := &rbacv1.ClusterRole{}
+		err := client.Get(context.Background(), types.NamespacedName{Name: r.Name, Namespace: ""}, clusterRole)
+		if err != nil && apiErrors.IsNotFound(err) {
+			r.ResourceVersion = ""
+
+			if err := controllerutil.SetControllerReference(instance, &r, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on clusterrole")
+			}
+			err := client.Create(context.Background(), &r)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
 func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
-	log.V(2).Info("Creating cluster role binding")
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{}
+	log.V(0).Info("Creating cluster role binding")
+	for _, b := range res.ClusterRoleBindingsToCreate.Items {
+		log.V(0).Info("Creating cluster role binding " + b.Name)
+		clusterRoleBinding := &rbacv1.ClusterRoleBinding{}
 
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRoleBinding)
-	if err != nil && apiErrors.IsNotFound(err) {
-		res.DefaultClusterRoleBinding.ResourceVersion = ""
-		res.DefaultClusterRoleBinding.Subjects[0].Namespace = namespace
-		if err := controllerutil.SetControllerReference(instance, res.DefaultClusterRoleBinding, scheme); err != nil {
-			log.Error(err, "Error setting controller reference on clusterrolebinding")
+		err := client.Get(context.Background(), types.NamespacedName{Name: b.Name, Namespace: ""}, clusterRoleBinding)
+		if err != nil && apiErrors.IsNotFound(err) {
+			b.ResourceVersion = ""
+			b.Subjects[0].Namespace = namespace
+			if err := controllerutil.SetControllerReference(instance, &b, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on clusterrolebinding")
+			}
+			err := client.Create(context.Background(), &b)
+			if err != nil {
+				return err
+			}
 		}
-		err := client.Create(context.Background(), res.DefaultClusterRoleBinding)
-		if err != nil {
-			return err
+	}
+
+	return nil
+}
+
+// TODO: rename this to createRoleBinding after refactoring the existing createRoleBinding in prereqs-webhook.go
+func createRB(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
+	log.V(0).Info("Creating role binding")
+	for _, b := range res.RoleBindingsToCreate.Items {
+		log.V(0).Info("Creating role binding " + b.Name)
+		roleBinding := &rbacv1.RoleBinding{}
+
+		err := client.Get(context.Background(), types.NamespacedName{Name: b.Name, Namespace: b.Namespace}, roleBinding)
+		if err != nil && apiErrors.IsNotFound(err) {
+			b.ResourceVersion = ""
+			b.Subjects[0].Namespace = namespace
+			if err := controllerutil.SetControllerReference(instance, &b, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on rolebinding")
+			}
+			err := client.Create(context.Background(), &b)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -97,17 +153,20 @@ func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *ru
 }
 
 func createServiceAccount(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
-	log.V(2).Info("Creating service account")
-	res.DefaultServiceAccount.ResourceVersion = ""
-	res.DefaultServiceAccount.Namespace = namespace
-	err := client.Create(context.Background(), res.DefaultServiceAccount)
-	if err := controllerutil.SetControllerReference(instance, res.DefaultServiceAccount, scheme); err != nil {
-		log.Error(err, "Error setting controller reference on service account")
-	}
-	if err != nil {
-		if !apiErrors.IsAlreadyExists(err) {
-			log.V(2).Info("Error creating the service account, but was not an already exists error", "error message", err)
-			return err
+	log.V(0).Info("Creating service account")
+	for _, a := range res.ServiceAccountsToCreate.Items {
+		log.V(0).Info("Creating service account" + a.Name)
+		a.ResourceVersion = ""
+		a.Namespace = namespace
+		err := client.Create(context.Background(), &a)
+		if err := controllerutil.SetControllerReference(instance, &a, scheme); err != nil {
+			log.Error(err, "Error setting controller reference on service account")
+		}
+		if err != nil {
+			if !apiErrors.IsAlreadyExists(err) {
+				log.V(2).Info("Error creating the service account, but was not an already exists error", "error message", err)
+				return err
+			}
 		}
 	}
 	return nil
