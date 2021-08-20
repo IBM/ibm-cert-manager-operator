@@ -242,16 +242,8 @@ const leaderElectNS = "--leader-election-namespace=cert-manager"
 // AcmeSolverArg is the acme solver image to use for the cert-manager-controller
 var AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
 
-var webhookNSArg = "--webhook-namespace=" + DeployNamespace
-
-const webhookCASecretArg = "--webhook-ca-secret=cert-manager-webhook-ca"
-const webhookServingSecretArg = "--webhook-serving-secret=" + WebhookServingSecret
-
-const webhookDNSNamesArg = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc"
-const controllersArg = "--controllers=certificates,issuers,clusterissuers,orders,challenges,webhook-bootstrap"
-
 // DefaultArgs are the default arguments use for cert-manager-controller
-var DefaultArgs = []string{webhookCASecretArg, webhookServingSecretArg, controllersArg}
+var DefaultArgs = []string{}
 
 // CRDs is the list of crds created/used by cert-manager in this version
 var CRDs = [5]string{"certificates", "issuers", "clusterissuers", "orders", "challenges"}

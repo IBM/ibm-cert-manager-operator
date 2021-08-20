@@ -20,12 +20,10 @@ import (
 	"context"
 	"strings"
 
-	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
-	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
-
 	"github.com/pkg/errors"
 	rbacv1 "k8s.io/api/rbac/v1"
 	apiextensionclientsetv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -34,6 +32,9 @@ import (
 	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
+	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 )
 
 // Check all RBAC is ready for cert-manager
@@ -79,6 +80,17 @@ func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, 
 			if err != nil {
 				return err
 			}
+		} else if err != nil {
+			return err
+		} else {
+			oldRole := role.DeepCopy()
+			role.Rules = r.Rules
+			if !equality.Semantic.DeepEqual(oldRole, role) {
+				err := client.Update(context.Background(), role)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
@@ -100,6 +112,17 @@ func createClusterRole(instance *operatorv1alpha1.CertManager, scheme *runtime.S
 			if err != nil {
 				return err
 			}
+		} else if err != nil {
+			return err
+		} else {
+			oldClusterRole := clusterRole.DeepCopy()
+			clusterRole.Rules = r.Rules
+			if !equality.Semantic.DeepEqual(oldClusterRole, clusterRole) {
+				err := client.Update(context.Background(), clusterRole)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
@@ -114,13 +137,30 @@ func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *ru
 		err := client.Get(context.Background(), types.NamespacedName{Name: b.Name, Namespace: ""}, clusterRoleBinding)
 		if err != nil && apiErrors.IsNotFound(err) {
 			b.ResourceVersion = ""
-			b.Subjects[0].Namespace = namespace
+			for i := range b.Subjects {
+				b.Subjects[i].Namespace = namespace
+			}
 			if err := controllerutil.SetControllerReference(instance, &b, scheme); err != nil {
 				log.Error(err, "Error setting controller reference on clusterrolebinding")
 			}
 			err := client.Create(context.Background(), &b)
 			if err != nil {
 				return err
+			}
+		} else if err != nil {
+			return err
+		} else {
+			for i := range b.Subjects {
+				b.Subjects[i].Namespace = namespace
+			}
+			oldClusterRoleBinding := clusterRoleBinding.DeepCopy()
+			clusterRoleBinding.RoleRef = b.RoleRef
+			clusterRoleBinding.Subjects = b.Subjects
+			if !equality.Semantic.DeepEqual(oldClusterRoleBinding, clusterRoleBinding) {
+				err := client.Update(context.Background(), clusterRoleBinding)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -138,11 +178,32 @@ func createRB(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, cl
 		err := client.Get(context.Background(), types.NamespacedName{Name: b.Name, Namespace: b.Namespace}, roleBinding)
 		if err != nil && apiErrors.IsNotFound(err) {
 			b.ResourceVersion = ""
-			b.Subjects[0].Namespace = namespace
+			for i := range b.Subjects {
+				b.Subjects[i].Namespace = namespace
+			}
 			if err := controllerutil.SetControllerReference(instance, &b, scheme); err != nil {
 				log.Error(err, "Error setting controller reference on rolebinding")
 			}
 			err := client.Create(context.Background(), &b)
+			if err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		} else {
+			for i := range b.Subjects {
+				b.Subjects[i].Namespace = namespace
+			}
+			oldRolebinding := roleBinding.DeepCopy()
+			roleBinding.RoleRef = b.RoleRef
+			roleBinding.Subjects = b.Subjects
+			if !equality.Semantic.DeepEqual(oldRolebinding, roleBinding) {
+				err := client.Update(context.Background(), roleBinding)
+				if err != nil {
+					return err
+				}
+			}
+			err := client.Update(context.Background(), roleBinding)
 			if err != nil {
 				return err
 			}
