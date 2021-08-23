@@ -48,7 +48,7 @@ var podSecurity = &corev1.PodSecurityContext{
 
 var certManagerControllerPod = corev1.PodSpec{
 	Affinity:           podAffinity,
-	ServiceAccountName: ServiceAccount,
+	ServiceAccountName: "ibm-cert-manager-controller",
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
 		controllerContainer,

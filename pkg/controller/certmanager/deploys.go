@@ -88,6 +88,7 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 		if !equalDeploys(deployment, existingDeploy) {
 			// Update
 			log.V(2).Info("Updating deployment")
+			deployment.SetResourceVersion(existingDeploy.GetResourceVersion())
 			if err := client.Update(context.Background(), &deployment); err != nil {
 				return err
 			}
@@ -122,11 +123,9 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 			resourceNS = "--cluster-resource-namespace=" + instance.Spec.ResourceNS
 		}
 		var leaderElect = "--leader-election-namespace=" + ns
-		var webhookNS = "--webhook-namespace=" + ns
-		var webhookDNS = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook." + ns + ",cert-manager-webhook." + ns + ".svc"
 		var args = make([]string, len(res.DefaultArgs))
 		copy(args, res.DefaultArgs)
-		args = append(args, acmesolver, resourceNS, leaderElect, webhookNS, webhookDNS)
+		args = append(args, acmesolver, resourceNS, leaderElect)
 		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
 		log.V(3).Info("The args", "args", deploy.Spec.Template.Spec.Containers[0].Args)
 

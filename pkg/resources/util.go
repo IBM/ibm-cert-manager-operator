@@ -28,10 +28,8 @@ var log = logf.Log.WithName("resource_utils")
 //GetImageID constructs image IDs for operands: either <IMAGE_NAME>:<IMAGE_TAG> or <IMAGE_NAME>@<IMAGE_SHA>
 func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, envVarName string) string {
 
-	var imageID string
-
 	//Check if the env var exists, if yes, check whether it's a SHA or tag and use accordingly; if no, use the default image version
-	imageID = os.Getenv(envVarName)
+	imageID := os.Getenv(envVarName)
 
 	if len(imageID) > 0 {
 		log.V(2).Info("Using env var for operand image: " + imageName)
