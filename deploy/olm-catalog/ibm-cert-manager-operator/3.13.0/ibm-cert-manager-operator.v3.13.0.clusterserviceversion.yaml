@@ -397,6 +397,9 @@ spec:
               - orders/status
               - issuers/status
               - clusterissuers/status
+              - issuers/finalizers
+              - clusterissuers/finalizers
+              - certificaterequests/finalizers
               - certificates/finalizers
               - challenges/finalizers
               - orders/finalizers

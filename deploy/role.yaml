@@ -267,6 +267,9 @@ rules:
   - challenges/status
   - orders/status
   - issuers/status
+  - issuers/finalizers
+  - clusterissuers/finalizers
+  - certificaterequests/finalizers
   - clusterissuers/status
   - certificates/finalizers
   - challenges/finalizers
