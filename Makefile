@@ -128,7 +128,7 @@ build: build-amd64 build-ppc64le build-s390x
 
 build-amd64:
 	@echo "Building the ${IMG} amd64 binary..."
-	@GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMG) ./cmd/manager
+	@GOOS=linux GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMG) ./cmd/manager
 
 build-ppc64le:
 	@echo "Building the ${IMG} ppc64le binary..."

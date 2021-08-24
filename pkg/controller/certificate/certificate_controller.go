@@ -19,20 +19,22 @@ package certificate
 import (
 	"context"
 
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
-	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 	cmmeta "github.com/ibm/ibm-cert-manager-operator/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
+	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 )
 
 var log = logf.Log.WithName("controller_certificate")
@@ -69,7 +71,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource Pods and requeue the owner Certificate
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &certmanagerv1.Certificate{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &certmanagerv1alpha1.Certificate{},
 	})
@@ -126,7 +128,7 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 	}
 	annotations["ibm-cert-manager-operator-generated"] = "true"
 
-	certificate := certmanagerv1.Certificate{
+	certificate := &certmanagerv1.Certificate{
 		TypeMeta: metav1.TypeMeta{Kind: "Certificate", APIVersion: "cert-manager.io/v1"},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:            instance.Name,
@@ -137,21 +139,39 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 		},
 		Spec: certmanagerv1.CertificateSpec{
 			CommonName: instance.Spec.CommonName,
-			Duration:   &metav1.Duration{Duration: instance.Spec.Duration.Duration},
+			Duration:   instance.Spec.Duration,
 			IssuerRef: cmmeta.ObjectReference{
 				Name:  instance.Spec.IssuerRef.Name,
 				Kind:  instance.Spec.IssuerRef.Kind,
 				Group: instance.Spec.IssuerRef.Group,
 			},
 			IsCA:        instance.Spec.IsCA,
-			RenewBefore: &metav1.Duration{Duration: instance.Spec.RenewBefore.Duration},
+			RenewBefore: instance.Spec.RenewBefore,
 			SecretName:  instance.Spec.SecretName,
 		},
 	}
-	if err := r.client.Create(context.TODO(), &certificate); err != nil {
+	// Set the certificate v1alpha1 as the controller of the certificate v1
+	if err := controllerutil.SetControllerReference(instance, certificate, r.scheme); err != nil {
+		reqLogger.Error(err, "### DEBUG ### failed to set Owner reference for %s", certificate)
+		return reconcile.Result{}, err
+	}
+
+	if err := r.client.Create(context.TODO(), certificate); err != nil {
 		if errors.IsAlreadyExists(err) {
-			reqLogger.Error(err, "### DEBUG ### v1 Certificate already exists")
-			return reconcile.Result{}, nil
+			existingCertificate := &certmanagerv1.Certificate{}
+			if err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: certificate.Namespace, Name: certificate.Name}, existingCertificate); err != nil {
+				reqLogger.Error(err, "### DEBUG ### Failed to get v1 Certificate")
+				return reconcile.Result{}, err
+			} else {
+				certificate.SetResourceVersion(existingCertificate.GetResourceVersion())
+				if err := r.client.Update(context.TODO(), certificate); err != nil {
+					reqLogger.Error(err, "### DEBUG ### Failed to update v1 Certificate")
+					return reconcile.Result{}, err
+				} else {
+					reqLogger.Info("### DEBUG #### Updated v1 Certificate")
+					return reconcile.Result{}, nil
+				}
+			}
 		}
 		reqLogger.Error(err, "### DEBUG ### Failed to create v1 Certificate")
 		return reconcile.Result{}, err
