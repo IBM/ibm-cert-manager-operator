@@ -296,6 +296,7 @@ run-csv:
 		--operator-version ${VERSION} \
 		--operator-namespace ibm-common-services \
 		--olm-namespace openshift-operator-lifecycle-manager
+		--timeout 180
 		
 	oc apply -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
 

@@ -136,16 +136,28 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 			OwnerReferences: instance.OwnerReferences,
 		},
 		Spec: certmanagerv1.CertificateSpec{
-			CommonName: instance.Spec.CommonName,
-			Duration:   instance.Spec.Duration,
-			IssuerRef: cmmeta.ObjectReference{
-				Name:  instance.Spec.IssuerRef.Name,
-				Kind:  instance.Spec.IssuerRef.Kind,
-				Group: instance.Spec.IssuerRef.Group,
+			Subject: &certmanagerv1.X509Subject{
+				Organizations: instance.Spec.Organization,
 			},
-			IsCA:        instance.Spec.IsCA,
-			RenewBefore: instance.Spec.RenewBefore,
-			SecretName:  instance.Spec.SecretName,
+			CommonName:     instance.Spec.CommonName,
+			Duration:       instance.Spec.Duration,
+			RenewBefore:    instance.Spec.RenewBefore,
+			DNSNames:       instance.Spec.DNSNames,
+			IPAddresses:    instance.Spec.IPAddresses,
+			URIs:           nil,
+			EmailAddresses: nil,
+			SecretName:     instance.Spec.SecretName,
+			Keystores:      nil,
+			IssuerRef:      cmmeta.ObjectReference(instance.Spec.IssuerRef),
+			IsCA:           instance.Spec.IsCA,
+			Usages:         convertUsages(instance.Spec.Usages),
+			PrivateKey: &certmanagerv1.CertificatePrivateKey{
+				Encoding:  convertKeyEncoding(instance.Spec.KeyEncoding),
+				Algorithm: converKeyAlgorithm(instance.Spec.KeyAlgorithm),
+				Size:      instance.Spec.KeySize,
+			},
+			EncodeUsagesInRequest: nil,
+			RevisionHistoryLimit:  nil,
 		},
 	}
 	if err := r.client.Create(context.TODO(), &certificate); err != nil {
