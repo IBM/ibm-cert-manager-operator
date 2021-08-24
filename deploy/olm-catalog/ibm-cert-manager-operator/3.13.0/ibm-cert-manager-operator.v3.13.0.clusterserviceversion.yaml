@@ -654,6 +654,22 @@ spec:
                         value: ibm-cert-manager-operator
                     image: quay.io/horis233/ibm-certmanager-operator
                     imagePullPolicy: Always
+                    livenessProbe:
+                      failureThreshold: 10
+                      httpGet:
+                        path: /healthz
+                        port: 8081
+                      initialDelaySeconds: 120
+                      periodSeconds: 60
+                      timeoutSeconds: 10
+                    readinessProbe:
+                      failureThreshold: 10
+                      httpGet:
+                        path: /readyz
+                        port: 8081
+                      initialDelaySeconds: 60
+                      periodSeconds: 20
+                      timeoutSeconds: 3
                     name: ibm-cert-manager-operator
                     resources:
                       limits:
