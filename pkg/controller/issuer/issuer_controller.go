@@ -19,6 +19,7 @@ package issuer
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -158,14 +159,19 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 				reqLogger.Error(err, "### DEBUG ### Failed to get v1 Issuer")
 				return reconcile.Result{}, err
 			}
-			v1Issuer.SetResourceVersion(existingIssuer.GetResourceVersion())
-			if err := r.client.Update(context.TODO(), v1Issuer); err != nil {
-				reqLogger.Error(err, "### DEBUG ### Failed to update v1 Issuer")
-				return reconcile.Result{}, err
+			if !equality.Semantic.DeepEqual(v1Issuer.Labels, existingIssuer.Labels) || !equality.Semantic.DeepEqual(v1Issuer.Spec, existingIssuer.Spec) {
+				v1Issuer.SetResourceVersion(existingIssuer.GetResourceVersion())
+				v1Issuer.SetAnnotations(existingIssuer.GetAnnotations())
+				if err := r.client.Update(context.TODO(), v1Issuer); err != nil {
+					reqLogger.Error(err, "### DEBUG ### Failed to update v1 Issuer")
+					return reconcile.Result{}, err
+				}
+				reqLogger.Info("### DEBUG #### Updated v1 Issuer")
 			}
-			reqLogger.Info("### DEBUG #### Updated v1 Issuer")
-			return reconcile.Result{}, nil
 
+			// TODO Add status update logic here
+
+			return reconcile.Result{}, nil
 		}
 		reqLogger.Error(err, "### DEBUG ### Failed to create v1 Issuer")
 		return reconcile.Result{}, err

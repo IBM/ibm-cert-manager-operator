@@ -20,6 +20,7 @@ import (
 	"context"
 
 	cmmeta "github.com/ibm/ibm-cert-manager-operator/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -163,14 +164,19 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 				reqLogger.Error(err, "### DEBUG ### Failed to get v1 Certificate")
 				return reconcile.Result{}, err
 			}
-			certificate.SetResourceVersion(existingCertificate.GetResourceVersion())
-			if err := r.client.Update(context.TODO(), certificate); err != nil {
-				reqLogger.Error(err, "### DEBUG ### Failed to update v1 Certificate")
-				return reconcile.Result{}, err
+			if !equality.Semantic.DeepEqual(certificate.Labels, existingCertificate.Labels) || !equality.Semantic.DeepEqual(certificate.Spec, existingCertificate.Spec) {
+				certificate.SetResourceVersion(existingCertificate.GetResourceVersion())
+				certificate.SetAnnotations(existingCertificate.GetAnnotations())
+				if err := r.client.Update(context.TODO(), certificate); err != nil {
+					reqLogger.Error(err, "### DEBUG ### Failed to update v1 Certificate")
+					return reconcile.Result{}, err
+				}
+				reqLogger.Info("### DEBUG #### Updated v1 Certificate")
 			}
-			reqLogger.Info("### DEBUG #### Updated v1 Certificate")
-			return reconcile.Result{}, nil
 
+			// TODO Add status update logic here
+
+			return reconcile.Result{}, nil
 		}
 		reqLogger.Error(err, "### DEBUG ### Failed to create v1 Certificate")
 		return reconcile.Result{}, err
