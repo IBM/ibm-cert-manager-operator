@@ -136,7 +136,6 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 			Namespace:       instance.Namespace,
 			Labels:          instance.Labels,
 			Annotations:     annotations,
-			OwnerReferences: instance.OwnerReferences,
 		},
 		Spec: certmanagerv1.CertificateSpec{
 			CommonName: instance.Spec.CommonName,
