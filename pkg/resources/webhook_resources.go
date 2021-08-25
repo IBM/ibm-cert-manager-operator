@@ -35,7 +35,7 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 		Name:   CertManagerWebhookName,
 		Labels: WebhookLabelMap,
 		Annotations: map[string]string{
-			"certmanager.io/inject-ca-from-secret": DeployNamespace + "/" + WebhookServingSecret,
+			"cert-manager.io/inject-ca-from-secret": DeployNamespace + "/" + WebhookServingSecret,
 		},
 	},
 	Webhooks: []admRegv1beta1.MutatingWebhook{
@@ -70,7 +70,7 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 			},
 			FailurePolicy:           &failPolicy,
 			SideEffects:             &sideEffect,
-			AdmissionReviewVersions: []string{"v1", "v1beta1"},
+			AdmissionReviewVersions: []string{"v1"},
 			TimeoutSeconds:          &timeoutSecondsWebhook,
 		},
 	},
@@ -136,7 +136,7 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 		Name:   CertManagerWebhookName,
 		Labels: WebhookLabelMap,
 		Annotations: map[string]string{
-			"certmanager.io/inject-ca-from-secret": DeployNamespace + WebhookServingSecret,
+			"cert-manager.io/inject-ca-from-secret": DeployNamespace + "/" + WebhookServingSecret,
 		},
 	},
 	Webhooks: []admRegv1beta1.ValidatingWebhook{
@@ -162,7 +162,7 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 					},
 				},
 			},
-			AdmissionReviewVersions: []string{"v1", "v1beta1"},
+			AdmissionReviewVersions: []string{"v1"},
 			ClientConfig: admRegv1beta1.WebhookClientConfig{
 				Service: &admRegv1beta1.ServiceReference{
 					Namespace: DeployNamespace,
@@ -175,7 +175,7 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 			NamespaceSelector: &metav1.LabelSelector{
 				MatchExpressions: []metav1.LabelSelectorRequirement{
 					{
-						Key:      "certmanager.k8s.io/disable-validation",
+						Key:      "cert-manager.k8s.io/disable-validation",
 						Operator: metav1.LabelSelectorOpNotIn,
 						Values:   []string{"true"},
 					},

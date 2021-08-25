@@ -101,7 +101,7 @@ var webhookContainer = corev1.Container{
 	Name:            CertManagerWebhookName,
 	Image:           webhookImage,
 	ImagePullPolicy: pullPolicy,
-	Args:            []string{"--v=0", "--secure-port=10250", "--dynamic-serving-ca-secret-namespace=" + DeployNamespace, "--dynamic-serving-ca-secret-name=" + WebhookServingSecret, "--dynamic-serving-dns-names=" + strings.Join([]string{CertManagerWebhookName, CertManagerWebhookName + "." + DeployNamespace, CertManagerWebhookName + "." + DeployNamespace + ".svc"}, ",")},
+	Args:            []string{"--v=2", "--secure-port=10250", "--dynamic-serving-ca-secret-namespace=" + DeployNamespace, "--dynamic-serving-ca-secret-name=" + WebhookServingSecret, "--dynamic-serving-dns-names=" + strings.Join([]string{CertManagerWebhookName, CertManagerWebhookName + "." + DeployNamespace, CertManagerWebhookName + "." + DeployNamespace + ".svc"}, ",")},
 	Env: []corev1.EnvVar{
 		{
 			Name: "POD_NAMESPACE",
@@ -110,6 +110,13 @@ var webhookContainer = corev1.Container{
 					FieldPath: "metadata.namespace",
 				},
 			},
+		},
+	},
+	Ports: []corev1.ContainerPort{
+		{
+			Name:          "https",
+			Protocol:      corev1.ProtocolTCP,
+			ContainerPort: 10250,
 		},
 	},
 	LivenessProbe: &corev1.Probe{
