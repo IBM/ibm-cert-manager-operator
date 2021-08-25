@@ -2,8 +2,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: challenges.acme.cert-manager.io
-  annotations:
-    cert-manager.io/inject-ca-from-secret: 'cert-manager/cert-manager-webhook-ca'
   labels:
     app: 'cert-manager'
     app.kubernetes.io/name: 'cert-manager'
@@ -22,25 +20,25 @@ spec:
       - cert-manager-acme
   scope: Namespaced
   conversion:
-    # a Webhook strategy instruct API server to call an external webhook for any conversion between custom resources.
-    strategy: Webhook
-    # webhookClientConfig is required when strategy is `Webhook` and it configures the webhook endpoint to be called by API server.
-    webhook:
-      # We don't actually support `v1beta1` but is listed here as it is a
-      # required value for [Kubernetes v1.16](kubernetes/kubernetes#82023). The
-      # API server reads the supported versions in order, so _should always_
-      # attempt a `v1` request which is understood by the cert-manager webhook.
-      # Any `v1beta1` request will return an error and fail closed for that
-      # resource (the whole object request is rejected).
-      # When we no longer support v1.16 we can remove `v1beta1` from this list.
-      conversionReviewVersions: ["v1", "v1beta1"]
-      clientConfig:
+  # a Webhook strategy instruct API server to call an external webhook for any conversion between custom resources.
+  strategy: Webhook
+  # webhookClientConfig is required when strategy is `Webhook` and it configures the webhook endpoint to be called by API server.
+  webhook:
+    # We don't actually support `v1beta1` but is listed here as it is a
+    # required value for [Kubernetes v1.16](kubernetes/kubernetes#82023). The
+    # API server reads the supported versions in order, so _should always_
+    # attempt a `v1` request which is understood by the cert-manager webhook.
+    # Any `v1beta1` request will return an error and fail closed for that
+    # resource (the whole object request is rejected).
+    # When we no longer support v1.16 we can remove `v1beta1` from this list.
+    conversionReviewVersions: ["v1", "v1beta1"]
+    clientConfig:
+      #
+      service:
+        name: 'cert-manager-webhook'
+        namespace: "cert-manager"
+        path: /convert
         #
-        service:
-          name: 'cert-manager-webhook'
-          namespace: "cert-manager"
-          path: /convert
-          #
   versions:
     - additionalPrinterColumns:
         - jsonPath: .status.state
