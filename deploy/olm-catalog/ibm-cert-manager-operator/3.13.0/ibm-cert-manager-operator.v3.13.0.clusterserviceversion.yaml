@@ -391,18 +391,18 @@ spec:
             - apiGroups:
                 - certmanager.k8s.io
               resources:
-              - certificates/status
-              - certificaterequests/status
-              - challenges/status
-              - orders/status
-              - issuers/status
-              - clusterissuers/status
-              - issuers/finalizers
-              - clusterissuers/finalizers
-              - certificaterequests/finalizers
-              - certificates/finalizers
-              - challenges/finalizers
-              - orders/finalizers
+                - certificates/status
+                - certificaterequests/status
+                - challenges/status
+                - orders/status
+                - issuers/status
+                - clusterissuers/status
+                - issuers/finalizers
+                - clusterissuers/finalizers
+                - certificaterequests/finalizers
+                - certificates/finalizers
+                - challenges/finalizers
+                - orders/finalizers
               verbs:
                 - update
             # cert-manager service needs permission to perform operations on secrets associated with the certs(eg: perform renewal, etc.)
