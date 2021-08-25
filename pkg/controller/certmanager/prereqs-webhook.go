@@ -34,15 +34,15 @@ import (
 )
 
 func webhookPrereqs(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
-	if err := createRoleBinding(instance, scheme, client); err != nil {
-		return err
-	}
+	// if err := createWebhookRoleBinding(instance, scheme, client); err != nil {
+	// 	return err
+	// }
 	if err := service(instance, scheme, client, ns); err != nil {
 		return err
 	}
-	if err := apiService(instance, scheme, client, ns); err != nil {
-		return err
-	}
+	// if err := apiService(instance, scheme, client, ns); err != nil {
+	// 	return err
+	// }
 	if err := webhooks(instance, scheme, client); err != nil {
 		return err
 	}
@@ -53,15 +53,15 @@ func removeWebhookPrereqs(client client.Client, ns string) error {
 	if err := removeSvc(client, ns); err != nil {
 		return err
 	}
-	if err := removeAPIService(client); err != nil {
-		return err
-	}
+	// if err := removeAPIService(client); err != nil {
+	// 	return err
+	// }
 	if err := removeWebhooks(client); err != nil {
 		return err
 	}
-	if err := removeRoleBinding(client); err != nil {
-		return err
-	}
+	// if err := removeRoleBinding(client); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
@@ -193,7 +193,7 @@ func removeSvc(client client.Client, ns string) error {
 	return nil
 }
 
-func createRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func createWebhookRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	log.V(2).Info("Creating role binding")
 	roleBinding := &rbacv1.RoleBinding{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: "kube-system"}, roleBinding)

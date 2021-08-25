@@ -17,6 +17,8 @@
 package resources
 
 import (
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -99,7 +101,7 @@ var webhookContainer = corev1.Container{
 	Name:            CertManagerWebhookName,
 	Image:           webhookImage,
 	ImagePullPolicy: pullPolicy,
-	Args:            []string{"--v=0", "--secure-port=1443", "--tls-cert-file=/certs/tls.crt", "--tls-private-key-file=/certs/tls.key"},
+	Args:            []string{"--v=0", "--secure-port=10250", "--dynamic-serving-ca-secret-namespace=" + DeployNamespace, "--dynamic-serving-ca-secret-name=" + WebhookServingSecret, "--dynamic-serving-dns-names=" + strings.Join([]string{CertManagerWebhookName, CertManagerWebhookName + "." + DeployNamespace, CertManagerWebhookName + "." + DeployNamespace + ".svc"}, ",")},
 	Env: []corev1.EnvVar{
 		{
 			Name: "POD_NAMESPACE",
@@ -130,12 +132,6 @@ var webhookContainer = corev1.Container{
 	},
 	SecurityContext: containerSecurityWebhook,
 	Resources:       cpuMemory,
-	VolumeMounts: []corev1.VolumeMount{
-		{
-			Name:      "certs",
-			MountPath: "/certs",
-		},
-	},
 }
 
 var cainjectorContainer = corev1.Container{

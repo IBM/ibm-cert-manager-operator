@@ -23,23 +23,23 @@ import (
 )
 
 var ServiceAccountsToCreate = &corev1.ServiceAccountList{
-	Items: []corev1.ServiceAccount{*ControllerServiceAccount, *CAInjectorServiceAccount},
+	Items: []corev1.ServiceAccount{*ControllerServiceAccount, *CAInjectorServiceAccount, *WebhookServiceAccount},
 }
 
 var RolesToCreate = &rbacv1.RoleList{
-	Items: []rbacv1.Role{*ControllerRole, *CAInjectorRole},
+	Items: []rbacv1.Role{*ControllerRole, *CAInjectorRole, *WebhookRole},
 }
 
 var RoleBindingsToCreate = &rbacv1.RoleBindingList{
-	Items: []rbacv1.RoleBinding{*ControllerRoleBinding, *CAInjectorRoleBinding},
+	Items: []rbacv1.RoleBinding{*ControllerRoleBinding, *CAInjectorRoleBinding, *WebhookRoleBinding},
 }
 
 var ClusterRolesToCreate = &rbacv1.ClusterRoleList{
-	Items: []rbacv1.ClusterRole{*ControllerViewClusterRole, *ControllerEditClusterRole, *ControllerApproveClusterRole, *ControllerCertificateSigningRequestsClusterRole, *ControllerIssuersClusterRole, *ControllerClusterIssuersClusterRole, *ControllerCertificatesClusterRole, *ControllerOrdersClusterRole, *ControllerChallengesClusterRole, *ControllerIngressShimClusterRole, *CAInjectorClusterRole},
+	Items: []rbacv1.ClusterRole{*ControllerViewClusterRole, *ControllerEditClusterRole, *ControllerApproveClusterRole, *ControllerCertificateSigningRequestsClusterRole, *ControllerIssuersClusterRole, *ControllerClusterIssuersClusterRole, *ControllerCertificatesClusterRole, *ControllerOrdersClusterRole, *ControllerChallengesClusterRole, *ControllerIngressShimClusterRole, *CAInjectorClusterRole, *WebhookClusterRole},
 }
 
 var ClusterRoleBindingsToCreate = &rbacv1.ClusterRoleBindingList{
-	Items: []rbacv1.ClusterRoleBinding{*ControllerApproveClusterRoleBinding, *ControllerCertificateSigningRequestsClusterRoleBinding, *ControllerIssuersClusterRoleBinding, *ControllerClusterIssuersClusterRoleBinding, *ControllerCertificatesClusterRoleBinding, *ControllerOrdersClusterRoleBinding, *ControllerChallengesClusterRoleBinding, *ControllerIngressShimClusterRoleBinding, *CAInjectorClusterRoleBinding},
+	Items: []rbacv1.ClusterRoleBinding{*ControllerApproveClusterRoleBinding, *ControllerCertificateSigningRequestsClusterRoleBinding, *ControllerIssuersClusterRoleBinding, *ControllerClusterIssuersClusterRoleBinding, *ControllerCertificatesClusterRoleBinding, *ControllerOrdersClusterRoleBinding, *ControllerChallengesClusterRoleBinding, *ControllerIngressShimClusterRoleBinding, *CAInjectorClusterRoleBinding, *WebhookClusterRoleBinding},
 }
 
 var ControllerServiceAccount = &corev1.ServiceAccount{
@@ -680,23 +680,78 @@ var CAInjectorClusterRoleBinding = &rbacv1.ClusterRoleBinding{
 	},
 }
 
-// WebhookRoleBinding is the rolebinding used for the cert-manager-webhook's ability to read the extension-apiserver-authentication
+var WebhookServiceAccount = &corev1.ServiceAccount{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "ibm-cert-manager-webhook",
+	},
+}
+
+var WebhookRole = &rbacv1.Role{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "ibm-cert-manager-webhook:dynamic-serving",
+		Namespace: "ibm-common-services",
+	},
+	Rules: []rbacv1.PolicyRule{
+		{
+			Verbs:         []string{"get", "list", "watch", "update"},
+			APIGroups:     []string{""},
+			Resources:     []string{"secrets"},
+			ResourceNames: []string{"cert-manager-webhook-ca"},
+		},
+		{
+			Verbs:     []string{"create", "list"},
+			APIGroups: []string{""},
+			Resources: []string{"secrets"},
+		},
+	},
+}
+
 var WebhookRoleBinding = &rbacv1.RoleBinding{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      CertManagerWebhookName,
-		Namespace: "kube-system",
+		Name:      "ibm-cert-manager-webhook:dynamic-serving",
+		Namespace: "ibm-common-services",
 	},
 	Subjects: []rbacv1.Subject{
 		{
 			Kind:      "ServiceAccount",
 			APIGroup:  "",
-			Name:      ServiceAccount,
+			Name:      "ibm-cert-manager-webhook",
 			Namespace: DeployNamespace,
 		},
 	},
 	RoleRef: rbacv1.RoleRef{
 		APIGroup: "rbac.authorization.k8s.io",
 		Kind:     "Role",
-		Name:     "extension-apiserver-authentication-reader",
+		Name:     "ibm-cert-manager-webhook:dynamic-serving",
+	},
+}
+
+var WebhookClusterRole = &rbacv1.ClusterRole{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "ibm-cert-manager-webhook:subjectaccessreviews",
+	},
+	Rules: []rbacv1.PolicyRule{
+		{
+			Verbs:     []string{"create"},
+			APIGroups: []string{"authorization.k8s.io"},
+			Resources: []string{"subjectaccessreviews"},
+		},
+	},
+}
+
+var WebhookClusterRoleBinding = &rbacv1.ClusterRoleBinding{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "ibm-cert-manager-webhook:subjectaccessreviews",
+	},
+	Subjects: []rbacv1.Subject{
+		{
+			Kind: "ServiceAccount",
+			Name: "ibm-cert-manager-webhook",
+		},
+	},
+	RoleRef: rbacv1.RoleRef{
+		APIGroup: "rbac.authorization.k8s.io",
+		Kind:     "ClusterRole",
+		Name:     "ibm-cert-manager-webhook:subjectaccessreviews",
 	},
 }
