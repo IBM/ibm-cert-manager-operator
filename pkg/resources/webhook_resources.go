@@ -40,7 +40,7 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 	},
 	Webhooks: []admRegv1beta1.MutatingWebhook{
 		{
-			Name: "webhook.certmanager.k8s.io",
+			Name: "webhook.cert-manager.io",
 			ClientConfig: admRegv1beta1.WebhookClientConfig{
 				Service: &admRegv1beta1.ServiceReference{
 					Namespace: DeployNamespace,
@@ -141,7 +141,7 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 	},
 	Webhooks: []admRegv1beta1.ValidatingWebhook{
 		{
-			Name: "webhook.certmanager.k8s.io",
+			Name: "webhook.cert-manager.io",
 			Rules: []admRegv1beta1.RuleWithOperations{
 				{
 					Operations: []admRegv1beta1.OperationType{
@@ -175,7 +175,7 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 			NamespaceSelector: &metav1.LabelSelector{
 				MatchExpressions: []metav1.LabelSelectorRequirement{
 					{
-						Key:      "cert-manager.k8s.io/disable-validation",
+						Key:      "cert-manager.io/disable-validation",
 						Operator: metav1.LabelSelectorOpNotIn,
 						Values:   []string{"true"},
 					},
