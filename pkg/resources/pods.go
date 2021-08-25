@@ -58,20 +58,10 @@ var certManagerControllerPod = corev1.PodSpec{
 var certManagerWebhookPod = corev1.PodSpec{
 	Affinity:           podAffinity,
 	HostNetwork:        TrueVar,
-	ServiceAccountName: ServiceAccount,
+	ServiceAccountName: "ibm-cert-manager-webhook",
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
 		webhookContainer,
-	},
-	Volumes: []corev1.Volume{
-		{
-			Name: "certs",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: "cert-manager-webhook-tls",
-				},
-			},
-		},
 	},
 }
 
