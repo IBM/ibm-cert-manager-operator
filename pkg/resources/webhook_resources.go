@@ -24,8 +24,8 @@ import (
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 )
 
-var valPath = "/apis/webhook.certmanager.k8s.io/v1beta1/validations"
-var mutationPath = "/apis/webhook.certmanager.k8s.io/v1beta1/mutations"
+var valPath = "/validate"
+var mutationPath = "/mutate"
 var failPolicy = admRegv1beta1.Fail
 var sideEffect = admRegv1beta1.SideEffectClassNone
 
@@ -35,16 +35,16 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 		Name:   CertManagerWebhookName,
 		Labels: WebhookLabelMap,
 		Annotations: map[string]string{
-			"certmanager.k8s.io/inject-apiserver-ca": "true",
+			"cert-manager.io/inject-ca-from-secret": DeployNamespace + "/" + WebhookServingSecret,
 		},
 	},
 	Webhooks: []admRegv1beta1.MutatingWebhook{
 		{
-			Name: "webhook.certmanager.k8s.io",
+			Name: "webhook.cert-manager.io",
 			ClientConfig: admRegv1beta1.WebhookClientConfig{
 				Service: &admRegv1beta1.ServiceReference{
-					Namespace: "default",
-					Name:      "kubernetes",
+					Namespace: DeployNamespace,
+					Name:      CertManagerWebhookName,
 					Path:      &mutationPath,
 				},
 			},
@@ -56,23 +56,22 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 					},
 					Rule: admRegv1beta1.Rule{
 						APIGroups: []string{
-							"certmanager.k8s.io",
+							"cert-manager.io",
+							"acme.cert-manager.io",
 						},
 						APIVersions: []string{
-							"v1alpha1",
+							"v1",
 						},
 						Resources: []string{
-							"certificates",
-							"issuers",
-							"clusterissuers",
-							"certificaterequests",
-							"orders",
-							"challenges",
+							"*/*",
 						},
 					},
 				},
 			},
-			FailurePolicy: &failPolicy,
+			FailurePolicy:           &failPolicy,
+			SideEffects:             &sideEffect,
+			AdmissionReviewVersions: []string{"v1"},
+			TimeoutSeconds:          &timeoutSecondsWebhook,
 		},
 	},
 }
@@ -108,8 +107,8 @@ var APIService = &apiRegv1.APIService{
 // WebhookSvc is the service definition for cert-manager-webhook
 var WebhookSvc = &corev1.Service{
 	ObjectMeta: metav1.ObjectMeta{
-		Name: CertManagerWebhookName,
-		//Namespace: DeployNamespace,
+		Name:      CertManagerWebhookName,
+		Namespace: DeployNamespace,
 		Labels: map[string]string{
 			"app": "ibm-cert-manager-webhook",
 		},
@@ -120,7 +119,7 @@ var WebhookSvc = &corev1.Service{
 				Name: "https",
 				Port: 443,
 				TargetPort: intstr.IntOrString{
-					IntVal: 1443,
+					IntVal: 10250,
 				},
 			},
 		},
@@ -137,12 +136,12 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 		Name:   CertManagerWebhookName,
 		Labels: WebhookLabelMap,
 		Annotations: map[string]string{
-			"certmanager.k8s.io/inject-apiserver-ca": "true",
+			"cert-manager.io/inject-ca-from-secret": DeployNamespace + "/" + WebhookServingSecret,
 		},
 	},
 	Webhooks: []admRegv1beta1.ValidatingWebhook{
 		{
-			Name: "webhook.certmanager.k8s.io",
+			Name: "webhook.cert-manager.io",
 			Rules: []admRegv1beta1.RuleWithOperations{
 				{
 					Operations: []admRegv1beta1.OperationType{
@@ -151,24 +150,23 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 					},
 					Rule: admRegv1beta1.Rule{
 						APIGroups: []string{
-							"certmanager.k8s.io",
+							"cert-manager.io",
+							"acme.cert-manager.io",
 						},
 						APIVersions: []string{
-							"v1alpha1",
+							"v1",
 						},
 						Resources: []string{
-							"certificates",
-							"issuers",
-							"clusterissuers",
-							"certificaterequests",
+							"*/*",
 						},
 					},
 				},
 			},
+			AdmissionReviewVersions: []string{"v1"},
 			ClientConfig: admRegv1beta1.WebhookClientConfig{
 				Service: &admRegv1beta1.ServiceReference{
-					Namespace: "default",
-					Name:      "kubernetes",
+					Namespace: DeployNamespace,
+					Name:      CertManagerWebhookName,
 					Path:      &valPath,
 				},
 			},
@@ -177,7 +175,7 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 			NamespaceSelector: &metav1.LabelSelector{
 				MatchExpressions: []metav1.LabelSelectorRequirement{
 					{
-						Key:      "certmanager.k8s.io/disable-validation",
+						Key:      "cert-manager.io/disable-validation",
 						Operator: metav1.LabelSelectorOpNotIn,
 						Values:   []string{"true"},
 					},
@@ -188,6 +186,7 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 					},
 				},
 			},
+			TimeoutSeconds: &timeoutSecondsWebhook,
 		},
 	},
 }

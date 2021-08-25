@@ -40,6 +40,7 @@ var memory300 = resource.NewQuantity(300*1024*1024, resource.BinarySI) // 300Mi
 var memory500 = resource.NewQuantity(500*1024*1024, resource.BinarySI) // 500Mi
 
 var replicaCount int32 = 1
+var timeoutSecondsWebhook int32 = 10
 
 const certManagerComponentName = "cert-manager"
 
@@ -232,7 +233,7 @@ var readinessExecActionConfigmapWatcher = v1.ExecAction{
 // Cert-manager args
 
 // WebhookServingSecret is the name of tls secret used for serving the cert-manager-webhook
-const WebhookServingSecret = "cert-manager-webhook-tls"
+const WebhookServingSecret = "cert-manager-webhook-ca"
 
 // ResourceNS is the resource namespace arg for cert-manager-controller
 var ResourceNS = "--cluster-resource-namespace=" + DeployNamespace

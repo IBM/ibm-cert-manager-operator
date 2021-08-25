@@ -56,7 +56,7 @@ func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, clien
 	if clusterRoleBindingErr := createClusterRoleBinding(instance, scheme, client, ns); clusterRoleBindingErr != nil {
 		return clusterRoleBindingErr
 	}
-	if roleBindingErr := createRB(instance, scheme, client, ns); roleBindingErr != nil {
+	if roleBindingErr := createRoleBinding(instance, scheme, client, ns); roleBindingErr != nil {
 		return roleBindingErr
 	}
 	if serviceAccountErr := createServiceAccount(instance, scheme, client, ns); serviceAccountErr != nil {
@@ -168,8 +168,7 @@ func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *ru
 	return nil
 }
 
-// TODO: rename this to createRoleBinding after refactoring the existing createRoleBinding in prereqs-webhook.go
-func createRB(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
+func createRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
 	log.V(0).Info("Creating role binding")
 	for _, b := range res.RoleBindingsToCreate.Items {
 		log.V(0).Info("Creating role binding " + b.Name)

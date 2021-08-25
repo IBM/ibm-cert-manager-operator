@@ -211,188 +211,188 @@ spec:
         - rules:
             # Can't make the CR namespace-scoped as the operator needs permission to deploy cluster-scoped resources
             - apiGroups:
-              - operator.ibm.com
+                - operator.ibm.com
               resources:
-              - certmanagers
-              - certmanagers/status
-              - certmanagers/finalizers
+                - certmanagers
+                - certmanagers/status
+                - certmanagers/finalizers
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             # required by operator to perform operations on CRDs (all the cert-manager operand CRDs)
             - apiGroups:
-              - apiextensions.k8s.io
+                - apiextensions.k8s.io
               resources:
-              - customresourcedefinitions
+                - customresourcedefinitions
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             # operator creates clusterrole, clusterrolebinding for the cert-manager operands. 
             # creates rolebinding as cert-manager-webhook needs to access a configmap in kube-system, so it needs to create a rolebinding in kube-system
             - apiGroups:
-              - rbac.authorization.k8s.io
+                - rbac.authorization.k8s.io
               resources:
-              - clusterroles
-              - clusterrolebindings
-              - rolebindings
-              - roles
+                - clusterroles
+                - clusterrolebindings
+                - rolebindings
+                - roles
               verbs:
-              - create
-              - get
-              - list
-              - watch
-              - delete
-              - update
+                - create
+                - get
+                - list
+                - watch
+                - delete
+                - update
             # operator deploys cert-manager-webhook apiservice
             - apiGroups:
-              - apiregistration.k8s.io
+                - apiregistration.k8s.io
               resources:
-              - apiservices
+                - apiservices
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch 
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             # operator needs to create mutatingwebhookconfigurations, validatingwebhookconfigurations as a part of webhook resources
             - apiGroups:
-              - admissionregistration.k8s.io
+                - admissionregistration.k8s.io
               resources:
-              - mutatingwebhookconfigurations
-              - validatingwebhookconfigurations
+                - mutatingwebhookconfigurations
+                - validatingwebhookconfigurations
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch 
-            # operator needs cluster-wide access to all the below resources because these are a part of clusterrole for operands
-            # to create a clusterrole with the below permissions, the creator must also have those permissions, in this case, the operator
-
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             # cert-manager service needs to perform all operations on cert-manager resources in any namespace
             - apiGroups:
-              - cert-manager.io
+                - cert-manager.io
+              # operator needs cluster-wide access to all the below resources because these are a part of clusterrole for operands
+              # to create a clusterrole with the below permissions, the creator must also have those permissions, in this case, the operator
+
               resources:
-              - certificates
-              - certificaterequests
-              - orders
-              - challenges
-              - clusterissuers
-              - issuers
+                - certificates
+                - certificaterequests
+                - orders
+                - challenges
+                - clusterissuers
+                - issuers
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
-              - deletecollection
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+                - deletecollection
             - apiGroups:
-              - cert-manager.io
+                - cert-manager.io
               resources:
-              - signers
+                - signers
               verbs:
-              - approve
+                - approve
             - apiGroups:
-              - certificates.k8s.io
+                - certificates.k8s.io
               resources:
-              - signers
+                - signers
               verbs:
-              - sign
+                - sign
             - apiGroups:
-              - certificates.k8s.io
+                - certificates.k8s.io
               resources:
-              - certificatesigningrequests
+                - certificatesigningrequests
               verbs:
-              - get
-              - list
-              - update
-              - watch
+                - get
+                - list
+                - update
+                - watch
             - apiGroups:
-              - certificates.k8s.io
+                - certificates.k8s.io
               resources:
-              - certificatesigningrequests/status
+                - certificatesigningrequests/status
               verbs:
-              - update
+                - update
             - apiGroups:
-              - authorization.k8s.io
+                - authorization.k8s.io
               resources:
-              - subjectaccessreviews
+                - subjectaccessreviews
               verbs:
-              - create
+                - create
             - apiGroups:
-              - acme.cert-manager.io
+                - acme.cert-manager.io
               resources:
-              - orders
-              - challenges
+                - orders
+                - challenges
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
-              - deletecollection
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+                - deletecollection
             - apiGroups:
-              - certmanager.k8s.io
+                - certmanager.k8s.io
               resources:
-              - certificates
-              - certificaterequests
-              - orders
-              - challenges
-              - clusterissuers
-              - issuers
+                - certificates
+                - certificaterequests
+                - orders
+                - challenges
+                - clusterissuers
+                - issuers
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
-              - cert-manager.io
+                - cert-manager.io
+              resources:
+                - certificates/status
+                - certificaterequests/status
+                - issuers/status
+                - clusterissuers/status
+                - certificates/finalizers
+                - certificaterequests/finalizers
+                - issuers/finalizers
+                - clusterissuers/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - acme.cert-manager.io
+              resources:
+                - challenges/status
+                - orders/status
+                - challenges/finalizers
+                - orders/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - certmanager.k8s.io
               resources:
               - certificates/status
               - certificaterequests/status
-              - issuers/status
-              - clusterissuers/status
-              - certificates/finalizers
-              - certificaterequests/finalizers
-              - issuers/finalizers
-              - clusterissuers/finalizers
-              verbs:
-              - update
-            - apiGroups:
-              - acme.cert-manager.io
-              resources:
-              - challenges/status
-              - orders/status
-              - challenges/finalizers
-              - orders/finalizers
-              verbs:
-              - update
-            - apiGroups:
-              - certmanager.k8s.io
-              resources:
-              - certificates/status
-              - certificaterequests/status
               - challenges/status
               - orders/status
               - issuers/status
@@ -404,185 +404,181 @@ spec:
               - challenges/finalizers
               - orders/finalizers
               verbs:
-              - update
+                - update
             # cert-manager service needs permission to perform operations on secrets associated with the certs(eg: perform renewal, etc.)
             - apiGroups:
-              - ""
+                - ""
               resources:
-              - secrets
+                - secrets
               verbs:
-              - get
-              - list
-              - watch
-              - create
-              - update
-              - delete
+                - get
+                - list
+                - watch
+                - create
+                - update
+                - delete
             # cert-manager service needs access to create and patch events for cert-manager resources
             - apiGroups:
-              - ""
+                - ""
               resources:
-              - events
+                - events
               verbs:
-              - create
-              - patch
+                - create
+                - patch
             # only list/watch permission to service-accounts
             - apiGroups:
-              - ""
+                - ""
               resources:
-              - serviceaccounts
+                - serviceaccounts
               verbs:
-              - list
-              - watch
+                - list
+                - watch
             # cert-manager service needs this for HTTP01 rules
             - apiGroups:
-              - ""
+                - ""
               resources:
-              - pods
-              - services
+                - pods
+                - services
               verbs:
-              - get
-              - list
-              - watch
-              - create
-              - delete
+                - get
+                - list
+                - watch
+                - create
+                - delete
             - apiGroups:
-              - networking.x-k8s.io
+                - networking.x-k8s.io
               resources:
-              - gateways
-              - httproutes
-              - gateways/finalizers
-              - httproutes/finalizers
+                - gateways
+                - httproutes
+                - gateways/finalizers
+                - httproutes/finalizers
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             - apiGroups:
-              - route.openshift.io
+                - route.openshift.io
               resources:
-              - routes/custom-host
+                - routes/custom-host
               verbs:
-              - create
-
+                - create
             # cert-manager service needs this to support inject ca bundle injection in ingresses
             - apiGroups:
-              - networking.k8s.io
+                - networking.k8s.io
               resources:
-              - ingresses
-              - ingresses/finalizers
+                - ingresses
+                - ingresses/finalizers
               verbs:
-              - get
-              - list
-              - watch
-              - create
-              - delete
-              - update
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - update
             # needed by cert-manager service to support pod-refresh after cert renewal feature
             # also needed by configmap-watcher
             - apiGroups:
-              - apps
+                - apps
               resources:
-              - deployments
-              - statefulsets
-              - daemonsets
+                - deployments
+                - statefulsets
+                - daemonsets
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             # need access to configmaps by both cert-manager and configmap-watcher service
             - apiGroups:
-              - ""
+                - ""
               resources:
-              - configmaps
+                - configmaps
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - update
-              - watch
-              - patch
+                - create
+                - delete
+                - get
+                - list
+                - update
+                - watch
+                - patch
             # needed by cert-manager-webhook for cert-manager resources admission 
             - apiGroups:
-              - admission.certmanager.k8s.io
+                - admission.certmanager.k8s.io
               resources:
-              - certificates
-              - clusterissuers
-              - issuers
-              - certificaterequests
+                - certificates
+                - clusterissuers
+                - issuers
+                - certificaterequests
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             # needed by the operator to enable/disable hostNetwork for cert-manager-webhook
             - apiGroups:
-              - security.openshift.io
+                - security.openshift.io
               resourceNames:
-              - restricted
-              - hostnetwork
+                - restricted
+                - hostnetwork
               resources:
-              - securitycontextconstraints
+                - securitycontextconstraints
               verbs:
-              - use
+                - use
             # needed by cert-manager-webhook for api server authorization/authentication
             - apiGroups:
-              - authorization.k8s.io
+                - authorization.k8s.io
               resources:
-              - subjectaccessreviews
+                - subjectaccessreviews
               verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch 
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
             # needed by the operator to detect RHACM is installed
             - apiGroups:
-              - operator.open-cluster-management.io
+                - operator.open-cluster-management.io
               resources:
-              - multiclusterhubs
+                - multiclusterhubs
               verbs:
-              - get
-              - list
-              - watch
+                - get
+                - list
+                - watch
             # required by the operator to list/watch at cluster level as operator cache needs it due to cluster-scoped operator
             - apiGroups:
-              - ibmcpcs.ibm.com
+                - ibmcpcs.ibm.com
               resources:
-              - secretshares
+                - secretshares
               verbs:
-              - list
-              - watch
+                - list
+                - watch
             # required by the certificate refresh controller to find certificates based on clusterissuer
             - apiGroups:
-              - ""
+                - ""
               resources:
-              - namespaces
+                - namespaces
               verbs:
-              - get
-              - list
-              - watch
-
+                - get
+                - list
+                - watch
             - apiGroups: [""]
               resources: ["events"]
               verbs: ["get", "create", "update", "patch"]
-
             - apiGroups: ["auditregistration.k8s.io"]
               resources: ["auditsinks"]
               verbs: ["get", "list", "watch", "update"]
-
             - apiGroups: ["coordination.k8s.io"]
               resources: ["leases"]
               resourceNames: ["cert-manager-cainjector-leader-election", "cert-manager-cainjector-leader-election-core", "cert-manager-controller"]
@@ -655,7 +651,7 @@ spec:
                             fieldPath: metadata.namespace
                       - name: OPERATOR_NAME
                         value: ibm-cert-manager-operator
-                    image: quay.io/horis233/ibm-certmanager-operator
+                    image: hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/ibmcom/ibm-cert-manager-operator-amd64:dev
                     imagePullPolicy: Always
                     livenessProbe:
                       failureThreshold: 10
