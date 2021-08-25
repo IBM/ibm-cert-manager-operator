@@ -1,5 +1,5 @@
 //
-// Copyright 2020 IBM Corporation
+// Copyright 2021 IBM Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,8 +23,26 @@ import (
 	v1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 )
 
-// converUsages converts v1alpha1 Certificate Spec Usages to v1 Usages.
+// convertPrivateKey converts v1alpha1 Certificate KeyEncoding, KeyAlgorithm,
+// and KeySize to a v1 PrivateKey object if the v1alpha1 fields exist
+func convertPrivateKey(s v1alpha1.CertificateSpec) *v1.CertificatePrivateKey {
+	if s.KeyEncoding == "" && s.KeyAlgorithm == "" && s.KeySize == 0 {
+		return nil
+	}
+	r := &v1.CertificatePrivateKey{
+		Encoding:  convertKeyEncoding(s.KeyEncoding),
+		Algorithm: converKeyAlgorithm(s.KeyAlgorithm),
+		Size:      s.KeySize,
+	}
+	return r
+}
+
+// converUsages converts v1alpha1 Certificate Spec Usages to v1 Usages if
+// v1alpha1 Usages exists
 func convertUsages(usages []v1alpha1.KeyUsage) []v1.KeyUsage {
+	if usages == nil {
+		return nil
+	}
 	v1Usages := make([]v1.KeyUsage, len(usages))
 	for i, u := range usages {
 		v1Usages[i] = v1.KeyUsage(u)
