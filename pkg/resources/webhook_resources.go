@@ -17,7 +17,7 @@
 package resources
 
 import (
-	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	admRegv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -26,11 +26,11 @@ import (
 
 var valPath = "/validate"
 var mutationPath = "/mutate"
-var failPolicy = admRegv1beta1.Fail
-var sideEffect = admRegv1beta1.SideEffectClassNone
+var failPolicy = admRegv1.Fail
+var sideEffect = admRegv1.SideEffectClassNone
 
 // MutatingWebhook is the mutating webhook definition for cert-manager-webhook
-var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
+var MutatingWebhook = &admRegv1.MutatingWebhookConfiguration{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:   CertManagerWebhookName,
 		Labels: WebhookLabelMap,
@@ -38,23 +38,23 @@ var MutatingWebhook = &admRegv1beta1.MutatingWebhookConfiguration{
 			"cert-manager.io/inject-ca-from-secret": DeployNamespace + "/" + WebhookServingSecret,
 		},
 	},
-	Webhooks: []admRegv1beta1.MutatingWebhook{
+	Webhooks: []admRegv1.MutatingWebhook{
 		{
 			Name: "webhook.cert-manager.io",
-			ClientConfig: admRegv1beta1.WebhookClientConfig{
-				Service: &admRegv1beta1.ServiceReference{
+			ClientConfig: admRegv1.WebhookClientConfig{
+				Service: &admRegv1.ServiceReference{
 					Namespace: DeployNamespace,
 					Name:      CertManagerWebhookName,
 					Path:      &mutationPath,
 				},
 			},
-			Rules: []admRegv1beta1.RuleWithOperations{
+			Rules: []admRegv1.RuleWithOperations{
 				{
-					Operations: []admRegv1beta1.OperationType{
-						admRegv1beta1.Create,
-						admRegv1beta1.Update,
+					Operations: []admRegv1.OperationType{
+						admRegv1.Create,
+						admRegv1.Update,
 					},
-					Rule: admRegv1beta1.Rule{
+					Rule: admRegv1.Rule{
 						APIGroups: []string{
 							"cert-manager.io",
 							"acme.cert-manager.io",
@@ -131,7 +131,7 @@ var WebhookSvc = &corev1.Service{
 }
 
 // ValidatingWebhook is the validating webhook definition for cert-manager-webhook
-var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
+var ValidatingWebhook = &admRegv1.ValidatingWebhookConfiguration{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:   CertManagerWebhookName,
 		Labels: WebhookLabelMap,
@@ -139,16 +139,16 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 			"cert-manager.io/inject-ca-from-secret": DeployNamespace + "/" + WebhookServingSecret,
 		},
 	},
-	Webhooks: []admRegv1beta1.ValidatingWebhook{
+	Webhooks: []admRegv1.ValidatingWebhook{
 		{
 			Name: "webhook.cert-manager.io",
-			Rules: []admRegv1beta1.RuleWithOperations{
+			Rules: []admRegv1.RuleWithOperations{
 				{
-					Operations: []admRegv1beta1.OperationType{
-						admRegv1beta1.Create,
-						admRegv1beta1.Update,
+					Operations: []admRegv1.OperationType{
+						admRegv1.Create,
+						admRegv1.Update,
 					},
-					Rule: admRegv1beta1.Rule{
+					Rule: admRegv1.Rule{
 						APIGroups: []string{
 							"cert-manager.io",
 							"acme.cert-manager.io",
@@ -163,8 +163,8 @@ var ValidatingWebhook = &admRegv1beta1.ValidatingWebhookConfiguration{
 				},
 			},
 			AdmissionReviewVersions: []string{"v1"},
-			ClientConfig: admRegv1beta1.WebhookClientConfig{
-				Service: &admRegv1beta1.ServiceReference{
+			ClientConfig: admRegv1.WebhookClientConfig{
+				Service: &admRegv1.ServiceReference{
 					Namespace: DeployNamespace,
 					Name:      CertManagerWebhookName,
 					Path:      &valPath,
