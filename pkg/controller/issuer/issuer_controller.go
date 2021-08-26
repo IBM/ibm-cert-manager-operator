@@ -1,5 +1,5 @@
 //
-// Copyright 2020 IBM Corporation
+// Copyright 2021 IBM Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -141,7 +141,11 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 		},
 		Spec: certmanagerv1.IssuerSpec{
 			IssuerConfig: certmanagerv1.IssuerConfig{
-				SelfSigned: &certmanagerv1.SelfSignedIssuer{},
+				ACME:       convertACME(instance.Spec.ACME),
+				CA:         convertCA(instance.Spec.CA),
+				Vault:      convertVault(instance.Spec.Vault),
+				SelfSigned: convertSelfSigned(instance.Spec.SelfSigned),
+				Venafi:     convertVenafi(instance.Spec.Venafi),
 			},
 		},
 	}
