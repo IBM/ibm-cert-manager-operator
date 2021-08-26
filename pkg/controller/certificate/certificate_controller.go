@@ -178,12 +178,12 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 				reqLogger.Info("### DEBUG #### Updated v1 Certificate")
 			}
 
-			reqLogger.Info("### DEBUG ### Converting status")
+			reqLogger.Info("### DEBUG ### Converting Certificate status")
 			status := convertStatus(existingCertificate.Status)
 			instance.Status = status
-			reqLogger.Info("### DEBUG ### Updating v1alpha1 status")
+			reqLogger.Info("### DEBUG ### Updating v1alpha1 Certificate status")
 			if err := r.client.Update(context.TODO(), instance); err != nil {
-				reqLogger.Error(err, "### DEBUG ### error patching")
+				reqLogger.Error(err, "### DEBUG ### error updating")
 				return reconcile.Result{}, err
 			}
 

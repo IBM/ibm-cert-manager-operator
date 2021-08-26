@@ -173,7 +173,14 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 				reqLogger.Info("### DEBUG #### Updated v1 Issuer")
 			}
 
-			// TODO Add status update logic here
+			reqLogger.Info("### DEBUG ### Converting Issuer status")
+			status := convertStatus(existingIssuer.Status)
+			instance.Status = status
+			reqLogger.Info("### DEBUG ### Updating v1alpha1 Issuer status")
+			if err := r.client.Update(context.TODO(), instance); err != nil {
+				reqLogger.Error(err, "### DEBUG ### error updating")
+				return reconcile.Result{}, err
+			}
 
 			return reconcile.Result{}, nil
 		}

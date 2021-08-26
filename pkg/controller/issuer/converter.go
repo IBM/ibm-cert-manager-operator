@@ -317,3 +317,23 @@ func convertVenafi(v *v1alpha1.VenafiIssuer) *v1.VenafiIssuer {
 		Cloud: cloud,
 	}
 }
+
+func convertStatus(s v1.IssuerStatus) v1alpha1.IssuerStatus {
+	conditions := make([]v1alpha1.IssuerCondition, len(s.Conditions))
+	if s.Conditions != nil && len(conditions) > 0 {
+		for i, c := range s.Conditions {
+			conditions[i] = v1alpha1.IssuerCondition{
+				Type:               v1alpha1.IssuerConditionType(c.Type),
+				Status:             v1alpha1.ConditionStatus(c.Status),
+				LastTransitionTime: c.LastTransitionTime,
+				Reason:             c.Reason,
+				Message:            c.Message,
+			}
+		}
+	}
+
+	return v1alpha1.IssuerStatus{
+		Conditions: conditions,
+		ACME:       (*v1alpha1.ACMEIssuerStatus)(s.ACME),
+	}
+}
