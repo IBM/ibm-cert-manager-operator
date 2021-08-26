@@ -116,8 +116,9 @@ var WebhookSvc = &corev1.Service{
 	Spec: corev1.ServiceSpec{
 		Ports: []corev1.ServicePort{
 			{
-				Name: "https",
-				Port: 443,
+				Name:     "https",
+				Port:     443,
+				Protocol: "TCP",
 				TargetPort: intstr.IntOrString{
 					IntVal: 10250,
 				},
