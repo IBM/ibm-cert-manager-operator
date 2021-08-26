@@ -321,9 +321,9 @@ func compareService(service *corev1.Service, originalService *corev1.Service) (n
 }
 
 func compareMutatingWebhook(webhook *admRegv1beta1.MutatingWebhookConfiguration, originalWebhook *admRegv1beta1.MutatingWebhookConfiguration) (needUpdate bool) {
-	return !equality.Semantic.DeepEqual(webhook.Webhooks, originalWebhook.Webhooks) || !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
+	return !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
 }
 
 func compareValidatingWebhook(webhook *admRegv1beta1.ValidatingWebhookConfiguration, originalWebhook *admRegv1beta1.ValidatingWebhookConfiguration) (needUpdate bool) {
-	return !equality.Semantic.DeepEqual(webhook.Webhooks, originalWebhook.Webhooks) || !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
+	return !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
 }
