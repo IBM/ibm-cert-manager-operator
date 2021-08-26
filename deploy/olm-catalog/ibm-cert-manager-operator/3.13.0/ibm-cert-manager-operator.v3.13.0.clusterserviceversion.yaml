@@ -49,33 +49,33 @@ spec:
       - description: 'Represents a certificate. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Certificate
         kind: Certificate
-        name: certificates.certmanager.k8s.io
-        version: v1alpha1
+        name: certificates.cert-manager.io
+        version: v1
       - description: 'Represents a certificateRequest. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: CertificateRequest
         kind: CertificateRequest
-        name: certificaterequests.certmanager.k8s.io
-        version: v1alpha1
+        name: certificaterequests.cert-manager.io
+        version: v1
       - description: 'Represents a Issuer. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Issuer
         kind: Issuer
-        name: issuers.certmanager.k8s.io
-        version: v1alpha1
+        name: issuers.cert-manager.io
+        version: v1
       - description: 'Represents a clusterissuer. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: ClusterIssuer
         kind: ClusterIssuer
-        name: clusterissuers.certmanager.k8s.io
-        version: v1alpha1
+        name: clusterissuers.cert-manager.io
+        version: v1
       - description: 'Represents an order. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Order
         kind: Order
-        name: orders.certmanager.k8s.io
-        version: v1alpha1
+        name: orders.acme.cert-manager.io
+        version: v1
       - description: 'Represents a challenge. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Challenge
         kind: Challenge
-        name: challenges.certmanager.k8s.io
-        version: v1alpha1
+        name: challenges.acme.cert-manager.io
+        version: v1
       - description: 'CertManager is the Schema for the certmanagers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         kind: CertManager
         name: certmanagers.operator.ibm.com
