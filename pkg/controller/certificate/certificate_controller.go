@@ -18,6 +18,7 @@ package certificate
 
 import (
 	"context"
+	"encoding/json"
 
 	cmmeta "github.com/ibm/ibm-cert-manager-operator/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -181,7 +182,18 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 				reqLogger.Info("### DEBUG #### Updated v1 Certificate")
 			}
 
-			// TODO Add status update logic here
+			status := convertStatus(existingCertificate.Status)
+			patch, err := json.Marshal(status)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+			reqLogger.Info("### DEBUG ### getting status", "%v", patch)
+
+			reqLogger.Info("### DEBUG ### Patching v1alpha1 status")
+			e := r.client.Patch(context.TODO(), instance, client.ConstantPatch(types.MergePatchType, patch))
+			if e != nil {
+				reqLogger.Error(e, "### DEBUG ### error patching")
+			}
 
 			return reconcile.Result{}, nil
 		}
