@@ -18,9 +18,7 @@ package certificate
 
 import (
 	"context"
-	"encoding/json"
 
-	cmmeta "github.com/ibm/ibm-cert-manager-operator/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -139,9 +137,7 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 			Annotations: annotations,
 		},
 		Spec: certmanagerv1.CertificateSpec{
-			Subject: &certmanagerv1.X509Subject{
-				Organizations: instance.Spec.Organization,
-			},
+			Subject:               convertSubject(instance.Spec.Organization),
 			CommonName:            instance.Spec.CommonName,
 			Duration:              instance.Spec.Duration,
 			RenewBefore:           instance.Spec.RenewBefore,
@@ -151,7 +147,7 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 			EmailAddresses:        nil,
 			SecretName:            instance.Spec.SecretName,
 			Keystores:             nil,
-			IssuerRef:             cmmeta.ObjectReference(instance.Spec.IssuerRef),
+			IssuerRef:             convertIssuerRef(instance.Spec.IssuerRef),
 			IsCA:                  instance.Spec.IsCA,
 			Usages:                convertUsages(instance.Spec.Usages),
 			PrivateKey:            convertPrivateKey(instance.Spec),
@@ -182,17 +178,13 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 				reqLogger.Info("### DEBUG #### Updated v1 Certificate")
 			}
 
+			reqLogger.Info("### DEBUG ### Converting status")
 			status := convertStatus(existingCertificate.Status)
-			patch, err := json.Marshal(status)
-			if err != nil {
+			instance.Status = status
+			reqLogger.Info("### DEBUG ### Updating v1alpha1 status")
+			if err := r.client.Update(context.TODO(), instance); err != nil {
+				reqLogger.Error(err, "### DEBUG ### error patching")
 				return reconcile.Result{}, err
-			}
-			reqLogger.Info("### DEBUG ### getting status", "%v", patch)
-
-			reqLogger.Info("### DEBUG ### Patching v1alpha1 status")
-			e := r.client.Patch(context.TODO(), instance, client.ConstantPatch(types.MergePatchType, patch))
-			if e != nil {
-				reqLogger.Error(e, "### DEBUG ### error patching")
 			}
 
 			return reconcile.Result{}, nil

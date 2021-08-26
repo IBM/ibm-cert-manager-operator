@@ -21,7 +21,25 @@ import (
 
 	v1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
 	v1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/pkg/apis/meta/v1"
 )
+
+func convertSubject(o []string) *v1.X509Subject {
+	if o == nil {
+		return nil
+	}
+	return &v1.X509Subject{
+		Organizations: o,
+	}
+}
+
+func convertIssuerRef(o v1alpha1.ObjectReference) cmmeta.ObjectReference {
+	return cmmeta.ObjectReference{
+		Name:  o.Name,
+		Kind:  o.Kind,
+		Group: "cert-manager.io",
+	}
+}
 
 // convertPrivateKey converts v1alpha1 Certificate KeyEncoding, KeyAlgorithm,
 // and KeySize to a v1 PrivateKey object if the v1alpha1 fields exist

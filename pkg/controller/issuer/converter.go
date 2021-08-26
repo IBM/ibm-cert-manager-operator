@@ -70,7 +70,7 @@ func convertHTTP01(a *v1alpha1.ACMEChallengeSolverHTTP01) *acme.ACMEChallengeSol
 		return nil
 	}
 
-	var podTemplate *acme.ACMEChallengeSolverHTTP01IngressPodTemplate = nil
+	var podTemplate *acme.ACMEChallengeSolverHTTP01IngressPodTemplate
 	if a.Ingress.PodTemplate != nil {
 		podTemplate = &acme.ACMEChallengeSolverHTTP01IngressPodTemplate{
 			ACMEChallengeSolverHTTP01IngressPodObjectMeta: acme.ACMEChallengeSolverHTTP01IngressPodObjectMeta{
@@ -95,7 +95,7 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		return nil
 	}
 
-	var akamai *acme.ACMEIssuerDNS01ProviderAkamai = nil
+	var akamai *acme.ACMEIssuerDNS01ProviderAkamai
 	if a.Akamai != nil {
 		akamai = &acme.ACMEIssuerDNS01ProviderAkamai{
 			ServiceConsumerDomain: a.Akamai.ServiceConsumerDomain,
@@ -114,7 +114,7 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var cloudDNS *acme.ACMEIssuerDNS01ProviderCloudDNS = nil
+	var cloudDNS *acme.ACMEIssuerDNS01ProviderCloudDNS
 	if a.CloudDNS != nil {
 		cloudDNS = &acme.ACMEIssuerDNS01ProviderCloudDNS{
 			ServiceAccount: &cmmeta.SecretKeySelector{ // not optional in v1alpha1
@@ -125,7 +125,7 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var cloudflare *acme.ACMEIssuerDNS01ProviderCloudflare = nil
+	var cloudflare *acme.ACMEIssuerDNS01ProviderCloudflare
 	if a.Cloudflare != nil {
 		cloudflare = &acme.ACMEIssuerDNS01ProviderCloudflare{
 			Email: a.Cloudflare.Email,
@@ -136,10 +136,10 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var route53 *acme.ACMEIssuerDNS01ProviderRoute53 = nil
+	var route53 *acme.ACMEIssuerDNS01ProviderRoute53
 	if a.Route53 != nil {
 		var key cmmeta.SecretKeySelector
-		if &a.Route53.SecretAccessKey != nil {
+		if a.Route53.SecretAccessKey != (v1alpha1.SecretKeySelector{}) {
 			key = cmmeta.SecretKeySelector{
 				LocalObjectReference: cmmeta.LocalObjectReference(a.Route53.SecretAccessKey.LocalObjectReference),
 				Key:                  a.Route53.SecretAccessKey.Key,
@@ -154,7 +154,7 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var azureDNS *acme.ACMEIssuerDNS01ProviderAzureDNS = nil
+	var azureDNS *acme.ACMEIssuerDNS01ProviderAzureDNS
 	if a.AzureDNS != nil {
 		azureDNS = &acme.ACMEIssuerDNS01ProviderAzureDNS{
 			ClientID: a.AzureDNS.ClientID,
@@ -170,7 +170,7 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var digitalOcean *acme.ACMEIssuerDNS01ProviderDigitalOcean = nil
+	var digitalOcean *acme.ACMEIssuerDNS01ProviderDigitalOcean
 	if a.DigitalOcean != nil {
 		digitalOcean = &acme.ACMEIssuerDNS01ProviderDigitalOcean{
 			Token: cmmeta.SecretKeySelector{
@@ -180,7 +180,7 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var acmeDNS *acme.ACMEIssuerDNS01ProviderAcmeDNS = nil
+	var acmeDNS *acme.ACMEIssuerDNS01ProviderAcmeDNS
 	if a.AcmeDNS != nil {
 		acmeDNS = &acme.ACMEIssuerDNS01ProviderAcmeDNS{
 			Host: a.AcmeDNS.Host,
@@ -191,10 +191,10 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var rfc2136 *acme.ACMEIssuerDNS01ProviderRFC2136 = nil
+	var rfc2136 *acme.ACMEIssuerDNS01ProviderRFC2136
 	if a.RFC2136 != nil {
 		var secret cmmeta.SecretKeySelector
-		if &a.RFC2136.TSIGSecret != nil {
+		if a.RFC2136.TSIGSecret != (v1alpha1.SecretKeySelector{}) {
 			secret = cmmeta.SecretKeySelector{
 				LocalObjectReference: cmmeta.LocalObjectReference(a.RFC2136.TSIGSecret.LocalObjectReference),
 				Key:                  a.RFC2136.TSIGSecret.Key,
@@ -208,7 +208,7 @@ func convertDNS01(a *v1alpha1.ACMEChallengeSolverDNS01) *acme.ACMEChallengeSolve
 		}
 	}
 
-	var webhook *acme.ACMEIssuerDNS01ProviderWebhook = nil
+	var webhook *acme.ACMEIssuerDNS01ProviderWebhook
 	if a.Webhook != nil {
 		webhook = &acme.ACMEIssuerDNS01ProviderWebhook{
 			GroupName:  a.Webhook.GroupName,
@@ -247,16 +247,16 @@ func convertVault(v *v1alpha1.VaultIssuer) *v1.VaultIssuer {
 		return nil
 	}
 
-	var ref *cmmeta.SecretKeySelector = nil
-	if &v.Auth.TokenSecretRef != nil {
+	var ref *cmmeta.SecretKeySelector
+	if v.Auth.TokenSecretRef != (v1alpha1.SecretKeySelector{}) {
 		ref = &cmmeta.SecretKeySelector{
 			LocalObjectReference: cmmeta.LocalObjectReference(v.Auth.TokenSecretRef.LocalObjectReference),
 			Key:                  v.Auth.TokenSecretRef.Key,
 		}
 	}
 
-	var role *v1.VaultAppRole = nil
-	if &v.Auth.AppRole != nil {
+	var role *v1.VaultAppRole
+	if v.Auth.AppRole != (v1alpha1.VaultAppRole{}) {
 		role = &v1.VaultAppRole{
 			Path:   v.Auth.AppRole.Path,
 			RoleId: v.Auth.AppRole.RoleId,
@@ -291,7 +291,7 @@ func convertVenafi(v *v1alpha1.VenafiIssuer) *v1.VenafiIssuer {
 	if v == nil {
 		return nil
 	}
-	var tpp *v1.VenafiTPP = nil
+	var tpp *v1.VenafiTPP
 	if v.TPP != nil {
 		tpp = &v1.VenafiTPP{
 			URL: v.TPP.URL,
@@ -301,7 +301,7 @@ func convertVenafi(v *v1alpha1.VenafiIssuer) *v1.VenafiIssuer {
 			CABundle: v.TPP.CABundle,
 		}
 	}
-	var cloud *v1.VenafiCloud = nil
+	var cloud *v1.VenafiCloud
 	if v.Cloud != nil {
 		cloud = &v1.VenafiCloud{
 			URL: v.Cloud.URL,
