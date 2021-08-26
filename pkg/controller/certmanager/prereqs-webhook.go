@@ -172,7 +172,7 @@ func webhooks(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, cl
 
 		if compareValidatingWebhook(validating, originalValidating) {
 			log.Info("Updating Validating Webhook " + res.CertManagerWebhookName)
-			err := client.Update(context.Background(), mutating)
+			err := client.Update(context.Background(), validating)
 			if err != nil {
 				return err
 			}
