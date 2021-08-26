@@ -38,6 +38,9 @@ func webhookPrereqs(instance *operatorv1alpha1.CertManager, scheme *runtime.Sche
 	if err := removeAPIService(client); err != nil {
 		return err
 	}
+	if err := removeOldSecret(client, ns); err != nil {
+		return err
+	}
 	if err := service(instance, scheme, client, ns); err != nil {
 		return err
 	}
@@ -89,6 +92,24 @@ func removeAPIService(client client.Client) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func removeOldSecret(client client.Client, ns string) error {
+	secret := &corev1.Secret{}
+	err := client.Get(context.Background(), types.NamespacedName{Name: res.WebhookServingSecret, Namespace: ns}, secret)
+	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	if _, ok := secret.Annotations["certmanager.k8s.io/allow-direct-injection"]; ok {
+		if err := client.Delete(context.Background(), secret); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
