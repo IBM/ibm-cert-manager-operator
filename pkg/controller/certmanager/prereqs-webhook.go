@@ -19,10 +19,7 @@ package certmanager
 import (
 	"context"
 
-	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
-	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
-
-	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	admRegv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -32,6 +29,9 @@ import (
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
+	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 )
 
 func webhookPrereqs(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
@@ -114,7 +114,7 @@ func removeOldSecret(client client.Client, ns string) error {
 }
 
 func webhooks(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
-	mutating := &admRegv1beta1.MutatingWebhookConfiguration{}
+	mutating := &admRegv1.MutatingWebhookConfiguration{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, mutating)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -156,7 +156,7 @@ func webhooks(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, cl
 		}
 	}
 
-	validating := &admRegv1beta1.ValidatingWebhookConfiguration{}
+	validating := &admRegv1.ValidatingWebhookConfiguration{}
 	err = client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, validating)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -204,7 +204,7 @@ func webhooks(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, cl
 }
 
 func removeWebhooks(client client.Client) error {
-	mutating := &admRegv1beta1.MutatingWebhookConfiguration{}
+	mutating := &admRegv1.MutatingWebhookConfiguration{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, mutating)
 	if err != nil {
 		if !apiErrors.IsNotFound(err) {
@@ -216,7 +216,7 @@ func removeWebhooks(client client.Client) error {
 		}
 	}
 
-	validating := &admRegv1beta1.ValidatingWebhookConfiguration{}
+	validating := &admRegv1.ValidatingWebhookConfiguration{}
 	err = client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, validating)
 	if err != nil {
 		if !apiErrors.IsNotFound(err) {
@@ -320,10 +320,10 @@ func compareService(service *corev1.Service, originalService *corev1.Service) (n
 	return !equality.Semantic.DeepEqual(service.Spec, originalService.Spec) || !equality.Semantic.DeepEqual(service.Labels, originalService.Labels)
 }
 
-func compareMutatingWebhook(webhook *admRegv1beta1.MutatingWebhookConfiguration, originalWebhook *admRegv1beta1.MutatingWebhookConfiguration) (needUpdate bool) {
+func compareMutatingWebhook(webhook *admRegv1.MutatingWebhookConfiguration, originalWebhook *admRegv1.MutatingWebhookConfiguration) (needUpdate bool) {
 	return !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
 }
 
-func compareValidatingWebhook(webhook *admRegv1beta1.ValidatingWebhookConfiguration, originalWebhook *admRegv1beta1.ValidatingWebhookConfiguration) (needUpdate bool) {
+func compareValidatingWebhook(webhook *admRegv1.ValidatingWebhookConfiguration, originalWebhook *admRegv1.ValidatingWebhookConfiguration) (needUpdate bool) {
 	return !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
 }
