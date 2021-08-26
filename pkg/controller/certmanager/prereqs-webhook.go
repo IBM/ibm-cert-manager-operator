@@ -25,6 +25,7 @@ import (
 	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -94,29 +95,87 @@ func removeAPIService(client client.Client) error {
 func webhooks(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	mutating := &admRegv1beta1.MutatingWebhookConfiguration{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, mutating)
-	if err != nil && apiErrors.IsNotFound(err) {
-		// Create the mutating webhook spec
-		res.MutatingWebhook.ResourceVersion = ""
-		if err := controllerutil.SetControllerReference(instance, res.MutatingWebhook, scheme); err != nil {
-			log.Error(err, "Error setting controller reference on mutating webhook")
-		}
-		err := client.Create(context.Background(), res.MutatingWebhook)
-		if err != nil {
+	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			// Create the mutating webhook spec
+			res.MutatingWebhook.ResourceVersion = ""
+			if err := controllerutil.SetControllerReference(instance, res.MutatingWebhook, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on mutating webhook")
+			}
+			err := client.Create(context.Background(), res.MutatingWebhook)
+			if err != nil {
+				return err
+			}
+		} else {
 			return err
+		}
+	} else {
+		originalmutating := mutating.DeepCopy()
+		if mutating.Labels == nil {
+			mutating.Labels = make(map[string]string)
+		}
+		if mutating.Annotations == nil {
+			mutating.Annotations = make(map[string]string)
+		}
+		mutating.Labels = res.MutatingWebhook.Labels
+		mutating.Annotations = res.MutatingWebhook.Annotations
+		mutating.Webhooks[0].Name = res.MutatingWebhook.Webhooks[0].Name
+		mutating.Webhooks[0].ClientConfig = res.MutatingWebhook.Webhooks[0].ClientConfig
+		mutating.Webhooks[0].Rules = res.MutatingWebhook.Webhooks[0].Rules
+		mutating.Webhooks[0].FailurePolicy = res.MutatingWebhook.Webhooks[0].FailurePolicy
+		mutating.Webhooks[0].SideEffects = res.MutatingWebhook.Webhooks[0].SideEffects
+		mutating.Webhooks[0].AdmissionReviewVersions = res.MutatingWebhook.Webhooks[0].AdmissionReviewVersions
+		mutating.Webhooks[0].TimeoutSeconds = res.MutatingWebhook.Webhooks[0].TimeoutSeconds
+		if compareMutatingWebhook(mutating, originalmutating) {
+			log.Info("Updating Mutating Webhook " + res.CertManagerWebhookName)
+			err := client.Update(context.Background(), mutating)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	validating := &admRegv1beta1.ValidatingWebhookConfiguration{}
 	err = client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, validating)
-	if err != nil && apiErrors.IsNotFound(err) {
-		// Create the validating webhook spec
-		res.ValidatingWebhook.ResourceVersion = ""
-		if err := controllerutil.SetControllerReference(instance, res.ValidatingWebhook, scheme); err != nil {
-			log.Error(err, "Error setting controller reference on validating webhook")
-		}
-		err := client.Create(context.Background(), res.ValidatingWebhook)
-		if err != nil {
+	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			// Create the validating webhook spec
+			res.ValidatingWebhook.ResourceVersion = ""
+			if err := controllerutil.SetControllerReference(instance, res.ValidatingWebhook, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on validating webhook")
+			}
+			err := client.Create(context.Background(), res.ValidatingWebhook)
+			if err != nil {
+				return err
+			}
+		} else {
 			return err
+		}
+	} else {
+		originalValidating := validating.DeepCopy()
+		if validating.Labels == nil {
+			validating.Labels = make(map[string]string)
+		}
+		if validating.Annotations == nil {
+			validating.Annotations = make(map[string]string)
+		}
+		validating.Labels = res.ValidatingWebhook.Labels
+		validating.Annotations = res.ValidatingWebhook.Annotations
+		validating.Webhooks[0].Name = res.ValidatingWebhook.Webhooks[0].Name
+		validating.Webhooks[0].ClientConfig = res.ValidatingWebhook.Webhooks[0].ClientConfig
+		validating.Webhooks[0].Rules = res.ValidatingWebhook.Webhooks[0].Rules
+		validating.Webhooks[0].FailurePolicy = res.ValidatingWebhook.Webhooks[0].FailurePolicy
+		validating.Webhooks[0].SideEffects = res.ValidatingWebhook.Webhooks[0].SideEffects
+		validating.Webhooks[0].AdmissionReviewVersions = res.ValidatingWebhook.Webhooks[0].AdmissionReviewVersions
+		validating.Webhooks[0].TimeoutSeconds = res.ValidatingWebhook.Webhooks[0].TimeoutSeconds
+		validating.Webhooks[0].NamespaceSelector = res.ValidatingWebhook.Webhooks[0].NamespaceSelector
+
+		if compareValidatingWebhook(validating, originalValidating) {
+			log.Info("Updating Validating Webhook " + res.CertManagerWebhookName)
+			err := client.Update(context.Background(), mutating)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -153,15 +212,35 @@ func removeWebhooks(client client.Client) error {
 func service(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
 	svc := &corev1.Service{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ns}, svc)
-	if err != nil && apiErrors.IsNotFound(err) {
-		// Create the webhook service spec
-		res.WebhookSvc.ResourceVersion = ""
-		res.WebhookSvc.Spec.ClusterIP = ""
-		res.WebhookSvc.Namespace = ns
-		if err := controllerutil.SetControllerReference(instance, res.WebhookSvc, scheme); err != nil {
-			log.Error(err, "Error setting controller reference on webhook's service")
+	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			// Create the webhook service spec
+			res.WebhookSvc.ResourceVersion = ""
+			res.WebhookSvc.Spec.ClusterIP = ""
+			res.WebhookSvc.Namespace = ns
+			if err := controllerutil.SetControllerReference(instance, res.WebhookSvc, scheme); err != nil {
+				log.Error(err, "Error setting controller reference on webhook's service")
+			}
+			err := client.Create(context.Background(), res.WebhookSvc)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
-		err := client.Create(context.Background(), res.WebhookSvc)
+		return err
+	}
+
+	originalService := svc.DeepCopy()
+	if svc.Labels == nil {
+		svc.Labels = make(map[string]string)
+	}
+	svc.Labels = res.WebhookSvc.Labels
+	svc.Spec.Selector = res.WebhookSvc.Spec.Selector
+	svc.Spec.Ports = res.WebhookSvc.Spec.Ports
+	svc.Spec.Type = res.WebhookSvc.Spec.Type
+	if compareService(svc, originalService) {
+		log.Info("Updating Webhook Service " + res.CertManagerWebhookName)
+		err := client.Update(context.Background(), svc)
 		if err != nil {
 			return err
 		}
@@ -214,4 +293,16 @@ func removeRoleBinding(client client.Client) error {
 		}
 	}
 	return nil
+}
+
+func compareService(service *corev1.Service, originalService *corev1.Service) (needUpdate bool) {
+	return !equality.Semantic.DeepEqual(service.Spec, originalService.Spec) || !equality.Semantic.DeepEqual(service.Labels, originalService.Labels)
+}
+
+func compareMutatingWebhook(webhook *admRegv1beta1.MutatingWebhookConfiguration, originalWebhook *admRegv1beta1.MutatingWebhookConfiguration) (needUpdate bool) {
+	return !equality.Semantic.DeepEqual(webhook.Webhooks, originalWebhook.Webhooks) || !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
+}
+
+func compareValidatingWebhook(webhook *admRegv1beta1.ValidatingWebhookConfiguration, originalWebhook *admRegv1beta1.ValidatingWebhookConfiguration) (needUpdate bool) {
+	return !equality.Semantic.DeepEqual(webhook.Webhooks, originalWebhook.Webhooks) || !equality.Semantic.DeepEqual(webhook.Labels, originalWebhook.Labels) || !equality.Semantic.DeepEqual(webhook.Annotations, originalWebhook.Annotations)
 }
