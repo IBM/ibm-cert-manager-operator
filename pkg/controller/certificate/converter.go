@@ -21,7 +21,25 @@ import (
 
 	v1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
 	v1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/pkg/apis/meta/v1"
 )
+
+func convertSubject(o []string) *v1.X509Subject {
+	if o == nil {
+		return nil
+	}
+	return &v1.X509Subject{
+		Organizations: o,
+	}
+}
+
+func convertIssuerRef(o v1alpha1.ObjectReference) cmmeta.ObjectReference {
+	return cmmeta.ObjectReference{
+		Name:  o.Name,
+		Kind:  o.Kind,
+		Group: "cert-manager.io",
+	}
+}
 
 // convertPrivateKey converts v1alpha1 Certificate KeyEncoding, KeyAlgorithm,
 // and KeySize to a v1 PrivateKey object if the v1alpha1 fields exist
@@ -62,4 +80,24 @@ func convertKeyEncoding(e v1alpha1.KeyEncoding) v1.PrivateKeyEncoding {
 // v1 values have been capitalized
 func converKeyAlgorithm(a v1alpha1.KeyAlgorithm) v1.PrivateKeyAlgorithm {
 	return v1.PrivateKeyAlgorithm(strings.ToUpper(string(a)))
+}
+
+func convertStatus(s v1.CertificateStatus) v1alpha1.CertificateStatus {
+	conditions := make([]v1alpha1.CertificateCondition, len(s.Conditions))
+	if s.Conditions != nil && len(conditions) > 0 {
+		for i, c := range s.Conditions {
+			conditions[i] = v1alpha1.CertificateCondition{
+				Type:               v1alpha1.CertificateConditionType(c.Type),
+				Status:             v1alpha1.ConditionStatus(c.Status),
+				LastTransitionTime: c.LastTransitionTime,
+				Reason:             c.Reason,
+				Message:            c.Message,
+			}
+		}
+	}
+	return v1alpha1.CertificateStatus{
+		Conditions:      conditions,
+		LastFailureTime: s.LastFailureTime,
+		NotAfter:        s.NotAfter,
+	}
 }
