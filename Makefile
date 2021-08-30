@@ -281,10 +281,22 @@ dev-csv:
 # deploys CSV using currently installed OLM on the cluster
 # change pullPolicy value in pkg/resources/constants.go to always pull operands
 run-csv:
+	mkdir -p tmp
+	cp deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/acme.cert-manager.io_challenges_crd.yaml tmp
+	cp deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/acme.cert-manager.io_orders_crd.yaml tmp
+	cp deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/cert-manager.io_certificaterequests_crd.yaml tmp
+	cp deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/cert-manager.io_clusterissuers_crd.yaml tmp
+
+	yq eval -i 'del(.spec.versions[0], .spec.versions[0], .spec.versions[0])' deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/acme.cert-manager.io_challenges_crd.yaml
+	yq eval -i 'del(.spec.versions[0], .spec.versions[0], .spec.versions[0])' deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/acme.cert-manager.io_orders_crd.yaml
+	yq eval -i 'del(.spec.versions[0], .spec.versions[0], .spec.versions[0])' deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/cert-manager.io_certificaterequests_crd.yaml
+	yq eval -i 'del(.spec.versions[0], .spec.versions[0], .spec.versions[0])' deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}/cert-manager.io_clusterissuers_crd.yaml
+
 	operator-sdk run packagemanifests \
 		--operator-version ${VERSION} \
 		--operator-namespace ibm-common-services \
 		--olm-namespace openshift-operator-lifecycle-manager
+		--timeout 180
 		
 	oc apply -f deploy/crds/operator.ibm.com_v1alpha1_certmanager_cr.yaml
 
@@ -295,5 +307,10 @@ cleanup-csv:
 		--operator-version ${VERSION} \
 		--operator-namespace ibm-common-services \
 		--olm-namespace openshift-operator-lifecycle-manager
+
+	cp tmp/acme.cert-manager.io_challenges_crd.yaml deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}
+	cp tmp/acme.cert-manager.io_orders_crd.yaml deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}
+	cp tmp/cert-manager.io_certificaterequests_crd.yaml deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}
+	cp tmp/cert-manager.io_clusterissuers_crd.yaml deploy/olm-catalog/ibm-cert-manager-operator/${VERSION}
 
 .PHONY: all work build check lint test coverage images multiarch-image

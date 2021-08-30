@@ -1,5 +1,5 @@
 //
-// Copyright 2020 IBM Corporation
+// Copyright 2021 IBM Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,19 +19,22 @@ package issuer
 import (
 	"context"
 
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
-	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
+	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 )
 
 var log = logf.Log.WithName("controller_issuer")
@@ -68,7 +71,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource Pods and requeue the owner Issuer
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &certmanagerv1.Issuer{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &certmanagerv1alpha1.Issuer{},
 	})
@@ -125,28 +128,60 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 	}
 	annotations["ibm-cert-manager-operator-generated"] = "true"
 
-	v1Issuer := certmanagerv1.Issuer{
+	v1Issuer := &certmanagerv1.Issuer{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Issuer",
 			APIVersion: "cert-manager.io/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:            instance.Name,
-			Namespace:       instance.Namespace,
-			Labels:          instance.Labels,
-			Annotations:     annotations,
-			OwnerReferences: instance.OwnerReferences,
+			Name:        instance.Name,
+			Namespace:   instance.Namespace,
+			Labels:      instance.Labels,
+			Annotations: annotations,
 		},
 		Spec: certmanagerv1.IssuerSpec{
 			IssuerConfig: certmanagerv1.IssuerConfig{
-				SelfSigned: &certmanagerv1.SelfSignedIssuer{},
+				ACME:       convertACME(instance.Spec.ACME),
+				CA:         convertCA(instance.Spec.CA),
+				Vault:      convertVault(instance.Spec.Vault),
+				SelfSigned: convertSelfSigned(instance.Spec.SelfSigned),
+				Venafi:     convertVenafi(instance.Spec.Venafi),
 			},
 		},
 	}
 
-	if err := r.client.Create(context.TODO(), &v1Issuer); err != nil {
+	// Set the issuer v1alpha1 as the controller of the issuer v1
+	if err := controllerutil.SetControllerReference(instance, v1Issuer, r.scheme); err != nil {
+		reqLogger.Error(err, "### DEBUG ### failed to set owner reference for %s", v1Issuer)
+		return reconcile.Result{}, err
+	}
+
+	if err := r.client.Create(context.TODO(), v1Issuer); err != nil {
 		if errors.IsAlreadyExists(err) {
-			reqLogger.Error(err, "### DEBUG ### v1 Issuer already exists")
+			existingIssuer := &certmanagerv1.Issuer{}
+			if err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: v1Issuer.Namespace, Name: v1Issuer.Name}, existingIssuer); err != nil {
+				reqLogger.Error(err, "### DEBUG ### Failed to get v1 Issuer")
+				return reconcile.Result{}, err
+			}
+			if !equality.Semantic.DeepEqual(v1Issuer.Labels, existingIssuer.Labels) || !equality.Semantic.DeepEqual(v1Issuer.Spec, existingIssuer.Spec) {
+				v1Issuer.SetResourceVersion(existingIssuer.GetResourceVersion())
+				v1Issuer.SetAnnotations(existingIssuer.GetAnnotations())
+				if err := r.client.Update(context.TODO(), v1Issuer); err != nil {
+					reqLogger.Error(err, "### DEBUG ### Failed to update v1 Issuer")
+					return reconcile.Result{}, err
+				}
+				reqLogger.Info("### DEBUG #### Updated v1 Issuer")
+			}
+
+			reqLogger.Info("### DEBUG ### Converting Issuer status")
+			status := convertStatus(existingIssuer.Status)
+			instance.Status = status
+			reqLogger.Info("### DEBUG ### Updating v1alpha1 Issuer status")
+			if err := r.client.Update(context.TODO(), instance); err != nil {
+				reqLogger.Error(err, "### DEBUG ### error updating")
+				return reconcile.Result{}, err
+			}
+
 			return reconcile.Result{}, nil
 		}
 		reqLogger.Error(err, "### DEBUG ### Failed to create v1 Issuer")

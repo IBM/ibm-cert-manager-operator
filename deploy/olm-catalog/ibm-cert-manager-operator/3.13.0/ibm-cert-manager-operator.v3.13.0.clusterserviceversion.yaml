@@ -49,33 +49,33 @@ spec:
       - description: 'Represents a certificate. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Certificate
         kind: Certificate
-        name: certificates.certmanager.k8s.io
-        version: v1alpha1
+        name: certificates.cert-manager.io
+        version: v1
       - description: 'Represents a certificateRequest. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: CertificateRequest
         kind: CertificateRequest
-        name: certificaterequests.certmanager.k8s.io
-        version: v1alpha1
+        name: certificaterequests.cert-manager.io
+        version: v1
       - description: 'Represents a Issuer. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Issuer
         kind: Issuer
-        name: issuers.certmanager.k8s.io
-        version: v1alpha1
+        name: issuers.cert-manager.io
+        version: v1
       - description: 'Represents a clusterissuer. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: ClusterIssuer
         kind: ClusterIssuer
-        name: clusterissuers.certmanager.k8s.io
-        version: v1alpha1
+        name: clusterissuers.cert-manager.io
+        version: v1
       - description: 'Represents an order. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Order
         kind: Order
-        name: orders.certmanager.k8s.io
-        version: v1alpha1
+        name: orders.acme.cert-manager.io
+        version: v1
       - description: 'Represents a challenge. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Challenge
         kind: Challenge
-        name: challenges.certmanager.k8s.io
-        version: v1alpha1
+        name: challenges.acme.cert-manager.io
+        version: v1
       - description: 'CertManager is the Schema for the certmanagers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         kind: CertManager
         name: certmanagers.operator.ibm.com
@@ -209,19 +209,7 @@ spec:
           serviceAccountName: ibm-cert-manager-operator
       clusterPermissions:
         - rules:
-            - apiGroups:
-                - cert-manager.io
-              resources:
-                - certificates
-                - issuers
-              verbs:
-                - create
-                - delete
-                - get
-                - list
-                - patch
-                - update
-                - watch
+            # Can't make the CR namespace-scoped as the operator needs permission to deploy cluster-scoped resources
             - apiGroups:
                 - operator.ibm.com
               resources:
@@ -236,6 +224,7 @@ spec:
                 - patch
                 - update
                 - watch
+            # required by operator to perform operations on CRDs (all the cert-manager operand CRDs)
             - apiGroups:
                 - apiextensions.k8s.io
               resources:
@@ -248,18 +237,23 @@ spec:
                 - patch
                 - update
                 - watch
+            # operator creates clusterrole, clusterrolebinding for the cert-manager operands. 
+            # creates rolebinding as cert-manager-webhook needs to access a configmap in kube-system, so it needs to create a rolebinding in kube-system
             - apiGroups:
                 - rbac.authorization.k8s.io
               resources:
                 - clusterroles
                 - clusterrolebindings
                 - rolebindings
+                - roles
               verbs:
                 - create
                 - get
                 - list
                 - watch
                 - delete
+                - update
+            # operator deploys cert-manager-webhook apiservice
             - apiGroups:
                 - apiregistration.k8s.io
               resources:
@@ -272,6 +266,7 @@ spec:
                 - patch
                 - update
                 - watch
+            # operator needs to create mutatingwebhookconfigurations, validatingwebhookconfigurations as a part of webhook resources
             - apiGroups:
                 - admissionregistration.k8s.io
               resources:
@@ -285,6 +280,75 @@ spec:
                 - patch
                 - update
                 - watch
+            # cert-manager service needs to perform all operations on cert-manager resources in any namespace
+            - apiGroups:
+                - cert-manager.io
+              # operator needs cluster-wide access to all the below resources because these are a part of clusterrole for operands
+              # to create a clusterrole with the below permissions, the creator must also have those permissions, in this case, the operator
+
+              resources:
+                - certificates
+                - certificaterequests
+                - orders
+                - challenges
+                - clusterissuers
+                - issuers
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+                - deletecollection
+            - apiGroups:
+                - cert-manager.io
+              resources:
+                - signers
+              verbs:
+                - approve
+            - apiGroups:
+                - certificates.k8s.io
+              resources:
+                - signers
+              verbs:
+                - sign
+            - apiGroups:
+                - certificates.k8s.io
+              resources:
+                - certificatesigningrequests
+              verbs:
+                - get
+                - list
+                - update
+                - watch
+            - apiGroups:
+                - certificates.k8s.io
+              resources:
+                - certificatesigningrequests/status
+              verbs:
+                - update
+            - apiGroups:
+                - authorization.k8s.io
+              resources:
+                - subjectaccessreviews
+              verbs:
+                - create
+            - apiGroups:
+                - acme.cert-manager.io
+              resources:
+                - orders
+                - challenges
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+                - deletecollection
             - apiGroups:
                 - certmanager.k8s.io
               resources:
@@ -303,6 +367,28 @@ spec:
                 - update
                 - watch
             - apiGroups:
+                - cert-manager.io
+              resources:
+                - certificates/status
+                - certificaterequests/status
+                - issuers/status
+                - clusterissuers/status
+                - certificates/finalizers
+                - certificaterequests/finalizers
+                - issuers/finalizers
+                - clusterissuers/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - acme.cert-manager.io
+              resources:
+                - challenges/status
+                - orders/status
+                - challenges/finalizers
+                - orders/finalizers
+              verbs:
+                - update
+            - apiGroups:
                 - certmanager.k8s.io
               resources:
                 - certificates/status
@@ -311,12 +397,15 @@ spec:
                 - orders/status
                 - issuers/status
                 - clusterissuers/status
+                - issuers/finalizers
+                - clusterissuers/finalizers
+                - certificaterequests/finalizers
                 - certificates/finalizers
                 - challenges/finalizers
-                - ingresses/finalizers
                 - orders/finalizers
               verbs:
                 - update
+            # cert-manager service needs permission to perform operations on secrets associated with the certs(eg: perform renewal, etc.)
             - apiGroups:
                 - ""
               resources:
@@ -328,6 +417,7 @@ spec:
                 - create
                 - update
                 - delete
+            # cert-manager service needs access to create and patch events for cert-manager resources
             - apiGroups:
                 - ""
               resources:
@@ -335,6 +425,7 @@ spec:
               verbs:
                 - create
                 - patch
+            # only list/watch permission to service-accounts
             - apiGroups:
                 - ""
               resources:
@@ -342,6 +433,7 @@ spec:
               verbs:
                 - list
                 - watch
+            # cert-manager service needs this for HTTP01 rules
             - apiGroups:
                 - ""
               resources:
@@ -353,10 +445,34 @@ spec:
                 - watch
                 - create
                 - delete
+                - update
             - apiGroups:
-                - extensions
+                - networking.x-k8s.io
+              resources:
+                - gateways
+                - httproutes
+                - gateways/finalizers
+                - httproutes/finalizers
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - route.openshift.io
+              resources:
+                - routes/custom-host
+              verbs:
+                - create
+            # cert-manager service needs this to support inject ca bundle injection in ingresses
+            - apiGroups:
+                - networking.k8s.io
               resources:
                 - ingresses
+                - ingresses/finalizers
               verbs:
                 - get
                 - list
@@ -364,6 +480,8 @@ spec:
                 - create
                 - delete
                 - update
+            # needed by cert-manager service to support pod-refresh after cert renewal feature
+            # also needed by configmap-watcher
             - apiGroups:
                 - apps
               resources:
@@ -378,6 +496,7 @@ spec:
                 - patch
                 - update
                 - watch
+            # need access to configmaps by both cert-manager and configmap-watcher service
             - apiGroups:
                 - ""
               resources:
@@ -390,6 +509,7 @@ spec:
                 - update
                 - watch
                 - patch
+            # needed by cert-manager-webhook for cert-manager resources admission 
             - apiGroups:
                 - admission.certmanager.k8s.io
               resources:
@@ -405,6 +525,7 @@ spec:
                 - patch
                 - update
                 - watch
+            # needed by the operator to enable/disable hostNetwork for cert-manager-webhook
             - apiGroups:
                 - security.openshift.io
               resourceNames:
@@ -414,6 +535,7 @@ spec:
                 - securitycontextconstraints
               verbs:
                 - use
+            # needed by cert-manager-webhook for api server authorization/authentication
             - apiGroups:
                 - authorization.k8s.io
               resources:
@@ -426,6 +548,7 @@ spec:
                 - patch
                 - update
                 - watch
+            # needed by the operator to detect RHACM is installed
             - apiGroups:
                 - operator.open-cluster-management.io
               resources:
@@ -434,6 +557,7 @@ spec:
                 - get
                 - list
                 - watch
+            # required by the operator to list/watch at cluster level as operator cache needs it due to cluster-scoped operator
             - apiGroups:
                 - ibmcpcs.ibm.com
               resources:
@@ -441,6 +565,7 @@ spec:
               verbs:
                 - list
                 - watch
+            # required by the certificate refresh controller to find certificates based on clusterissuer
             - apiGroups:
                 - ""
               resources:
@@ -449,6 +574,19 @@ spec:
                 - get
                 - list
                 - watch
+            - apiGroups: [""]
+              resources: ["events"]
+              verbs: ["get", "create", "update", "patch"]
+            - apiGroups: ["auditregistration.k8s.io"]
+              resources: ["auditsinks"]
+              verbs: ["get", "list", "watch", "update"]
+            - apiGroups: ["coordination.k8s.io"]
+              resources: ["leases"]
+              resourceNames: ["cert-manager-cainjector-leader-election", "cert-manager-cainjector-leader-election-core", "cert-manager-controller"]
+              verbs: ["get", "update", "patch"]
+            - apiGroups: ["coordination.k8s.io"]
+              resources: ["leases"]
+              verbs: ["create"]
           serviceAccountName: ibm-cert-manager-operator
       deployments:
         - name: ibm-cert-manager-operator
@@ -535,8 +673,8 @@ spec:
                     name: ibm-cert-manager-operator
                     resources:
                       limits:
-                        cpu: 100m
-                        memory: 300Mi
+                        cpu: 200m
+                        memory: 500Mi
                       requests:
                         cpu: 10m
                         memory: 50Mi

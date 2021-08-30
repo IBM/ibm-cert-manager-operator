@@ -115,12 +115,14 @@ rules:
   - clusterroles
   - clusterrolebindings
   - rolebindings
+  - roles
   verbs:
   - create
   - get
   - list
   - watch
   - delete
+  - update
 # operator deploys cert-manager-webhook apiservice
 - apiGroups:
   - apiregistration.k8s.io
@@ -156,6 +158,10 @@ rules:
   - cert-manager.io
   resources:
   - certificates
+  - certificaterequests
+  - orders
+  - challenges
+  - clusterissuers
   - issuers
   verbs:
   - create
@@ -165,7 +171,54 @@ rules:
   - patch
   - update
   - watch
-
+  - deletecollection
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - signers
+  verbs:
+  - approve
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - signers
+  verbs:
+  - sign
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests/status
+  verbs:
+  - update
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - orders
+  - challenges
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - deletecollection
 - apiGroups:
   - certmanager.k8s.io
   resources:
@@ -183,6 +236,29 @@ rules:
   - patch
   - update
   - watch
+  - deletecollection
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates/status
+  - certificaterequests/status
+  - issuers/status
+  - clusterissuers/status
+  - certificates/finalizers
+  - certificaterequests/finalizers
+  - issuers/finalizers
+  - clusterissuers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges/status
+  - orders/status
+  - challenges/finalizers
+  - orders/finalizers
+  verbs:
+  - update
 - apiGroups:
   - certmanager.k8s.io
   resources:
@@ -191,10 +267,12 @@ rules:
   - challenges/status
   - orders/status
   - issuers/status
+  - issuers/finalizers
+  - clusterissuers/finalizers
+  - certificaterequests/finalizers
   - clusterissuers/status
   - certificates/finalizers
   - challenges/finalizers
-  - ingresses/finalizers
   - orders/finalizers
   verbs:
   - update
@@ -238,11 +316,34 @@ rules:
   - watch
   - create
   - delete
+- apiGroups:
+  - networking.x-k8s.io
+  resources:
+  - gateways
+  - httproutes
+  - gateways/finalizers
+  - httproutes/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes/custom-host
+  verbs:
+  - create
+
 # cert-manager service needs this to support inject ca bundle injection in ingresses
 - apiGroups:
-  - extensions
+  - networking.k8s.io
   resources:
   - ingresses
+  - ingresses/finalizers
   verbs:
   - get
   - list
@@ -344,3 +445,19 @@ rules:
   - get
   - list
   - watch
+
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "create", "update", "patch"]
+
+- apiGroups: ["auditregistration.k8s.io"]
+  resources: ["auditsinks"]
+  verbs: ["get", "list", "watch", "update"]
+
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  resourceNames: ["cert-manager-cainjector-leader-election", "cert-manager-cainjector-leader-election-core", "cert-manager-controller"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create"]
