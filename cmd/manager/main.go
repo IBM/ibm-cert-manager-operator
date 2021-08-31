@@ -35,7 +35,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/restmapper"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	"github.com/spf13/pflag"
-	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	admRegv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	apiextensionv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -146,7 +146,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := admRegv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := admRegv1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}
