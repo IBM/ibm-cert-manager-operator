@@ -308,10 +308,6 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 }
 
 func (r *ReconcileCertManager) PreReqs(instance *operatorv1alpha1.CertManager) error {
-	// if err := checkCrds(instance, r.scheme, r.apiextclient.ApiextensionsV1beta1().CustomResourceDefinitions(), instance.Name, instance.Namespace); err != nil {
-	// 	log.V(2).Info("Checking CRDs failed")
-	// 	return err
-	// }
 	if err := checkRbac(instance, r.scheme, r.client, r.ns); err != nil {
 		log.V(2).Info("Checking RBAC failed")
 		return err
