@@ -287,7 +287,7 @@ func (r *Reconcilepodrefresh) updateDeploymentAnnotations(deploymentsToUpdate []
 		if err != nil {
 			return fmt.Errorf("error updating deployment: %v", err)
 		}
-		log.Info(timeNow, " Cert-Manager Restarting Resource:", "Certificate=", cert, "Secret=", secret, "Deployment=", deployment.ObjectMeta.Name)
+		log.Info("Cert-Manager Restarting Resource:", "Certificate=", cert, "Secret=", secret, "Deployment=", deployment.ObjectMeta.Name, "TimeNow=", timeNow)
 	}
 	return nil
 }
@@ -301,7 +301,7 @@ func (r *Reconcilepodrefresh) updateStsAnnotations(statefulsetsToUpdate []appsv1
 		if err := r.client.Update(context.TODO(), &statefulset); err != nil {
 			return fmt.Errorf("error updating statefulset: %v", err)
 		}
-		log.Info(timeNow, " Cert-Manager Restarting Resource:", "Certificate=", cert, "Secret=", secret, "StatefulSet=", statefulset.ObjectMeta.Name)
+		log.Info("Cert-Manager Restarting Resource:", "Certificate=", cert, "Secret=", secret, "StatefulSet=", statefulset.ObjectMeta.Name, "TimeNow=", timeNow)
 	}
 	return nil
 }
@@ -315,7 +315,7 @@ func (r *Reconcilepodrefresh) updateDaemonSetAnnotations(daemonsetsToUpdate []ap
 		if err := r.client.Update(context.TODO(), &daemonset); err != nil {
 			return fmt.Errorf("error updating daemonset: %v", err)
 		}
-		log.Info(timeNow, " Cert-Manager Restarting Resource:", "Certificate=", cert, "Secret=", secret, "DaemonSet=", daemonset.ObjectMeta.Name)
+		log.Info("Cert-Manager Restarting Resource:", "Certificate=", cert, "Secret=", secret, "DaemonSet=", daemonset.ObjectMeta.Name, "TimeNow=", timeNow)
 	}
 	return nil
 }
