@@ -16,6 +16,69 @@ require (
 	sigs.k8s.io/controller-runtime v0.6.0
 )
 
+require (
+	cloud.google.com/go v0.38.0 // indirect
+	github.com/Azure/go-autorest/autorest v0.9.0 // indirect
+	github.com/Azure/go-autorest/autorest/adal v0.5.0 // indirect
+	github.com/Azure/go-autorest/autorest/date v0.1.0 // indirect
+	github.com/Azure/go-autorest/logger v0.1.0 // indirect
+	github.com/Azure/go-autorest/tracing v0.5.0 // indirect
+	github.com/PuerkitoBio/purell v1.1.1 // indirect
+	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/cespare/xxhash/v2 v2.1.0 // indirect
+	github.com/coreos/prometheus-operator v0.34.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
+	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
+	github.com/go-logr/logr v0.1.0 // indirect
+	github.com/go-logr/zapr v0.1.1 // indirect
+	github.com/go-openapi/jsonpointer v0.19.3 // indirect
+	github.com/go-openapi/jsonreference v0.19.2 // indirect
+	github.com/go-openapi/spec v0.19.4 // indirect
+	github.com/go-openapi/swag v0.19.5 // indirect
+	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef // indirect
+	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/google/go-cmp v0.4.0 // indirect
+	github.com/google/gofuzz v1.0.0 // indirect
+	github.com/google/uuid v1.1.1 // indirect
+	github.com/googleapis/gnostic v0.3.1 // indirect
+	github.com/gophercloud/gophercloud v0.2.0 // indirect
+	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	github.com/imdario/mergo v0.3.7 // indirect
+	github.com/json-iterator/go v1.1.7 // indirect
+	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/prometheus/client_golang v1.2.1 // indirect
+	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4 // indirect
+	github.com/prometheus/common v0.7.0 // indirect
+	github.com/prometheus/procfs v0.0.5 // indirect
+	go.uber.org/atomic v1.4.0 // indirect
+	go.uber.org/multierr v1.1.0 // indirect
+	go.uber.org/zap v1.10.0 // indirect
+	golang.org/x/crypto v0.0.0-20200128174031-69ecbb4d6d5d // indirect
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
+	golang.org/x/sys v0.0.0-20191210023423-ac6580df4449 // indirect
+	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
+	gomodules.xyz/jsonpatch/v2 v2.0.1 // indirect
+	google.golang.org/appengine v1.5.0 // indirect
+	gopkg.in/fsnotify.v1 v1.4.7 // indirect
+	gopkg.in/inf.v0 v0.9.1 // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
+	k8s.io/klog v1.0.0 // indirect
+	k8s.io/kube-openapi v0.0.0-20191107075043-30be4d16710a // indirect
+	k8s.io/kube-state-metrics v1.7.2 // indirect
+	k8s.io/utils v0.0.0-20190801114015-581e00157fb1 // indirect
+	sigs.k8s.io/yaml v1.1.0 // indirect
+)
+
 // Pinned to kubernetes-1.16.2
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.4-0.20200207053602-7439e774c9e9+incompatible
