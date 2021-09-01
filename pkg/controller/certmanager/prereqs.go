@@ -217,7 +217,7 @@ func checkRhacm(client client.Client) (string, string, error) {
 	}
 
 	if len(multiClusterHubList.Items) < 1 {
-		return "", "", errors.New("MultiClusterHub CRD exists, but no CR created")
+		return "", "", errors.New("the MultiClusterHub CRD exists, but no CR created")
 	}
 
 	// there should only be one MultiClusterHub CR in a cluster
