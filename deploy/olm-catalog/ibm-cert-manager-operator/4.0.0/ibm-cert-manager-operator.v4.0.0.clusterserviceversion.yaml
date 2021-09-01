@@ -719,5 +719,5 @@ spec:
       image: quay.io/opencloudio/icp-cert-manager-acmesolver:1.0.0-jetstack.1.5.1
     - name: ICP_CONFIGMAP_WATCHER_IMAGE
       image: quay.io/opencloudio/icp-configmap-watcher:3.8.0
-  replaces: ibm-cert-manager-operator.v3.13.0
+  replaces: ibm-cert-manager-operator.v3.12.0
   version: 4.0.0
