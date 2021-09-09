@@ -50,7 +50,7 @@ func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, clien
 	if clusterRoleErr := createClusterRole(instance, scheme, client); clusterRoleErr != nil {
 		return clusterRoleErr
 	}
-	if roleErr := createRole(instance, scheme, client); roleErr != nil {
+	if roleErr := createRole(instance, scheme, client, ns); roleErr != nil {
 		return roleErr
 	}
 	if clusterRoleBindingErr := createClusterRoleBinding(instance, scheme, client, ns); clusterRoleBindingErr != nil {
@@ -65,7 +65,7 @@ func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, clien
 	return nil
 }
 
-func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
 	log.V(0).Info("Creating roles")
 	for _, r := range res.RolesToCreate.Items {
 		log.V(0).Info("Creating role " + r.Name)
@@ -73,6 +73,7 @@ func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, 
 		err := client.Get(context.Background(), types.NamespacedName{Name: r.Name, Namespace: r.Namespace}, role)
 		if err != nil && apiErrors.IsNotFound(err) {
 			r.ResourceVersion = ""
+			r.Namespace = namespace
 			if err := controllerutil.SetControllerReference(instance, &r, scheme); err != nil {
 				log.Error(err, "Error setting controller reference on role")
 			}
@@ -177,6 +178,7 @@ func createRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.S
 		err := client.Get(context.Background(), types.NamespacedName{Name: b.Name, Namespace: b.Namespace}, roleBinding)
 		if err != nil && apiErrors.IsNotFound(err) {
 			b.ResourceVersion = ""
+			b.Namespace = namespace
 			for i := range b.Subjects {
 				b.Subjects[i].Namespace = namespace
 			}
