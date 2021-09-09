@@ -50,8 +50,7 @@ var ControllerServiceAccount = &corev1.ServiceAccount{
 
 var ControllerRole = &rbacv1.Role{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "ibm-cert-manager-controller:leaderelection",
-		Namespace: "ibm-common-services",
+		Name: "ibm-cert-manager-controller:leaderelection",
 	},
 	Rules: []rbacv1.PolicyRule{
 		{
@@ -81,8 +80,7 @@ var ControllerRole = &rbacv1.Role{
 
 var ControllerRoleBinding = &rbacv1.RoleBinding{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "ibm-cert-manager-controller:leaderelection",
-		Namespace: "ibm-common-services",
+		Name: "ibm-cert-manager-controller:leaderelection",
 	},
 	Subjects: []rbacv1.Subject{
 		{
@@ -572,8 +570,7 @@ var CAInjectorServiceAccount = &corev1.ServiceAccount{
 
 var CAInjectorRole = &rbacv1.Role{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "ibm-cert-manager-cainjector:leaderelection",
-		Namespace: "ibm-common-services",
+		Name: "ibm-cert-manager-cainjector:leaderelection",
 	},
 	Rules: []rbacv1.PolicyRule{
 		{
@@ -603,8 +600,7 @@ var CAInjectorRole = &rbacv1.Role{
 
 var CAInjectorRoleBinding = &rbacv1.RoleBinding{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "ibm-cert-manager-cainjector:leaderelection",
-		Namespace: "ibm-common-services",
+		Name: "ibm-cert-manager-cainjector:leaderelection",
 	},
 	Subjects: []rbacv1.Subject{
 		{
@@ -688,8 +684,7 @@ var WebhookServiceAccount = &corev1.ServiceAccount{
 
 var WebhookRole = &rbacv1.Role{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "ibm-cert-manager-webhook:dynamic-serving",
-		Namespace: "ibm-common-services",
+		Name: "ibm-cert-manager-webhook:dynamic-serving",
 	},
 	Rules: []rbacv1.PolicyRule{
 		{
@@ -708,8 +703,7 @@ var WebhookRole = &rbacv1.Role{
 
 var WebhookRoleBinding = &rbacv1.RoleBinding{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "ibm-cert-manager-webhook:dynamic-serving",
-		Namespace: "ibm-common-services",
+		Name: "ibm-cert-manager-webhook:dynamic-serving",
 	},
 	Subjects: []rbacv1.Subject{
 		{
