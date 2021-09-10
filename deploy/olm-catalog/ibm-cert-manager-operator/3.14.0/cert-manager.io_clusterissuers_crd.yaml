@@ -2,20 +2,32 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/instance: ibm-cert-manager-operator
-    app.kubernetes.io/managed-by: ibm-cert-manager-operator
+    app: cert-manager
+    app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/name: cert-manager
-  name: issuers.cert-manager.io
+    app.kubernetes.io/version: v1.5.1
+  name: clusterissuers.cert-manager.io
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: cert-manager-webhook
+          namespace: cert-manager
+          path: /convert
+      conversionReviewVersions:
+        - v1
+        - v1beta1
   group: cert-manager.io
   names:
     categories:
       - cert-manager
-    kind: Issuer
-    listKind: IssuerList
-    plural: issuers
-    singular: issuer
-  scope: Namespaced
+    kind: ClusterIssuer
+    listKind: ClusterIssuerList
+    plural: clusterissuers
+    singular: clusterissuer
+  scope: Cluster
   versions:
     - additionalPrinterColumns:
         - jsonPath: .status.conditions[?(@.type=="Ready")].status
@@ -32,7 +44,7 @@ spec:
       name: v1
       schema:
         openAPIV3Schema:
-          description: An Issuer represents a certificate issuing authority which can be referenced as part of `issuerRef` fields. It is scoped to a single namespace and can therefore only be referenced by resources within the same namespace.
+          description: A ClusterIssuer represents a certificate issuing authority which can be referenced as part of `issuerRef` fields. It is similar to an Issuer, however it is cluster-scoped and therefore can be referenced by resources that exist in *any* namespace, not just the same namespace as the referent.
           properties:
             apiVersion:
               description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -43,7 +55,7 @@ spec:
             metadata:
               type: object
             spec:
-              description: Desired state of the Issuer resource.
+              description: Desired state of the ClusterIssuer resource.
               properties:
                 acme:
                   description: ACME configures this issuer to communicate with a RFC8555 (ACME) server to obtain signed x509 certificates.
@@ -111,7 +123,7 @@ spec:
                     solvers:
                       description: 'Solvers is a list of challenge solvers that will be used to solve ACME challenges for the matching domains. Solver configurations must be provided in order to obtain certificates from an ACME server. For more information, see: https://cert-manager.io/docs/configuration/acme/'
                       items:
-                        description: Configures an issuer to solve challenges using the specified options. Only one of HTTP01 or DNS01 may be provided.
+                        description: An ACMEChallengeSolver describes how to solve ACME challenges for the issuer it is part of. A selector may be provided to use different solving strategies for different DNS names. Only one of HTTP01 or DNS01 must be provided.
                         properties:
                           dns01:
                             description: Configures cert-manager to attempt to complete authorizations by performing the DNS01 challenge flow.
@@ -304,7 +316,7 @@ spec:
                                 description: Use RFC2136 ("Dynamic Updates in the Domain Name System") (https://datatracker.ietf.org/doc/rfc2136/) to manage DNS01 challenge records.
                                 properties:
                                   nameserver:
-                                    description: The IP address or hostname of an authoritative DNS server supporting RFC2136 in the form host:port. If the host is an IPv6 address it must be enclosed in square brackets (e.g [2001:db8::1]) ; port is optional. This field is required.
+                                    description: "The IP address or hostname of an authoritative DNS server supporting RFC2136 in the form host:port. If the host is an IPv6 address it must be enclosed in square brackets (e.g [2001:db8::1]) ; port is optional. This field is required."
                                     type: string
                                   tsigAlgorithm:
                                     description: 'The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when ``tsigSecretSecretRef`` and ``tsigKeyName`` are defined. Supported values are (case-insensitive): ``HMACMD5`` (default), ``HMACSHA1``, ``HMACSHA256`` or ``HMACSHA512``.'
@@ -377,6 +389,18 @@ spec:
                           http01:
                             description: Configures cert-manager to attempt to complete authorizations by performing the HTTP01 challenge flow. It is not possible to obtain certificates for wildcard domain names (e.g. `*.example.com`) using the HTTP01 challenge mechanism.
                             properties:
+                              gatewayHTTPRoute:
+                                description: The Gateway API is a sig-network community API that models service networking in Kubernetes (https://gateway-api.sigs.k8s.io/). The Gateway solver will create HTTPRoutes with the specified labels in the same namespace as the challenge. This solver is experimental, and fields / behaviour may change in the future.
+                                properties:
+                                  labels:
+                                    additionalProperties:
+                                      type: string
+                                    description: The labels that cert-manager will use when creating the temporary HTTPRoute needed for solving the HTTP-01 challenge. These labels must match the label selector of at least one Gateway.
+                                    type: object
+                                  serviceType:
+                                    description: Optional service type for Kubernetes solver service. Supported values are NodePort or ClusterIP (default).
+                                    type: string
+                                type: object
                               ingress:
                                 description: The ingress based HTTP01 challenge solver will solve challenges by creating or modifying Ingress resources in order to route requests for '/.well-known/acme-challenge/XYZ' to 'challenge solver' pods that are provisioned by cert-manager for each Challenge to be completed.
                                 properties:
@@ -384,7 +408,7 @@ spec:
                                     description: The ingress class to use when creating Ingress resources to solve ACME challenges that use this challenge solver. Only one of 'class' or 'name' may be specified.
                                     type: string
                                   ingressTemplate:
-                                    description: Optional ingress template used to configure the ACME challenge solver ingress used for HTTP01 challenges
+                                    description: Optional ingress template used to configure the ACME challenge solver ingress used for HTTP01 challenges.
                                     properties:
                                       metadata:
                                         description: ObjectMeta overrides for the ingress used to solve HTTP01 challenges. Only the 'labels' and 'annotations' fields may be set. If labels or annotations overlap with in-built values, the values here will override the in-built values.
@@ -542,68 +566,7 @@ spec:
                                                                     type: string
                                                                   type: object
                                                               type: object
-                                                            namespaces:
-                                                              items:
-                                                                type: string
-                                                              type: array
-                                                            topologyKey:
-                                                              type: string
-                                                          required:
-                                                            - topologyKey
-                                                          type: object
-                                                        weight:
-                                                          format: int32
-                                                          type: integer
-                                                      required:
-                                                        - podAffinityTerm
-                                                        - weight
-                                                      type: object
-                                                    type: array
-                                                  requiredDuringSchedulingIgnoredDuringExecution:
-                                                    items:
-                                                      properties:
-                                                        labelSelector:
-                                                          properties:
-                                                            matchExpressions:
-                                                              items:
-                                                                properties:
-                                                                  key:
-                                                                    type: string
-                                                                  operator:
-                                                                    type: string
-                                                                  values:
-                                                                    items:
-                                                                      type: string
-                                                                    type: array
-                                                                required:
-                                                                  - key
-                                                                  - operator
-                                                                type: object
-                                                              type: array
-                                                            matchLabels:
-                                                              additionalProperties:
-                                                                type: string
-                                                              type: object
-                                                          type: object
-                                                        namespaces:
-                                                          items:
-                                                            type: string
-                                                          type: array
-                                                        topologyKey:
-                                                          type: string
-                                                      required:
-                                                        - topologyKey
-                                                      type: object
-                                                    type: array
-                                                type: object
-                                              podAntiAffinity:
-                                                properties:
-                                                  preferredDuringSchedulingIgnoredDuringExecution:
-                                                    items:
-                                                      properties:
-                                                        podAffinityTerm:
-                                                          properties:
-                                                            labelSelector:
+                                                            namespaceSelector:
                                                               properties:
                                                                 matchExpressions:
                                                                   items:
@@ -669,6 +632,159 @@ spec:
                                                                 type: string
                                                               type: object
                                                           type: object
+                                                        namespaceSelector:
+                                                          properties:
+                                                            matchExpressions:
+                                                              items:
+                                                                properties:
+                                                                  key:
+                                                                    type: string
+                                                                  operator:
+                                                                    type: string
+                                                                  values:
+                                                                    items:
+                                                                      type: string
+                                                                    type: array
+                                                                required:
+                                                                  - key
+                                                                  - operator
+                                                                type: object
+                                                              type: array
+                                                            matchLabels:
+                                                              additionalProperties:
+                                                                type: string
+                                                              type: object
+                                                          type: object
+                                                        namespaces:
+                                                          items:
+                                                            type: string
+                                                          type: array
+                                                        topologyKey:
+                                                          type: string
+                                                      required:
+                                                        - topologyKey
+                                                      type: object
+                                                    type: array
+                                                type: object
+                                              podAntiAffinity:
+                                                properties:
+                                                  preferredDuringSchedulingIgnoredDuringExecution:
+                                                    items:
+                                                      properties:
+                                                        podAffinityTerm:
+                                                          properties:
+                                                            labelSelector:
+                                                              properties:
+                                                                matchExpressions:
+                                                                  items:
+                                                                    properties:
+                                                                      key:
+                                                                        type: string
+                                                                      operator:
+                                                                        type: string
+                                                                      values:
+                                                                        items:
+                                                                          type: string
+                                                                        type: array
+                                                                    required:
+                                                                      - key
+                                                                      - operator
+                                                                    type: object
+                                                                  type: array
+                                                                matchLabels:
+                                                                  additionalProperties:
+                                                                    type: string
+                                                                  type: object
+                                                              type: object
+                                                            namespaceSelector:
+                                                              properties:
+                                                                matchExpressions:
+                                                                  items:
+                                                                    properties:
+                                                                      key:
+                                                                        type: string
+                                                                      operator:
+                                                                        type: string
+                                                                      values:
+                                                                        items:
+                                                                          type: string
+                                                                        type: array
+                                                                    required:
+                                                                      - key
+                                                                      - operator
+                                                                    type: object
+                                                                  type: array
+                                                                matchLabels:
+                                                                  additionalProperties:
+                                                                    type: string
+                                                                  type: object
+                                                              type: object
+                                                            namespaces:
+                                                              items:
+                                                                type: string
+                                                              type: array
+                                                            topologyKey:
+                                                              type: string
+                                                          required:
+                                                            - topologyKey
+                                                          type: object
+                                                        weight:
+                                                          format: int32
+                                                          type: integer
+                                                      required:
+                                                        - podAffinityTerm
+                                                        - weight
+                                                      type: object
+                                                    type: array
+                                                  requiredDuringSchedulingIgnoredDuringExecution:
+                                                    items:
+                                                      properties:
+                                                        labelSelector:
+                                                          properties:
+                                                            matchExpressions:
+                                                              items:
+                                                                properties:
+                                                                  key:
+                                                                    type: string
+                                                                  operator:
+                                                                    type: string
+                                                                  values:
+                                                                    items:
+                                                                      type: string
+                                                                    type: array
+                                                                required:
+                                                                  - key
+                                                                  - operator
+                                                                type: object
+                                                              type: array
+                                                            matchLabels:
+                                                              additionalProperties:
+                                                                type: string
+                                                              type: object
+                                                          type: object
+                                                        namespaceSelector:
+                                                          properties:
+                                                            matchExpressions:
+                                                              items:
+                                                                properties:
+                                                                  key:
+                                                                    type: string
+                                                                  operator:
+                                                                    type: string
+                                                                  values:
+                                                                    items:
+                                                                      type: string
+                                                                    type: array
+                                                                required:
+                                                                  - key
+                                                                  - operator
+                                                                type: object
+                                                              type: array
+                                                            matchLabels:
+                                                              additionalProperties:
+                                                                type: string
+                                                              type: object
+                                                          type: object
                                                         namespaces:
                                                           items:
                                                             type: string
@@ -708,7 +824,7 @@ spec:
                                         type: object
                                     type: object
                                   serviceType:
-                                    description: Optional service type for Kubernetes solver service
+                                    description: Optional service type for Kubernetes solver service. Supported values are NodePort or ClusterIP (default).
                                     type: string
                                 type: object
                             type: object
@@ -836,7 +952,7 @@ spec:
                           type: object
                       type: object
                     caBundle:
-                      description: PEM encoded CA bundle used to validate Vault server certificate. Only used if the Server URL is using HTTPS protocol. This parameter is ignored for plain HTTP protocol connection. If not set the system root certificates are used to validate the TLS connection.
+                      description: PEM-encoded CA bundle (base64-encoded) used to validate Vault server certificate. Only used if the Server URL is using HTTPS protocol. This parameter is ignored for plain HTTP protocol connection. If not set the system root certificates are used to validate the TLS connection.
                       format: byte
                       type: string
                     namespace:
@@ -908,7 +1024,7 @@ spec:
                   type: object
               type: object
             status:
-              description: Status of the Issuer. This is set and managed automatically.
+              description: Status of the ClusterIssuer. This is set and managed automatically.
               properties:
                 acme:
                   description: ACME specific status options. This field should only be set if the Issuer is configured to use an ACME server to issue certificates.
@@ -962,5 +1078,11 @@ spec:
       storage: true
       subresources:
         status: {}
+status:
+  acceptedNames:
+    kind: ''
+    plural: ''
+  conditions: []
+  storedVersions: []
 ---
 

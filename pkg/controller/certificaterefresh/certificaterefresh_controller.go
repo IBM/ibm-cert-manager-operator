@@ -21,15 +21,11 @@ import (
 	"fmt"
 	"time"
 
-	certmgr "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
-	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
-	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/fields"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -40,6 +36,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	certmgr "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
+	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
+	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 )
 
 var log = logf.Log.WithName("controller_certificaterefresh")
@@ -190,11 +190,13 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
-	// Fetch clusterissuers
-	clusterissuers, err := r.findClusterIssuersBasedOnCA(caSecret)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
+	//nolint
+	//TODO: Add clusterissuer to api
+	// // Fetch clusterissuers
+	// clusterissuers, err := r.findClusterIssuersBasedOnCA(caSecret)
+	// if err != nil {
+	// 	return reconcile.Result{}, err
+	// }
 
 	// // Fetch all the secrets of leaf certificates issued by these issuers/clusterissuers
 	var leafSecrets []*corev1.Secret
@@ -207,22 +209,26 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
-	allNamespaces, err := r.getAllNamespaces()
-	if err != nil {
-		log.Error(err, "Error listing all namespaces - requeue the request")
-		return reconcile.Result{}, err
-	}
+	//nolint
+	//TODO: Add clusterissuer to api
+	// allNamespaces, err := r.getAllNamespaces()
+	// if err != nil {
+	// 	log.Error(err, "Error listing all namespaces - requeue the request")
+	// 	return reconcile.Result{}, err
+	// }
 
-	for _, clusterissuer := range clusterissuers {
-		for _, ns := range allNamespaces.Items {
-			clusterLeafSecrets, err := r.findLeafSecrets(clusterissuer.Name, ns.Name)
-			if err != nil {
-				log.Error(err, "Error reading the leaf certificates for clusterissuer - requeue the request")
-				return reconcile.Result{}, err
-			}
-			leafSecrets = append(leafSecrets, clusterLeafSecrets...)
-		}
-	}
+	//nolint
+	//TODO: Add clusterissuer to api
+	// for _, clusterissuer := range clusterissuers {
+	// 	for _, ns := range allNamespaces.Items {
+	// 		clusterLeafSecrets, err := r.findLeafSecrets(clusterissuer.Name, ns.Name)
+	// 		if err != nil {
+	// 			log.Error(err, "Error reading the leaf certificates for clusterissuer - requeue the request")
+	// 			return reconcile.Result{}, err
+	// 		}
+	// 		leafSecrets = append(leafSecrets, clusterLeafSecrets...)
+	// 	}
+	// }
 
 	// Compare ca.crt in leaf with tls.crt of CA
 	// If the values don't match, delete the secret; if error, requeue else don't requeue
@@ -299,24 +305,24 @@ func (r *ReconcileCertificateRefresh) findIssuersBasedOnCA(caSecret *corev1.Secr
 	return issuers, err
 }
 
-// findClusterIssuersBasedOnCA finds issuers that are based on the given CA secret
-func (r *ReconcileCertificateRefresh) findClusterIssuersBasedOnCA(caSecret *corev1.Secret) ([]certmgr.ClusterIssuer, error) {
+// // findClusterIssuersBasedOnCA finds issuers that are based on the given CA secret
+// func (r *ReconcileCertificateRefresh) findClusterIssuersBasedOnCA(caSecret *corev1.Secret) ([]certmgr.ClusterIssuer, error) {
 
-	var clusterissuers []certmgr.ClusterIssuer
+// 	var clusterissuers []certmgr.ClusterIssuer
 
-	clusterIssuerList := &certmgr.ClusterIssuerList{}
-	err := r.client.List(context.TODO(), clusterIssuerList, &client.ListOptions{})
+// 	clusterIssuerList := &certmgr.ClusterIssuerList{}
+// 	err := r.client.List(context.TODO(), clusterIssuerList, &client.ListOptions{})
 
-	if err == nil {
-		for _, cissuer := range clusterIssuerList.Items {
-			if cissuer.Spec.CA != nil && cissuer.Spec.CA.SecretName == caSecret.Name {
-				clusterissuers = append(clusterissuers, cissuer)
-			}
-		}
-	}
+// 	if err == nil {
+// 		for _, cissuer := range clusterIssuerList.Items {
+// 			if cissuer.Spec.CA != nil && cissuer.Spec.CA.SecretName == caSecret.Name {
+// 				clusterissuers = append(clusterissuers, cissuer)
+// 			}
+// 		}
+// 	}
 
-	return clusterissuers, err
-}
+// 	return clusterissuers, err
+// }
 
 // findLeafSecrets finds issuers that are based on the given CA secret
 func (r *ReconcileCertificateRefresh) findLeafSecrets(issuedBy string, namespace string) ([]*corev1.Secret, error) {

@@ -2,7 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    olm.skipRange: '<3.13.0'
+    olm.skipRange: '<4.0.0'
     alm-examples: |-
       [
         {
@@ -20,7 +20,7 @@ metadata:
             "disableHostNetwork": true,
             "enableWebhook": true,
             "imageRegistry": "quay.io/opencloudio",
-            "version": "3.13.0",
+            "version": "4.0.0",
             "enableCertRefresh": true
           },
           "status": {
@@ -31,8 +31,8 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
-    createdAt: "2021-08-16T20:32:00Z"
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:4.0.0
+    createdAt: "2021-09-01T14:35:00Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
   labels:
@@ -40,7 +40,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-cert-manager-operator.v3.13.0
+  name: ibm-cert-manager-operator.v4.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -629,13 +629,13 @@ spec:
                       - ibm-cert-manager-operator
                     env:
                       - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-                        value: quay.io/opencloudio/icp-cert-manager-controller:0.15.0
+                        value: quay.io/opencloudio/icp-cert-manager-controller:1.0.0-jetstack.1.5.1
                       - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-                        value: quay.io/opencloudio/icp-cert-manager-webhook:0.15.0
+                        value: quay.io/opencloudio/icp-cert-manager-webhook:1.0.0-jetstack.1.5.1
                       - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-                        value: quay.io/opencloudio/icp-cert-manager-cainjector:0.15.0
+                        value: quay.io/opencloudio/icp-cert-manager-cainjector:1.0.0-jetstack.1.5.1
                       - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-                        value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.15.0
+                        value: quay.io/opencloudio/icp-cert-manager-acmesolver:1.0.0-jetstack.1.5.1
                       - name: ICP_CONFIGMAP_WATCHER_IMAGE
                         value: quay.io/opencloudio/icp-configmap-watcher:3.8.0
                       - name: WATCH_NAMESPACE
@@ -708,16 +708,16 @@ spec:
     name: IBM
   relatedImages:
     - name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-      image: quay.io/opencloudio/ibm-cert-manager-operator:3.13.0
+      image: quay.io/opencloudio/ibm-cert-manager-operator:latest
     - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-      image: quay.io/opencloudio/icp-cert-manager-controller:0.15.0
+      image: quay.io/opencloudio/icp-cert-manager-controller:1.0.0-jetstack.1.5.1
     - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-      image: quay.io/opencloudio/icp-cert-manager-webhook:0.15.0
+      image: quay.io/opencloudio/icp-cert-manager-webhook:1.0.0-jetstack.1.5.1
     - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-      image: quay.io/opencloudio/icp-cert-manager-cainjector:0.15.0
+      image: quay.io/opencloudio/icp-cert-manager-cainjector:1.0.0-jetstack.1.5.1
     - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-      image: quay.io/opencloudio/icp-cert-manager-acmesolver:0.15.0
+      image: quay.io/opencloudio/icp-cert-manager-acmesolver:1.0.0-jetstack.1.5.1
     - name: ICP_CONFIGMAP_WATCHER_IMAGE
       image: quay.io/opencloudio/icp-configmap-watcher:3.8.0
   replaces: ibm-cert-manager-operator.v3.12.0
-  version: 3.13.0
+  version: 4.0.0

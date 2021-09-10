@@ -48,7 +48,7 @@ var podSecurity = &corev1.PodSecurityContext{
 
 var certManagerControllerPod = corev1.PodSpec{
 	Affinity:           podAffinity,
-	ServiceAccountName: ServiceAccount,
+	ServiceAccountName: "ibm-cert-manager-controller",
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
 		controllerContainer,
@@ -58,26 +58,16 @@ var certManagerControllerPod = corev1.PodSpec{
 var certManagerWebhookPod = corev1.PodSpec{
 	Affinity:           podAffinity,
 	HostNetwork:        TrueVar,
-	ServiceAccountName: ServiceAccount,
+	ServiceAccountName: "ibm-cert-manager-webhook",
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
 		webhookContainer,
-	},
-	Volumes: []corev1.Volume{
-		{
-			Name: "certs",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: "cert-manager-webhook-tls",
-				},
-			},
-		},
 	},
 }
 
 var certManagerCainjectorPod = corev1.PodSpec{
 	Affinity:           podAffinity,
-	ServiceAccountName: ServiceAccount,
+	ServiceAccountName: "ibm-cert-manager-cainjector",
 	SecurityContext:    podSecurity,
 	Containers: []corev1.Container{
 		cainjectorContainer,

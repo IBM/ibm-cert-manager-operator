@@ -28,10 +28,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
-	"github.com/ibm/ibm-cert-manager-operator/pkg/apis"
-	"github.com/ibm/ibm-cert-manager-operator/pkg/controller"
-	"github.com/ibm/ibm-cert-manager-operator/version"
-
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	kubemetrics "github.com/operator-framework/operator-sdk/pkg/kube-metrics"
 	"github.com/operator-framework/operator-sdk/pkg/log/zap"
@@ -39,12 +35,12 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/restmapper"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	"github.com/spf13/pflag"
-	admRegv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	admRegv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
 	apiextensionv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -53,6 +49,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
+
+	"github.com/ibm/ibm-cert-manager-operator/pkg/apis"
+	"github.com/ibm/ibm-cert-manager-operator/pkg/controller"
+	"github.com/ibm/ibm-cert-manager-operator/version"
 )
 
 // Change below variables to serve metrics on different host or port.
@@ -132,22 +132,21 @@ func main() {
 	}
 
 	// Setup Scheme for all resources
+	if err := clientgoscheme.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
 	if err := apiextensionv1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}
-
-	if err := rbacv1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "")
-		os.Exit(1)
-	}
-
 	if err := apiRegv1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}
 
-	if err := admRegv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := admRegv1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}

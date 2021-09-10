@@ -40,6 +40,7 @@ var memory300 = resource.NewQuantity(300*1024*1024, resource.BinarySI) // 300Mi
 var memory500 = resource.NewQuantity(500*1024*1024, resource.BinarySI) // 500Mi
 
 var replicaCount int32 = 1
+var timeoutSecondsWebhook int32 = 10
 
 const certManagerComponentName = "cert-manager"
 
@@ -232,7 +233,7 @@ var readinessExecActionConfigmapWatcher = v1.ExecAction{
 // Cert-manager args
 
 // WebhookServingSecret is the name of tls secret used for serving the cert-manager-webhook
-const WebhookServingSecret = "cert-manager-webhook-tls"
+const WebhookServingSecret = "cert-manager-webhook-ca"
 
 // ResourceNS is the resource namespace arg for cert-manager-controller
 var ResourceNS = "--cluster-resource-namespace=" + DeployNamespace
@@ -242,16 +243,8 @@ const leaderElectNS = "--leader-election-namespace=cert-manager"
 // AcmeSolverArg is the acme solver image to use for the cert-manager-controller
 var AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
 
-var webhookNSArg = "--webhook-namespace=" + DeployNamespace
-
-const webhookCASecretArg = "--webhook-ca-secret=cert-manager-webhook-ca"
-const webhookServingSecretArg = "--webhook-serving-secret=" + WebhookServingSecret
-
-const webhookDNSNamesArg = "--webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc"
-const controllersArg = "--controllers=certificates,issuers,clusterissuers,orders,challenges,webhook-bootstrap"
-
 // DefaultArgs are the default arguments use for cert-manager-controller
-var DefaultArgs = []string{webhookCASecretArg, webhookServingSecretArg, controllersArg}
+var DefaultArgs = []string{}
 
 // CRDs is the list of crds created/used by cert-manager in this version
 var CRDs = [5]string{"certificates", "issuers", "clusterissuers", "orders", "challenges"}
