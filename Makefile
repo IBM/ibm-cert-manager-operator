@@ -42,6 +42,7 @@ export TESTARGS ?= $(TESTARGS_DEFAULT)
 DEST := $(GOPATH)/src/$(GIT_HOST)/$(BASE_DIR)
 VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
 CSV_VERSION ?= $(VERSION)
+VCS_REF ?= $(shell git rev-parse HEAD)
 
 LOCAL_OS := $(shell uname)
 ifeq ($(LOCAL_OS),Linux)
@@ -154,15 +155,21 @@ endif
 
 
 build-image-amd64: $(CONFIG_DOCKER_TARGET) build-amd64
-	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) -f build/Dockerfile .
+	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) \
+		--build-arg VCS_REF=$(VCS_REF) \
+		-f build/Dockerfile .
 
 build-image-ppc64le: $(CONFIG_DOCKER_TARGET) build-ppc64le
 	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) -f build/Dockerfile.ppc64le .
+	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) \
+		--build-arg VCS_REF=$(VCS_REF) \
+		-f build/Dockerfile.ppc64le .
 
 build-image-s390x: $(CONFIG_DOCKER_TARGET) build-s390x
 	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) -f build/Dockerfile.s390x .
+	@docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) \
+		--build-arg VCS_REF=$(VCS_REF) \
+		-f build/Dockerfile.s390x .
 
 push-image-amd64: $(CONFIG_DOCKER_TARGET) build-image-amd64
 	@docker push $(REGISTRY)/$(IMG)-amd64:$(VERSION)
