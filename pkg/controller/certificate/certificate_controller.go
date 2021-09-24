@@ -96,6 +96,8 @@ type ReconcileCertificate struct {
 	scheme *runtime.Scheme
 }
 
+const t = "true"
+
 // Reconcile reads that state of the cluster for a Certificate object and makes changes based on the state read
 // and what is in the Certificate.Spec
 // TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
@@ -133,13 +135,13 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
-	annotations[resources.OperatorGeneratedAnno] = "true"
+	annotations[resources.OperatorGeneratedAnno] = t
 
 	labels := instance.Labels
 	if labels == nil {
 		labels = make(map[string]string)
 	}
-	labels[resources.ProperV1Label] = "true"
+	labels[resources.ProperV1Label] = t
 
 	certificate := &certmanagerv1.Certificate{
 		TypeMeta: metav1.TypeMeta{Kind: "Certificate", APIVersion: "cert-manager.io/v1"},
