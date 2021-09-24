@@ -18,7 +18,9 @@ package certificate
 
 import (
 	"context"
+	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,6 +37,7 @@ import (
 
 	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
+	"github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 )
 
 var log = logf.Log.WithName("controller_certificate")
@@ -93,6 +96,8 @@ type ReconcileCertificate struct {
 	scheme *runtime.Scheme
 }
 
+const t = "true"
+
 // Reconcile reads that state of the cluster for a Certificate object and makes changes based on the state read
 // and what is in the Certificate.Spec
 // TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
@@ -118,15 +123,25 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	reqLogger.Info("### DEBUG ### v1alpha1 Certificate created", "Certificate.Namespace", instance.Namespace, "Certificate.Name", instance.Name)
+	reqLogger.Info("purging old v1 Certs")
+	if err := r.purgeOldV1(); err != nil {
+		reqLogger.Error(err, "failed to remove all old v1 Certificates ")
+		return reconcile.Result{}, err
+	}
 
-	reqLogger.Info("### DEBUG ### Creating v1 Certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", instance.Name)
+	reqLogger.V(2).Info("Initializing v1 Certificate from v1alpha1", "Certificate.Namespace", instance.Namespace, "Certificate.Name", instance.Name)
 
 	annotations := instance.Annotations
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
-	annotations["ibm-cert-manager-operator-generated"] = "true"
+	annotations[resources.OperatorGeneratedAnno] = t
+
+	labels := instance.Labels
+	if labels == nil {
+		labels = make(map[string]string)
+	}
+	labels[resources.ProperV1Label] = t
 
 	certificate := &certmanagerv1.Certificate{
 		TypeMeta: metav1.TypeMeta{Kind: "Certificate", APIVersion: "cert-manager.io/v1"},
@@ -157,43 +172,101 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 	}
 	// Set the certificate v1alpha1 as the controller of the certificate v1
 	if err := controllerutil.SetControllerReference(instance, certificate, r.scheme); err != nil {
-		reqLogger.Error(err, "### DEBUG ### failed to set Owner reference for %s", certificate)
+		reqLogger.Error(err, "failed to set Owner reference for %s", certificate)
 		return reconcile.Result{}, err
 	}
 
-	if err := r.client.Create(context.TODO(), certificate); err != nil {
-		if errors.IsAlreadyExists(err) {
-			existingCertificate := &certmanagerv1.Certificate{}
-			if err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: certificate.Namespace, Name: certificate.Name}, existingCertificate); err != nil {
-				reqLogger.Error(err, "### DEBUG ### Failed to get v1 Certificate")
-				return reconcile.Result{}, err
-			}
-			if !equality.Semantic.DeepEqual(certificate.Labels, existingCertificate.Labels) || !equality.Semantic.DeepEqual(certificate.Spec, existingCertificate.Spec) {
-				certificate.SetResourceVersion(existingCertificate.GetResourceVersion())
-				certificate.SetAnnotations(existingCertificate.GetAnnotations())
-				if err := r.client.Update(context.TODO(), certificate); err != nil {
-					reqLogger.Error(err, "### DEBUG ### Failed to update v1 Certificate")
+	reqLogger.Info("Getting certificate secret")
+	secret := &corev1.Secret{}
+	nsname := types.NamespacedName{Name: instance.Spec.SecretName, Namespace: instance.Namespace}
+	err = r.client.Get(context.TODO(), nsname, secret)
+	if err != nil {
+		// Error reading the object - requeue the request.
+		return reconcile.Result{}, err
+	}
+
+	if isExpired(instance, secret) {
+		reqLogger.Info("v1alpha1 Certificate is expired, creating v1 version")
+		if err := r.client.Create(context.TODO(), certificate); err != nil {
+			if errors.IsAlreadyExists(err) {
+				existingCertificate := &certmanagerv1.Certificate{}
+				if err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: certificate.Namespace, Name: certificate.Name}, existingCertificate); err != nil {
+					reqLogger.Error(err, "failed to get v1 Certificate")
 					return reconcile.Result{}, err
 				}
-				reqLogger.Info("### DEBUG #### Updated v1 Certificate")
-			}
+				if !equality.Semantic.DeepEqual(certificate.Labels, existingCertificate.Labels) || !equality.Semantic.DeepEqual(certificate.Spec, existingCertificate.Spec) {
+					certificate.SetResourceVersion(existingCertificate.GetResourceVersion())
+					certificate.SetAnnotations(existingCertificate.GetAnnotations())
+					if err := r.client.Update(context.TODO(), certificate); err != nil {
+						reqLogger.Error(err, "failed to update v1 Certificate")
+						return reconcile.Result{}, err
+					}
+					reqLogger.Info("Updated v1 Certificate")
+				}
 
-			reqLogger.Info("### DEBUG ### Converting Certificate status")
-			status := convertStatus(existingCertificate.Status)
-			instance.Status = status
-			reqLogger.Info("### DEBUG ### Updating v1alpha1 Certificate status")
-			if err := r.client.Update(context.TODO(), instance); err != nil {
-				reqLogger.Error(err, "### DEBUG ### error updating")
-				return reconcile.Result{}, err
-			}
+				reqLogger.Info("Converting Certificate status")
+				status := convertStatus(existingCertificate.Status)
+				instance.Status = status
+				reqLogger.Info("Updating v1alpha1 Certificate status")
+				if err := r.client.Update(context.TODO(), instance); err != nil {
+					reqLogger.Error(err, "error updating status")
+					return reconcile.Result{}, err
+				}
 
-			return reconcile.Result{}, nil
+				return reconcile.Result{}, nil
+			}
+			reqLogger.Error(err, "failed to create v1 Certificate")
+			return reconcile.Result{}, err
 		}
-		reqLogger.Error(err, "### DEBUG ### Failed to create v1 Certificate")
-		return reconcile.Result{}, err
+
+		reqLogger.Info("Created v1 Certificate")
+	} else {
+		// should be safe to assume that NotAfter exists at this point since if statement would have executed if it was empty
+		t := time.Until(getExpiration(*instance.Status.NotAfter))
+		reqLogger.Info("Not creating v1 Certificate because existing certificate secret still valid", "Requeuing in: %v", t)
+		return reconcile.Result{RequeueAfter: t}, nil
 	}
 
-	reqLogger.Info("### DEBUG #### Created v1 Certificate")
-
 	return reconcile.Result{}, nil
+}
+
+// isExpired Determines if v1alpha1 Certificate is expired or not based on three
+// conditions:
+// 1. existence of NotAfter status
+// 2. existence of certificate secret
+// 3. is current date after expiration date
+// TODO: could optionally inspect the secret to check if NotAfter date matches with Certificate status
+func isExpired(c *certmanagerv1alpha1.Certificate, s *corev1.Secret) bool {
+	if c.Status.NotAfter == nil {
+		return true
+	}
+	if s == nil {
+		return true
+	}
+	return time.Now().After(getExpiration(*c.Status.NotAfter))
+}
+
+// getExpiration Gets the time when Certificate would have been renewed by
+// cert-manager controller. Subtracting one day to provide a buffer time
+func getExpiration(notAfter metav1.Time) time.Time {
+	return notAfter.Add(-time.Hour * 24)
+}
+
+// purgeOldV1 deletes all v1 Certificates generated by the operator before v1.x
+// operand was deployed, i.e. before operator v3.14.0. New conversion logic
+// will only conditionally create v1 Certificates, so previous ones must be
+// deleted
+func (r *ReconcileCertificate) purgeOldV1() error {
+	oldV1List := &certmanagerv1.CertificateList{}
+	if err := r.client.List(context.TODO(), oldV1List); err != nil {
+		return err
+	}
+	for _, v := range oldV1List.Items {
+		if v.Annotations[resources.OperatorGeneratedAnno] == "true" && v.Labels[resources.ProperV1Label] != "true" {
+			if err := r.client.Delete(context.TODO(), &v); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
