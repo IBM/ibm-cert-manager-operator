@@ -181,8 +181,11 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 	nsname := types.NamespacedName{Name: instance.Spec.SecretName, Namespace: instance.Namespace}
 	err = r.client.Get(context.TODO(), nsname, secret)
 	if err != nil {
-		// Error reading the object - requeue the request.
-		return reconcile.Result{}, err
+		if errors.IsNotFound(err) {
+			reqLogger.Info("No secret found, continuing")
+		} else {
+			return reconcile.Result{}, err
+		}
 	}
 
 	if isExpired(instance, secret) {
