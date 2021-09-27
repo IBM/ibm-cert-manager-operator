@@ -249,7 +249,7 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	r.updateEvent(instance, "Instance found", corev1.EventTypeNormal, "Initializing")
 
 	//Check RHACM
-	rhacmVersion, rhacmNamespace, rhacmErr := checkRhacm(r.client)
+	rhacmVersion, rhacmNamespace, rhacmErr := CheckRhacm(r.client)
 	if rhacmErr != nil {
 		// will continue since RHACM most likely not installed
 		// logging error in case there is some other issue

@@ -19,6 +19,8 @@ package issuer
 import (
 	"context"
 
+	"golang.org/x/mod/semver"
+
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,6 +37,7 @@ import (
 
 	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
+	"github.com/ibm/ibm-cert-manager-operator/pkg/controller/certmanager"
 )
 
 var log = logf.Log.WithName("controller_issuer")
@@ -116,6 +119,23 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	//Check RHACM
+	rhacmVersion, _, rhacmErr := certmanager.CheckRhacm(r.client)
+	if rhacmErr != nil {
+		// will continue since RHACM most likely not installed
+		// logging error in case there is some other issue
+		log.Error(rhacmErr, "Error trying to check for RHACM")
+	}
+	if rhacmVersion != "" {
+		rhacmVersion = "v" + rhacmVersion
+		deployOperand := semver.Compare(rhacmVersion, "v2.3")
+
+		if deployOperand < 0 {
+			log.Info("RHACM version is less than 2.3, so not reconciling Issuer")
+			return reconcile.Result{}, nil
+		}
 	}
 
 	reqLogger.Info("### DEBUG ### v1alpha1 Issuer created", "Issuer.Namespace", instance.Namespace, "Issuer.Name", instance.Name)

@@ -20,6 +20,8 @@ import (
 	"context"
 	"time"
 
+	"golang.org/x/mod/semver"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -37,6 +39,7 @@ import (
 
 	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
+	"github.com/ibm/ibm-cert-manager-operator/pkg/controller/certmanager"
 	"github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 )
 
@@ -121,6 +124,23 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	//Check RHACM
+	rhacmVersion, _, rhacmErr := certmanager.CheckRhacm(r.client)
+	if rhacmErr != nil {
+		// will continue since RHACM most likely not installed
+		// logging error in case there is some other issue
+		log.Error(rhacmErr, "Error trying to check for RHACM")
+	}
+	if rhacmVersion != "" {
+		rhacmVersion = "v" + rhacmVersion
+		deployOperand := semver.Compare(rhacmVersion, "v2.3")
+
+		if deployOperand < 0 {
+			log.Info("RHACM version is less than 2.3, so not reconciling Certificate")
+			return reconcile.Result{}, nil
+		}
 	}
 
 	reqLogger.Info("purging old v1 Certs")

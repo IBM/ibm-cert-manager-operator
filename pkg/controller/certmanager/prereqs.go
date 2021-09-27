@@ -327,7 +327,7 @@ func removeRoles(client client.Client) error {
 }
 
 //CheckRhacm checks if RHACM exists and returns RHACM version and namespace
-func checkRhacm(client client.Client) (string, string, error) {
+func CheckRhacm(client client.Client) (string, string, error) {
 
 	multiClusterHubList := &unstructured.UnstructuredList{}
 	multiClusterHubList.SetGroupVersionKind(res.RhacmGVK)
