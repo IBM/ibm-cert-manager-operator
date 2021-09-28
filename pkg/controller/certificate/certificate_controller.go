@@ -183,6 +183,7 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 	if err != nil {
 		if errors.IsNotFound(err) {
 			reqLogger.Info("No secret found, continuing")
+			secret = nil
 		} else {
 			return reconcile.Result{}, err
 		}
