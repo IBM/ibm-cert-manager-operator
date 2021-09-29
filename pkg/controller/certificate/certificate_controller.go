@@ -308,7 +308,7 @@ func (r *ReconcileCertificate) purgeOldV1() error {
 		return err
 	}
 	for _, v := range oldV1List.Items {
-		if v.Annotations[resources.OperatorGeneratedAnno] == "true" && v.Labels[resources.ProperV1Label] != "true" {
+		if v.Annotations[resources.OperatorGeneratedAnno] == t && v.Labels[resources.ProperV1Label] != t {
 			if err := r.client.Delete(context.TODO(), &v); err != nil {
 				return err
 			}
