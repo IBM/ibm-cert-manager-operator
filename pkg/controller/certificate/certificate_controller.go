@@ -117,6 +117,7 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
+			reqLogger.Info("hello")
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
@@ -216,11 +217,53 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 					reqLogger.Error(err, "error updating status")
 					return reconcile.Result{}, err
 				}
-
-				return reconcile.Result{}, nil
+			} else {
+				reqLogger.Error(err, "failed to create v1 Certificate")
+				return reconcile.Result{}, err
 			}
-			reqLogger.Error(err, "failed to create v1 Certificate")
-			return reconcile.Result{}, err
+		}
+
+		// leaf certificate refresh logic enabled by default in conversion logic
+		// otherwise services can be broken when v1alpha1 Certificates expire
+		// and are automatically converted to v1
+		if instance.Spec.IsCA {
+			reqLogger.Info("CA Certificate has refreshed from upgrade, converting v1alpha1 leaf Certificates")
+			caSecret, err := r.getSecret(instance)
+			if err != nil {
+				if errors.IsNotFound(err) {
+					return reconcile.Result{}, nil
+				}
+				return reconcile.Result{}, err
+			}
+
+			issuers, err := r.findIssuersBasedOnCA(caSecret)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+
+			var leafSecrets []*corev1.Secret
+
+			for _, issuer := range issuers {
+				leafSecrets, err = r.findLeafSecrets(issuer.Name, issuer.Namespace)
+				if err != nil {
+					log.Error(err, "Error reading the leaf certificates for issuer - requeue the request")
+					return reconcile.Result{}, err
+				}
+			}
+
+			for _, leafSecret := range leafSecrets {
+				if err := r.client.Delete(context.TODO(), leafSecret); err != nil {
+					if errors.IsNotFound(err) {
+						continue
+					}
+					return reconcile.Result{}, err
+				}
+			}
+
+			if err := r.updateLeafCerts(issuers); err != nil {
+				return reconcile.Result{}, err
+			}
+
 		}
 
 		reqLogger.Info("Created v1 Certificate")
@@ -269,6 +312,82 @@ func (r *ReconcileCertificate) purgeOldV1() error {
 		if v.Annotations[resources.OperatorGeneratedAnno] == "true" && v.Labels[resources.ProperV1Label] != "true" {
 			if err := r.client.Delete(context.TODO(), &v); err != nil {
 				return err
+			}
+		}
+	}
+	return nil
+}
+
+// getSecret finds corresponding secret of the certificate
+func (r *ReconcileCertificate) getSecret(cert *certmanagerv1alpha1.Certificate) (*corev1.Secret, error) {
+	secretName := cert.Spec.SecretName
+	secret := &corev1.Secret{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: cert.Namespace}, secret)
+
+	return secret, err
+}
+
+// findIssuersBasedOnCA finds issuers that are based on the given CA secret
+func (r *ReconcileCertificate) findIssuersBasedOnCA(caSecret *corev1.Secret) ([]certmanagerv1alpha1.Issuer, error) {
+
+	var issuers []certmanagerv1alpha1.Issuer
+
+	issuerList := &certmanagerv1alpha1.IssuerList{}
+	err := r.client.List(context.TODO(), issuerList, &client.ListOptions{Namespace: caSecret.Namespace})
+	if err == nil {
+		for _, issuer := range issuerList.Items {
+			if issuer.Spec.CA != nil && issuer.Spec.CA.SecretName == caSecret.Name {
+				issuers = append(issuers, issuer)
+			}
+		}
+	}
+
+	return issuers, err
+}
+
+// findLeafSecrets finds issuers that are based on the given CA secret
+func (r *ReconcileCertificate) findLeafSecrets(issuedBy string, namespace string) ([]*corev1.Secret, error) {
+
+	var leafSecrets []*corev1.Secret
+
+	certList := &certmanagerv1alpha1.CertificateList{}
+	err := r.client.List(context.TODO(), certList, &client.ListOptions{Namespace: namespace})
+
+	if err == nil {
+		for _, cert := range certList.Items {
+			if cert.Spec.IssuerRef.Name == issuedBy {
+				leafSecret, err := r.getSecret(&cert)
+				if err != nil {
+					if errors.IsNotFound(err) {
+						log.V(2).Info("Secret not found for cert " + cert.Name)
+						continue
+					}
+					break
+				}
+				leafSecrets = append(leafSecrets, leafSecret)
+			}
+		}
+	}
+
+	return leafSecrets, err
+}
+
+// updateLeafCerts adds a label to v1alpha1 leaf Certificate, so that it will be
+// converted to v1 Certificate. The secret for the leaf certificate must be
+// deleted beforehand.
+func (r *ReconcileCertificate) updateLeafCerts(issuers []certmanagerv1alpha1.Issuer) error {
+	for _, i := range issuers {
+		certList := &certmanagerv1alpha1.CertificateList{}
+		if err := r.client.List(context.TODO(), certList, &client.ListOptions{Namespace: i.Namespace}); err != nil {
+			return err
+		}
+
+		for _, c := range certList.Items {
+			if c.Spec.IssuerRef.Name == i.Name {
+				c.Labels["ibm-cert-manager-operator/conversion-leaf-refresh"] = "true"
+				if err := r.client.Update(context.TODO(), &c); err != nil {
+					return err
+				}
 			}
 		}
 	}
