@@ -314,3 +314,10 @@ const OdlmDeploymentName = "operand-deployment-lifecycle-manager"
 
 // ProductName is the name of Common Services
 const ProductName = "IBM Cloud Pak Foundational Services"
+
+// Labels and Annotations added by this operator
+const (
+	OperatorGeneratedAnno = "ibm-cert-manager-operator-generated"
+	ProperV1Label         = "ibm-cert-manager-operator/conditionally-generated-v1"
+	RefreshCALabel        = "ibm-cert-manager-operator/refresh-ca-chain"
+)
