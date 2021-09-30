@@ -70,7 +70,7 @@ func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, 
 	for _, r := range res.RolesToCreate.Items {
 		log.V(0).Info("Creating role " + r.Name)
 		role := &rbacv1.Role{}
-		err := client.Get(context.Background(), types.NamespacedName{Name: r.Name, Namespace: r.Namespace}, role)
+		err := client.Get(context.Background(), types.NamespacedName{Name: r.Name, Namespace: namespace}, role)
 		if err != nil && apiErrors.IsNotFound(err) {
 			r.ResourceVersion = ""
 			r.Namespace = namespace
@@ -175,7 +175,7 @@ func createRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.S
 		log.V(0).Info("Creating role binding " + b.Name)
 		roleBinding := &rbacv1.RoleBinding{}
 
-		err := client.Get(context.Background(), types.NamespacedName{Name: b.Name, Namespace: b.Namespace}, roleBinding)
+		err := client.Get(context.Background(), types.NamespacedName{Name: b.Name, Namespace: namespace}, roleBinding)
 		if err != nil && apiErrors.IsNotFound(err) {
 			b.ResourceVersion = ""
 			b.Namespace = namespace
@@ -327,7 +327,7 @@ func removeRoles(client client.Client) error {
 }
 
 //CheckRhacm checks if RHACM exists and returns RHACM version and namespace
-func checkRhacm(client client.Client) (string, string, error) {
+func CheckRhacm(client client.Client) (string, string, error) {
 
 	multiClusterHubList := &unstructured.UnstructuredList{}
 	multiClusterHubList.SetGroupVersionKind(res.RhacmGVK)
