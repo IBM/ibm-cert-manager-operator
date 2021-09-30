@@ -32,7 +32,7 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: quay.io/opencloudio/ibm-cert-manager-operator:4.0.0
-    createdAt: "2021-09-01T14:35:00Z"
+    createdAt: "2021-09-30T21:50:00Z"
     description: Operator for managing deployment of cert-manager service.
     support: IBM
   labels:
@@ -637,7 +637,7 @@ spec:
                       - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
                         value: quay.io/opencloudio/icp-cert-manager-acmesolver:1.0.0-jetstack.1.5.1
                       - name: ICP_CONFIGMAP_WATCHER_IMAGE
-                        value: quay.io/opencloudio/icp-configmap-watcher:3.8.0
+                        value: quay.io/opencloudio/icp-configmap-watcher:3.9.0
                       - name: WATCH_NAMESPACE
                         valueFrom:
                           fieldRef:
@@ -718,6 +718,6 @@ spec:
     - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
       image: quay.io/opencloudio/icp-cert-manager-acmesolver:1.0.0-jetstack.1.5.1
     - name: ICP_CONFIGMAP_WATCHER_IMAGE
-      image: quay.io/opencloudio/icp-configmap-watcher:3.8.0
-  replaces: ibm-cert-manager-operator.v3.12.0
+      image: quay.io/opencloudio/icp-configmap-watcher:3.9.0
+  replaces: ibm-cert-manager-operator.v3.14.0
   version: 4.0.0
