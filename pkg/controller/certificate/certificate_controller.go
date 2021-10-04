@@ -425,11 +425,20 @@ func (r *ReconcileCertificate) updateLeafCerts(issuers []certmanagerv1alpha1.Iss
 
 func (r *ReconcileCertificate) updateIAMWebhook(name, ns string) error {
 	webhook := &admRegv1.MutatingWebhookConfiguration{}
-	if err := r.client.Get(context.TODO(), types.NamespacedName{
+	webhookName := types.NamespacedName{
 		Name:      name,
-		Namespace: ns,
-	}, webhook); err != nil {
-		return err
+		Namespace: "",
+	}
+	if err := r.client.Get(context.TODO(), webhookName, webhook); err != nil {
+		// name has namespace prepended in SaaS mode
+		if errors.IsNotFound(err) {
+			webhookName.Name = ns + "." + name
+			if err = r.client.Get(context.TODO(), webhookName, webhook); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
 	}
 
 	webhook.Annotations["cert-manager.io/inject-ca-from"] = webhook.Annotations["certmanager.k8s.io/inject-ca-from"]
