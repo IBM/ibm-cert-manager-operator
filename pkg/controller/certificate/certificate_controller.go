@@ -22,6 +22,8 @@ import (
 
 	"golang.org/x/mod/semver"
 
+	admRegv1 "k8s.io/api/admissionregistration/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -242,6 +244,14 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 			}
 		}
 
+		if instance.Name == "platform-identity-management" {
+			if err := r.updateIAMWebhook(instance.Name, instance.Namespace); err != nil {
+				// requeue even if error is IsNotFound because if IAM webhook
+				// is not found, then something is really wrong
+				return reconcile.Result{}, err
+			}
+		}
+
 		// leaf certificate refresh logic enabled by default in conversion logic
 		// otherwise services can be broken when v1alpha1 Certificates expire
 		// and are automatically converted to v1
@@ -410,5 +420,31 @@ func (r *ReconcileCertificate) updateLeafCerts(issuers []certmanagerv1alpha1.Iss
 			}
 		}
 	}
+	return nil
+}
+
+func (r *ReconcileCertificate) updateIAMWebhook(name, ns string) error {
+	webhook := &admRegv1.MutatingWebhookConfiguration{}
+	webhookName := types.NamespacedName{
+		Name:      name,
+		Namespace: "",
+	}
+	if err := r.client.Get(context.TODO(), webhookName, webhook); err != nil {
+		// name has namespace prepended in SaaS mode
+		if errors.IsNotFound(err) {
+			webhookName.Name = ns + "." + name
+			if err = r.client.Get(context.TODO(), webhookName, webhook); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	webhook.Annotations["cert-manager.io/inject-ca-from"] = webhook.Annotations["certmanager.k8s.io/inject-ca-from"]
+	if err := r.client.Update(context.TODO(), webhook); err != nil {
+		return err
+	}
+
 	return nil
 }
