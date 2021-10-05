@@ -42,7 +42,6 @@ var ClusterRoleBindingsToCreate = &rbacv1.ClusterRoleBindingList{
 	Items: []rbacv1.ClusterRoleBinding{*ControllerApproveClusterRoleBinding, *ControllerCertificateSigningRequestsClusterRoleBinding, *ControllerIssuersClusterRoleBinding, *ControllerClusterIssuersClusterRoleBinding, *ControllerCertificatesClusterRoleBinding, *ControllerOrdersClusterRoleBinding, *ControllerChallengesClusterRoleBinding, *ControllerIngressShimClusterRoleBinding, *CAInjectorClusterRoleBinding, *WebhookClusterRoleBinding},
 }
 
-
 var ConfigWatchServiceAccount = &corev1.ServiceAccount{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: "cert-manager",
