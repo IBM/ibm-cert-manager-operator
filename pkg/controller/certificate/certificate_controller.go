@@ -245,7 +245,7 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 		}
 
 		if instance.Name == "platform-identity-management" {
-			if err := r.updateIAMWebhook(instance.Name, instance.Namespace); err != nil {
+			if err := r.updateIAMWebhook(instance.Namespace); err != nil {
 				// requeue even if error is IsNotFound because if IAM webhook
 				// is not found, then something is really wrong
 				return reconcile.Result{}, err
@@ -423,16 +423,16 @@ func (r *ReconcileCertificate) updateLeafCerts(issuers []certmanagerv1alpha1.Iss
 	return nil
 }
 
-func (r *ReconcileCertificate) updateIAMWebhook(name, ns string) error {
+func (r *ReconcileCertificate) updateIAMWebhook(ns string) error {
 	webhook := &admRegv1.MutatingWebhookConfiguration{}
 	webhookName := types.NamespacedName{
-		Name:      name,
+		Name:      "namespace-admission-config",
 		Namespace: "",
 	}
 	if err := r.client.Get(context.TODO(), webhookName, webhook); err != nil {
 		// name has namespace prepended in SaaS mode
 		if errors.IsNotFound(err) {
-			webhookName.Name = ns + "." + name
+			webhookName.Name = "namespace-admission-config-" + ns
 			if err = r.client.Get(context.TODO(), webhookName, webhook); err != nil {
 				return err
 			}
