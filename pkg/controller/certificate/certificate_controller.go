@@ -430,7 +430,7 @@ func (r *ReconcileCertificate) updateIAMWebhook(ns string) error {
 		Namespace: "",
 	}
 	if err := r.client.Get(context.TODO(), webhookName, webhook); err != nil {
-		// name has namespace prepended in SaaS mode
+		// name has namespace appended in SaaS mode
 		if errors.IsNotFound(err) {
 			webhookName.Name = "namespace-admission-config-" + ns
 			if err = r.client.Get(context.TODO(), webhookName, webhook); err != nil {
