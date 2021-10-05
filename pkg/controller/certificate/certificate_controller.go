@@ -170,7 +170,7 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        instance.Name,
 			Namespace:   instance.Namespace,
-			Labels:      instance.Labels,
+			Labels:      labels,
 			Annotations: annotations,
 		},
 		Spec: certmanagerv1.CertificateSpec{
