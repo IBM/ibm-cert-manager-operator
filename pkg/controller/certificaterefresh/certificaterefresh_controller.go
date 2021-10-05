@@ -38,7 +38,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	certmgr "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
-	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 )
@@ -112,24 +111,24 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 
 	// trigger conversion controller to handle mixing v1 CA Certificates and
 	// v1alpha1 leaf Certificates
-	if cert.Labels[res.OperatorGeneratedAnno] == "" && cert.Labels[res.ProperV1Label] == "" {
-		v1alpha1 := &certmgrv1alpha1.Certificate{}
-		if err := r.client.Get(context.TODO(), request.NamespacedName, v1alpha1); err != nil {
-			if errors.IsNotFound(err) {
-				// Request object not found, could have been deleted after reconcile req
-				// Return and don't requeue
-				reqLogger.Info("Could not find v1alpha1 certificate")
-				return reconcile.Result{}, nil
-			}
-			return reconcile.Result{}, err
-		}
-		reqLogger.Info("Emptying v1alpha1 Cert status")
-		v1alpha1.Status = certmgrv1alpha1.CertificateStatus{}
-		if err := r.client.Update(context.TODO(), v1alpha1); err != nil {
-			reqLogger.Error(err, "failed to empty v1alpha1 status")
-			return reconcile.Result{}, err
-		}
-	}
+	// if cert.Labels[res.OperatorGeneratedAnno] == "" && cert.Labels[res.ProperV1Label] == "" {
+	// 	v1alpha1 := &certmgrv1alpha1.Certificate{}
+	// 	if err := r.client.Get(context.TODO(), request.NamespacedName, v1alpha1); err != nil {
+	// 		if errors.IsNotFound(err) {
+	// 			// Request object not found, could have been deleted after reconcile req
+	// 			// Return and don't requeue
+	// 			reqLogger.Info("Could not find v1alpha1 certificate")
+	// 			return reconcile.Result{}, nil
+	// 		}
+	// 		return reconcile.Result{}, err
+	// 	}
+	// 	reqLogger.Info("Emptying v1alpha1 Cert status")
+	// 	v1alpha1.Status = certmgrv1alpha1.CertificateStatus{}
+	// 	if err := r.client.Update(context.TODO(), v1alpha1); err != nil {
+	// 		reqLogger.Error(err, "failed to empty v1alpha1 status")
+	// 		return reconcile.Result{}, err
+	// 	}
+	// }
 
 	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
 	// If fields exist, don't do anything
