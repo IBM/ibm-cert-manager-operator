@@ -23,7 +23,7 @@ import (
 )
 
 var ServiceAccountsToCreate = &corev1.ServiceAccountList{
-	Items: []corev1.ServiceAccount{*ControllerServiceAccount, *CAInjectorServiceAccount, *WebhookServiceAccount},
+	Items: []corev1.ServiceAccount{*ControllerServiceAccount, *CAInjectorServiceAccount, *WebhookServiceAccount, *ConfigWatchServiceAccount},
 }
 
 var RolesToCreate = &rbacv1.RoleList{
@@ -40,6 +40,13 @@ var ClusterRolesToCreate = &rbacv1.ClusterRoleList{
 
 var ClusterRoleBindingsToCreate = &rbacv1.ClusterRoleBindingList{
 	Items: []rbacv1.ClusterRoleBinding{*ControllerApproveClusterRoleBinding, *ControllerCertificateSigningRequestsClusterRoleBinding, *ControllerIssuersClusterRoleBinding, *ControllerClusterIssuersClusterRoleBinding, *ControllerCertificatesClusterRoleBinding, *ControllerOrdersClusterRoleBinding, *ControllerChallengesClusterRoleBinding, *ControllerIngressShimClusterRoleBinding, *CAInjectorClusterRoleBinding, *WebhookClusterRoleBinding},
+}
+
+
+var ConfigWatchServiceAccount = &corev1.ServiceAccount{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "cert-manager",
+	},
 }
 
 var ControllerServiceAccount = &corev1.ServiceAccount{
