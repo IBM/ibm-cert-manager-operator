@@ -17,12 +17,48 @@
 package certificate
 
 import (
+	"net"
 	"strings"
 
 	v1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
 	v1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 	cmmeta "github.com/ibm/ibm-cert-manager-operator/pkg/apis/meta/v1"
 )
+
+func sanitizeDNSNames(names []string) ([]string, []string) {
+	dnsNames := make([]string, 0)
+	ipAddresses := make([]string, 0)
+	for _, n := range names {
+		if isIP(n) {
+			ipAddresses = append(ipAddresses, n)
+		} else {
+			dnsNames = append(dnsNames, n)
+		}
+	}
+	return dnsNames, ipAddresses
+}
+
+func isIP(s string) bool {
+	if ip := net.ParseIP(s); ip != nil {
+		return true
+	}
+	return false
+}
+
+func convertCommonName(s string, names []string) string {
+	if s == "" && names != nil && len(names) > 0 {
+		return names[0]
+	}
+	return s
+}
+
+func convertIPAddresses(fromCR, fromDNS []string) []string {
+	if fromCR == nil {
+		return fromDNS
+	} else {
+		return append(fromCR, fromDNS...)
+	}
+}
 
 func convertSubject(o []string) *v1.X509Subject {
 	if o == nil {
