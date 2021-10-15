@@ -55,9 +55,8 @@ func convertCommonName(s string, names []string) string {
 func convertIPAddresses(fromCR, fromDNS []string) []string {
 	if fromCR == nil {
 		return fromDNS
-	} else {
-		return append(fromCR, fromDNS...)
 	}
+	return append(fromCR, fromDNS...)
 }
 
 func convertSubject(o []string) *v1.X509Subject {
