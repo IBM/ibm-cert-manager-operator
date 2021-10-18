@@ -51,10 +51,12 @@ type CertificateSpec struct {
 	// If no CommonName is given, then the first entry in DNSNames is used as
 	// the CommonName and must have a length of 64 characters or fewer.
 	// +optional
+	// +nullable
 	DNSNames []string `json:"dnsNames,omitempty"`
 
 	// IPAddresses is a list of IP addresses to be used on the Certificate
 	// +optional
+	// +nullable
 	IPAddresses []string `json:"ipAddresses,omitempty"`
 
 	// SecretName is the name of the secret resource to store this secret in
