@@ -165,6 +165,8 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 	}
 	labels[resources.ProperV1Label] = t
 
+	dnsNames, ipAddresses := sanitizeDNSNames(instance.Spec.DNSNames)
+
 	certificate := &certmanagerv1.Certificate{
 		TypeMeta: metav1.TypeMeta{Kind: "Certificate", APIVersion: "cert-manager.io/v1"},
 		ObjectMeta: metav1.ObjectMeta{
@@ -175,11 +177,11 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 		},
 		Spec: certmanagerv1.CertificateSpec{
 			Subject:               convertSubject(instance.Spec.Organization),
-			CommonName:            instance.Spec.CommonName,
+			CommonName:            convertCommonName(instance.Spec.CommonName, instance.Spec.DNSNames),
 			Duration:              instance.Spec.Duration,
 			RenewBefore:           instance.Spec.RenewBefore,
-			DNSNames:              instance.Spec.DNSNames,
-			IPAddresses:           instance.Spec.IPAddresses,
+			DNSNames:              dnsNames,
+			IPAddresses:           convertIPAddresses(instance.Spec.IPAddresses, ipAddresses),
 			URIs:                  nil,
 			EmailAddresses:        nil,
 			SecretName:            instance.Spec.SecretName,
