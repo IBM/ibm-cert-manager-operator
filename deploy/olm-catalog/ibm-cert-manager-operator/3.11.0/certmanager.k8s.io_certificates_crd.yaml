@@ -103,6 +103,7 @@ spec:
                   description: DNSNames is a list of subject alt names to be used on the Certificate. If no CommonName is given, then the first entry in DNSNames is used as the CommonName and must have a length of 64 characters or fewer.
                   items:
                     type: string
+                  nullable: true
                   type: array
                 duration:
                   description: Certificate default Duration
@@ -111,6 +112,7 @@ spec:
                   description: IPAddresses is a list of IP addresses to be used on the Certificate
                   items:
                     type: string
+                  nullable: true
                   type: array
                 isCA:
                   description: IsCA will mark this Certificate as valid for signing. This implies that the 'cert sign' usage is set
