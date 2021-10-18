@@ -415,6 +415,9 @@ func (r *ReconcileCertificate) updateLeafCerts(issuers []certmanagerv1alpha1.Iss
 
 		for _, c := range certList.Items {
 			if c.Spec.IssuerRef.Name == i.Name {
+				if c.Labels == nil {
+					c.Labels = make(map[string]string)
+				}
 				c.Labels["ibm-cert-manager-operator/conversion-leaf-refresh"] = "true"
 				if err := r.client.Update(context.TODO(), &c); err != nil {
 					return err
