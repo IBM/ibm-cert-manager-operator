@@ -279,6 +279,9 @@ func (r *Reconcilepodrefresh) updateDeploymentAnnotations(deploymentsToUpdate []
 		if deployment.ObjectMeta.Labels == nil {
 			deployment.ObjectMeta.Labels = make(map[string]string)
 		}
+		if deployment.Spec.Template.ObjectMeta.Labels == nil {
+			deployment.Spec.Template.ObjectMeta.Labels = make(map[string]string)
+		}
 		deployment.ObjectMeta.Labels[restartLabel] = timeNow
 		deployment.Spec.Template.ObjectMeta.Labels[restartLabel] = timeNow
 		deployment.ObjectMeta.Labels[expirationLabel] = expiration
@@ -294,6 +297,12 @@ func (r *Reconcilepodrefresh) updateDeploymentAnnotations(deploymentsToUpdate []
 
 func (r *Reconcilepodrefresh) updateStsAnnotations(statefulsetsToUpdate []appsv1.StatefulSet, cert, secret, timeNow, expiration string) error {
 	for _, statefulset := range statefulsetsToUpdate {
+		if statefulset.ObjectMeta.Labels == nil {
+			statefulset.ObjectMeta.Labels = make(map[string]string)
+		}
+		if statefulset.Spec.Template.ObjectMeta.Labels == nil {
+			statefulset.Spec.Template.ObjectMeta.Labels = make(map[string]string)
+		}
 		statefulset.ObjectMeta.Labels[restartLabel] = timeNow
 		statefulset.Spec.Template.ObjectMeta.Labels[restartLabel] = timeNow
 		statefulset.ObjectMeta.Labels[expirationLabel] = expiration
@@ -308,6 +317,12 @@ func (r *Reconcilepodrefresh) updateStsAnnotations(statefulsetsToUpdate []appsv1
 
 func (r *Reconcilepodrefresh) updateDaemonSetAnnotations(daemonsetsToUpdate []appsv1.DaemonSet, cert, secret, timeNow, expiration string) error {
 	for _, daemonset := range daemonsetsToUpdate {
+		if daemonset.ObjectMeta.Labels == nil {
+			daemonset.ObjectMeta.Labels = make(map[string]string)
+		}
+		if daemonset.Spec.Template.ObjectMeta.Labels == nil {
+			daemonset.Spec.Template.ObjectMeta.Labels = make(map[string]string)
+		}
 		daemonset.ObjectMeta.Labels[restartLabel] = timeNow
 		daemonset.Spec.Template.ObjectMeta.Labels[restartLabel] = timeNow
 		daemonset.ObjectMeta.Labels[expirationLabel] = expiration
