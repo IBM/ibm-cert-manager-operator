@@ -246,12 +246,8 @@ func (r *ReconcileCertificate) Reconcile(request reconcile.Request) (reconcile.R
 			}
 		}
 
-		if instance.Name == "platform-identity-management" {
-			if err := r.updateIAMWebhook(instance.Namespace); err != nil {
-				// requeue even if error is IsNotFound because if IAM webhook
-				// is not found, then something is really wrong
-				return reconcile.Result{}, err
-			}
+		if err := r.updateWebhooks(instance.Namespace + "/" + instance.Name); err != nil {
+			return reconcile.Result{}, err
 		}
 
 		// leaf certificate refresh logic enabled by default in conversion logic
@@ -428,28 +424,35 @@ func (r *ReconcileCertificate) updateLeafCerts(issuers []certmanagerv1alpha1.Iss
 	return nil
 }
 
-func (r *ReconcileCertificate) updateIAMWebhook(ns string) error {
-	webhook := &admRegv1.MutatingWebhookConfiguration{}
-	webhookName := types.NamespacedName{
-		Name:      "namespace-admission-config",
-		Namespace: "",
+func (r *ReconcileCertificate) updateWebhooks(s string) error {
+	mwebhooks := &admRegv1.MutatingWebhookConfigurationList{}
+	if err := r.client.List(context.TODO(), mwebhooks); err != nil {
+		return err
 	}
-	if err := r.client.Get(context.TODO(), webhookName, webhook); err != nil {
-		// name has namespace appended in SaaS mode
-		if errors.IsNotFound(err) {
-			webhookName.Name = "namespace-admission-config-" + ns
-			if err = r.client.Get(context.TODO(), webhookName, webhook); err != nil {
-				return err
+	for _, w := range mwebhooks.Items {
+		if w.Annotations != nil {
+			if w.Annotations["certmanager.k8s.io/inject-ca-from"] == s {
+				w.Annotations["cert-manager.io/inject-ca-from"] = s
+				if err := r.client.Update(context.TODO(), &w); err != nil {
+					return err
+				}
 			}
-		} else {
-			return err
 		}
 	}
 
-	webhook.Annotations["cert-manager.io/inject-ca-from"] = webhook.Annotations["certmanager.k8s.io/inject-ca-from"]
-	if err := r.client.Update(context.TODO(), webhook); err != nil {
+	vwebhooks := &admRegv1.ValidatingWebhookConfigurationList{}
+	if err := r.client.List(context.TODO(), vwebhooks); err != nil {
 		return err
 	}
-
+	for _, w := range vwebhooks.Items {
+		if w.Annotations != nil {
+			if w.Annotations["certmanager.k8s.io/inject-ca-from"] == s {
+				w.Annotations["cert-manager.io/inject-ca-from"] = s
+				if err := r.client.Update(context.TODO(), &w); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
