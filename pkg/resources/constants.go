@@ -319,4 +319,5 @@ const ProductName = "IBM Cloud Pak Foundational Services"
 const (
 	OperatorGeneratedAnno = "ibm-cert-manager-operator-generated"
 	ProperV1Label         = "ibm-cert-manager-operator/conditionally-generated-v1"
+	RefreshCALabel        = "ibm-cert-manager-operator/refresh-ca-chain"
 )
