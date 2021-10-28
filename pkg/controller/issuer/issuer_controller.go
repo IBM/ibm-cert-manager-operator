@@ -23,6 +23,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metaerrors "k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -124,9 +125,12 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 	//Check RHACM
 	rhacmVersion, _, rhacmErr := certmanager.CheckRhacm(r.client)
 	if rhacmErr != nil {
-		// will continue since RHACM most likely not installed
-		// logging error in case there is some other issue
-		log.Error(rhacmErr, "Error trying to check for RHACM")
+		// missing RHACM CR or CRD means RHACM does not exist
+		if errors.IsNotFound(rhacmErr) || metaerrors.IsNoMatchError(rhacmErr) {
+			log.Error(rhacmErr, "Could not find RHACM")
+		} else {
+			return reconcile.Result{}, rhacmErr
+		}
 	}
 	if rhacmVersion != "" {
 		rhacmVersion = "v" + rhacmVersion
