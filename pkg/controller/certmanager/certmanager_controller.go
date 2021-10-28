@@ -35,6 +35,7 @@ import (
 	apiextensionsAPIv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metaerrors "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
@@ -251,9 +252,12 @@ func (r *ReconcileCertManager) Reconcile(request reconcile.Request) (reconcile.R
 	//Check RHACM
 	rhacmVersion, rhacmNamespace, rhacmErr := CheckRhacm(r.client)
 	if rhacmErr != nil {
-		// will continue since RHACM most likely not installed
-		// logging error in case there is some other issue
-		log.Error(rhacmErr, "Error trying to check for RHACM")
+		// missing RHACM CR or CRD means RHACM does not exist
+		if errors.IsNotFound(rhacmErr) || metaerrors.IsNoMatchError(rhacmErr) {
+			log.Error(rhacmErr, "Could not find RHACM")
+		} else {
+			return reconcile.Result{}, rhacmErr
+		}
 	}
 	if rhacmVersion != "" {
 		rhacmVersion = "v" + rhacmVersion
