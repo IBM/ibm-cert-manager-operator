@@ -476,15 +476,15 @@ spec:
                 - ibm-cert-manager-operator
                 env:
                 - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-                  value: quay.io/opencloudio/icp-cert-manager-controller:0.10.9
+                  value: quay.io/opencloudio/icp-cert-manager-controller:0.10.10
                 - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-                  value: quay.io/opencloudio/icp-cert-manager-webhook:0.10.9
+                  value: quay.io/opencloudio/icp-cert-manager-webhook:0.10.10
                 - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-                  value: quay.io/opencloudio/icp-cert-manager-cainjector:0.10.9
+                  value: quay.io/opencloudio/icp-cert-manager-cainjector:0.10.10
                 - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-                  value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.10.9
+                  value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.10.10
                 - name: ICP_CONFIGMAP_WATCHER_IMAGE
-                  value: quay.io/opencloudio/icp-configmap-watcher:3.3.6
+                  value: quay.io/opencloudio/icp-configmap-watcher:3.3.7
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
