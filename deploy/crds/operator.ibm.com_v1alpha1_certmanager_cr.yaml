@@ -10,7 +10,7 @@ spec:
   disableHostNetwork: true
   enableWebhook: true
   imageRegistry: quay.io/opencloudio
-  version: "3.8.2"
+  version: "3.8.3"
   enableCertRefresh: true
 status:
   certManagerStatus: ''
