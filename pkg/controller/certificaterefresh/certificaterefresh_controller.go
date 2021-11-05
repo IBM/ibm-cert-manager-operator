@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -39,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	certmgr "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
+	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1alpha1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/pkg/resources"
 )
@@ -168,15 +170,6 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 
 	//set the list of CAs that need their leaf certs refreshed
 	listOfCAs = r.buildDefaultCAList()
-	l, err := r.buildRefreshList(res.RefreshCALabel)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info("Listing Certificates with refresh label returned empty")
-		} else {
-			return reconcile.Result{}, err
-		}
-	}
-	listOfCAs = append(listOfCAs, l...)
 	listOfCAs = append(listOfCAs, instance.Spec.RefreshCertsBasedOnCA...)
 
 	log.V(2).Info("refreshCertsBasedOnCA list: ", "", listOfCAs)
@@ -194,6 +187,10 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 			found = true
 			break
 		}
+	}
+
+	if cert.Labels["res.RefreshCALabel"] == "true" {
+		found = true
 	}
 
 	if !found {
@@ -275,8 +272,42 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
+	// find all v1alpha1 leaf certs
+	v1alpha1Leaves, err := r.findV1Alpha1Certs(issuers)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	// clear status of v1alpha1 leaf certs
+	for _, c := range v1alpha1Leaves.Items {
+		c.Status = certmgrv1alpha1.CertificateStatus{}
+		if err := r.client.Update(context.TODO(), &c); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
 	log.Info("All leaf certificates refreshed for", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCertificateRefresh) findV1Alpha1Certs(issuers []certmgr.Issuer) (*certmgrv1alpha1.CertificateList, error) {
+	certs := &certmgrv1alpha1.CertificateList{}
+
+	issuerNames := []string{}
+	for _, i := range issuers {
+		issuerNames = append(issuerNames, i.Name)
+	}
+	requirement, err := labels.NewRequirement("certmanager.k8s.io/issuer-name", selection.In, issuerNames)
+	if err != nil {
+		return certs, err
+	}
+	selector := labels.NewSelector().Add(*requirement)
+
+	if err := r.client.List(context.TODO(), certs, &client.ListOptions{
+		LabelSelector: selector,
+	}); err != nil {
+		return certs, err
+	}
+	return certs, nil
 }
 
 // getSecret finds corresponding secret of the certificate
@@ -316,30 +347,6 @@ func (r *ReconcileCertificateRefresh) buildDefaultCAList() []operatorv1alpha1.CA
 	}
 
 	return defaultCAs
-}
-
-// buildRefreshList returns a list of Certificates (should be CAs) which are
-// labeled with label s
-func (r *ReconcileCertificateRefresh) buildRefreshList(s string) ([]operatorv1alpha1.CACertificate, error) {
-	certList := &certmgr.CertificateList{}
-	caList := make([]operatorv1alpha1.CACertificate, 0)
-
-	log.Info("Listing certificates with label: " + s)
-	if err := r.client.List(context.TODO(), certList, &client.ListOptions{
-		LabelSelector: labels.SelectorFromSet(labels.Set{
-			s: "true",
-		}),
-	}); err != nil {
-		return caList, err
-	}
-	for _, c := range certList.Items {
-		caList = append(caList, operatorv1alpha1.CACertificate{
-			CertName:  c.Name,
-			Namespace: c.Namespace,
-		})
-	}
-	log.V(2).Info("List of certificates with label", "Certificates: ", caList)
-	return caList, nil
 }
 
 // findIssuersBasedOnCA finds issuers that are based on the given CA secret
