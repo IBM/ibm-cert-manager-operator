@@ -189,7 +189,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
-	if cert.Labels["res.RefreshCALabel"] == "true" {
+	if cert.Labels[res.RefreshCALabel] == "true" {
 		found = true
 	}
 
@@ -278,9 +278,22 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 	// clear status of v1alpha1 leaf certs
+	log.Info("Refreshing v1alpha1 leaf certs")
 	for _, c := range v1alpha1Leaves.Items {
 		c.Status = certmgrv1alpha1.CertificateStatus{}
 		if err := r.client.Update(context.TODO(), &c); err != nil {
+			return reconcile.Result{}, err
+		}
+		secret := &corev1.Secret{}
+		if err := r.client.Get(context.TODO(), types.NamespacedName{
+			Namespace: c.Namespace,
+			Name:      c.Name,
+		}, secret); err != nil {
+			if !errors.IsNotFound(err) {
+				return reconcile.Result{}, err
+			}
+		}
+		if err := r.client.Delete(context.TODO(), secret); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
