@@ -287,7 +287,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		secret := &corev1.Secret{}
 		if err := r.client.Get(context.TODO(), types.NamespacedName{
 			Namespace: c.Namespace,
-			Name:      c.Name,
+			Name:      c.Spec.SecretName,
 		}, secret); err != nil {
 			if !errors.IsNotFound(err) {
 				return reconcile.Result{}, err
