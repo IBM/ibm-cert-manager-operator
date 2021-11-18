@@ -229,9 +229,15 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	// // Fetch all the secrets of leaf certificates issued by these issuers/clusterissuers
 	var leafSecrets []*corev1.Secret
 
-	leafSecrets, err = r.findLeafSecrets(issuers)
+	v1LeafCerts, err := r.findV1Certs(issuers)
 	if err != nil {
 		log.Error(err, "Error reading the leaf certificates for issuer - requeue the request")
+		return reconcile.Result{}, err
+	}
+
+	leafSecrets, err = r.findLeafSecrets(v1LeafCerts)
+	if err != nil {
+		log.Error(err, "Error finding secrets from v1 leaf certificates - requeue the request")
 		return reconcile.Result{}, err
 	}
 
@@ -271,33 +277,51 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	}
 
 	// find all v1alpha1 leaf certs
-	v1alpha1Leaves, err := r.findV1Alpha1Certs(issuers)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-	// clear status of v1alpha1 leaf certs
-	log.Info("Refreshing v1alpha1 leaf certs")
-	for _, c := range v1alpha1Leaves.Items {
-		c.Status = certmgrv1alpha1.CertificateStatus{}
-		if err := r.client.Update(context.TODO(), &c); err != nil {
-			return reconcile.Result{}, err
-		}
-		secret := &corev1.Secret{}
-		if err := r.client.Get(context.TODO(), types.NamespacedName{
-			Namespace: c.Namespace,
-			Name:      c.Spec.SecretName,
-		}, secret); err != nil {
-			if !errors.IsNotFound(err) {
-				return reconcile.Result{}, err
-			}
-		}
-		if err := r.client.Delete(context.TODO(), secret); err != nil {
-			return reconcile.Result{}, err
-		}
-	}
+	// v1alpha1Leaves, err := r.findV1Alpha1Certs(issuers)
+	// if err != nil {
+	// 	return reconcile.Result{}, err
+	// }
+	// // clear status of v1alpha1 leaf certs
+	// log.Info("Refreshing v1alpha1 leaf certs")
+	// for _, c := range v1alpha1Leaves.Items {
+	// 	c.Status = certmgrv1alpha1.CertificateStatus{}
+	// 	if err := r.client.Update(context.TODO(), &c); err != nil {
+	// 		return reconcile.Result{}, err
+	// 	}
+	// 	secret := &corev1.Secret{}
+	// 	if err := r.client.Get(context.TODO(), types.NamespacedName{
+	// 		Namespace: c.Namespace,
+	// 		Name:      c.Spec.SecretName,
+	// 	}, secret); err != nil {
+	// 		if !errors.IsNotFound(err) {
+	// 			return reconcile.Result{}, err
+	// 		}
+	// 	}
+	// 	if err := r.client.Delete(context.TODO(), secret); err != nil {
+	// 		return reconcile.Result{}, err
+	// 	}
+	// }
 
 	log.Info("All leaf certificates refreshed for", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCertificateRefresh) findV1Certs(issuers []certmgr.Issuer) ([]certmgr.Certificate, error) {
+	var leafCerts []certmgr.Certificate
+	for _, i := range issuers {
+		certList := &certmgr.CertificateList{}
+		err := r.client.List(context.TODO(), certList, &client.ListOptions{Namespace: i.Namespace})
+		if err != nil {
+			return leafCerts, err
+		}
+
+		for _, c := range certList.Items {
+			if c.Spec.IssuerRef.Name == i.Name {
+				leafCerts = append(leafCerts, c)
+			}
+		}
+	}
+	return leafCerts, nil
 }
 
 func (r *ReconcileCertificateRefresh) findV1Alpha1Certs(issuers []certmgr.Issuer) (*certmgrv1alpha1.CertificateList, error) {
@@ -398,30 +422,20 @@ func (r *ReconcileCertificateRefresh) findIssuersBasedOnCA(caSecret *corev1.Secr
 // }
 
 // findLeafSecrets finds issuers that are based on the given CA secret
-func (r *ReconcileCertificateRefresh) findLeafSecrets(issuers []certmgr.Issuer) ([]*corev1.Secret, error) {
+func (r *ReconcileCertificateRefresh) findLeafSecrets(v1Certs []certmgr.Certificate) ([]*corev1.Secret, error) {
 
 	var leafSecrets []*corev1.Secret
 
-	for _, i := range issuers {
-		certList := &certmgr.CertificateList{}
-		err := r.client.List(context.TODO(), certList, &client.ListOptions{Namespace: i.Namespace})
+	for _, cert := range v1Certs {
+		leafSecret, err := r.getSecret(&cert)
 		if err != nil {
-			return nil, err
-		}
-		for _, cert := range certList.Items {
-			if cert.Spec.IssuerRef.Name == i.Name {
-				leafSecret, err := r.getSecret(&cert)
-				if err != nil {
-					if errors.IsNotFound(err) {
-						log.V(2).Info("Secret not found for cert " + cert.Name)
-						continue
-					}
-					break
-				}
-				leafSecrets = append(leafSecrets, leafSecret)
+			if errors.IsNotFound(err) {
+				log.V(2).Info("Secret not found for cert " + cert.Name)
+				continue
 			}
+			return leafSecrets, err
 		}
-
+		leafSecrets = append(leafSecrets, leafSecret)
 	}
 
 	return leafSecrets, nil
