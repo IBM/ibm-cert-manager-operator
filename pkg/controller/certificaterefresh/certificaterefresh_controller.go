@@ -241,6 +241,12 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
+	v1alpha1Leaves, err := r.findV1Alpha1Certs(issuers, v1LeafCerts...)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	log.Info("v1alpha1leaves are ", "list", v1alpha1Leaves)
+
 	//nolint
 	//TODO: Add clusterissuer to api
 	// allNamespaces, err := r.getAllNamespaces()
@@ -276,31 +282,26 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
-	// find all v1alpha1 leaf certs
-	// v1alpha1Leaves, err := r.findV1Alpha1Certs(issuers)
-	// if err != nil {
-	// 	return reconcile.Result{}, err
-	// }
-	// // clear status of v1alpha1 leaf certs
-	// log.Info("Refreshing v1alpha1 leaf certs")
-	// for _, c := range v1alpha1Leaves.Items {
-	// 	c.Status = certmgrv1alpha1.CertificateStatus{}
-	// 	if err := r.client.Update(context.TODO(), &c); err != nil {
-	// 		return reconcile.Result{}, err
-	// 	}
-	// 	secret := &corev1.Secret{}
-	// 	if err := r.client.Get(context.TODO(), types.NamespacedName{
-	// 		Namespace: c.Namespace,
-	// 		Name:      c.Spec.SecretName,
-	// 	}, secret); err != nil {
-	// 		if !errors.IsNotFound(err) {
-	// 			return reconcile.Result{}, err
-	// 		}
-	// 	}
-	// 	if err := r.client.Delete(context.TODO(), secret); err != nil {
-	// 		return reconcile.Result{}, err
-	// 	}
-	// }
+	// clear status of v1alpha1 leaf certs
+	log.Info("Refreshing v1alpha1 leaf certs")
+	for _, c := range v1alpha1Leaves {
+		c.Status = certmgrv1alpha1.CertificateStatus{}
+		if err := r.client.Update(context.TODO(), &c); err != nil {
+			return reconcile.Result{}, err
+		}
+		secret := &corev1.Secret{}
+		if err := r.client.Get(context.TODO(), types.NamespacedName{
+			Namespace: c.Namespace,
+			Name:      c.Spec.SecretName,
+		}, secret); err != nil {
+			if !errors.IsNotFound(err) {
+				return reconcile.Result{}, err
+			}
+		}
+		if err := r.client.Delete(context.TODO(), secret); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
 
 	log.Info("All leaf certificates refreshed for", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
 	return reconcile.Result{}, nil
@@ -324,8 +325,11 @@ func (r *ReconcileCertificateRefresh) findV1Certs(issuers []certmgr.Issuer) ([]c
 	return leafCerts, nil
 }
 
-func (r *ReconcileCertificateRefresh) findV1Alpha1Certs(issuers []certmgr.Issuer) (*certmgrv1alpha1.CertificateList, error) {
+// findV1Alpha1Certs Finds all the v1alpha1 Certificates which have not been
+// converted to avoid deleting the same certificate secret twice
+func (r *ReconcileCertificateRefresh) findV1Alpha1Certs(issuers []certmgr.Issuer, v1Certs ...certmgr.Certificate) ([]certmgrv1alpha1.Certificate, error) {
 	certs := &certmgrv1alpha1.CertificateList{}
+	var v1alpha1Certs []certmgrv1alpha1.Certificate
 
 	issuerNames := []string{}
 	for _, i := range issuers {
@@ -333,16 +337,30 @@ func (r *ReconcileCertificateRefresh) findV1Alpha1Certs(issuers []certmgr.Issuer
 	}
 	requirement, err := labels.NewRequirement("certmanager.k8s.io/issuer-name", selection.In, issuerNames)
 	if err != nil {
-		return certs, err
+		return v1alpha1Certs, err
 	}
 	selector := labels.NewSelector().Add(*requirement)
 
 	if err := r.client.List(context.TODO(), certs, &client.ListOptions{
 		LabelSelector: selector,
 	}); err != nil {
-		return certs, err
+		return v1alpha1Certs, err
 	}
-	return certs, nil
+
+	for _, c := range certs.Items {
+		found := false
+		for _, v := range v1Certs {
+			if c.Name == v.Name && c.Namespace == v.Namespace {
+				found = true
+				break
+			}
+		}
+		if !found {
+			v1alpha1Certs = append(v1alpha1Certs, c)
+		}
+	}
+
+	return v1alpha1Certs, nil
 }
 
 // getSecret finds corresponding secret of the certificate
