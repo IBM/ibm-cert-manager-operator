@@ -229,12 +229,10 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	// // Fetch all the secrets of leaf certificates issued by these issuers/clusterissuers
 	var leafSecrets []*corev1.Secret
 
-	for _, issuer := range issuers {
-		leafSecrets, err = r.findLeafSecrets(issuer.Name, issuer.Namespace)
-		if err != nil {
-			log.Error(err, "Error reading the leaf certificates for issuer - requeue the request")
-			return reconcile.Result{}, err
-		}
+	leafSecrets, err = r.findLeafSecrets(issuers)
+	if err != nil {
+		log.Error(err, "Error reading the leaf certificates for issuer - requeue the request")
+		return reconcile.Result{}, err
 	}
 
 	//nolint
@@ -400,16 +398,18 @@ func (r *ReconcileCertificateRefresh) findIssuersBasedOnCA(caSecret *corev1.Secr
 // }
 
 // findLeafSecrets finds issuers that are based on the given CA secret
-func (r *ReconcileCertificateRefresh) findLeafSecrets(issuedBy string, namespace string) ([]*corev1.Secret, error) {
+func (r *ReconcileCertificateRefresh) findLeafSecrets(issuers []certmgr.Issuer) ([]*corev1.Secret, error) {
 
 	var leafSecrets []*corev1.Secret
 
-	certList := &certmgr.CertificateList{}
-	err := r.client.List(context.TODO(), certList, &client.ListOptions{Namespace: namespace})
-
-	if err == nil {
+	for _, i := range issuers {
+		certList := &certmgr.CertificateList{}
+		err := r.client.List(context.TODO(), certList, &client.ListOptions{Namespace: i.Namespace})
+		if err != nil {
+			return nil, err
+		}
 		for _, cert := range certList.Items {
-			if cert.Spec.IssuerRef.Name == issuedBy {
+			if cert.Spec.IssuerRef.Name == i.Name {
 				leafSecret, err := r.getSecret(&cert)
 				if err != nil {
 					if errors.IsNotFound(err) {
@@ -421,9 +421,10 @@ func (r *ReconcileCertificateRefresh) findLeafSecrets(issuedBy string, namespace
 				leafSecrets = append(leafSecrets, leafSecret)
 			}
 		}
+
 	}
 
-	return leafSecrets, err
+	return leafSecrets, nil
 }
 
 // getAllNamespaces finds all namespaces in the cluster
