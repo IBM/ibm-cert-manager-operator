@@ -245,7 +245,7 @@ func (r *ReconcileCertificateRefresh) Reconcile(request reconcile.Request) (reco
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	log.Info("v1alpha1leaves are ", "list", v1alpha1Leaves)
+	log.V(2).Info("List of v1alpha1 leaves for refresh", "v1alpha1 certs", v1alpha1Leaves)
 
 	//nolint
 	//TODO: Add clusterissuer to api
