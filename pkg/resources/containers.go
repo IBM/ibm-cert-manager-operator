@@ -79,6 +79,8 @@ var controllerContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsLiveness,
 		TimeoutSeconds:      timeoutSecondsLiveness,
+		PeriodSeconds:       periodSecondsLiveness,
+		FailureThreshold:    failureThresholdLiveness,
 	},
 	ReadinessProbe: &corev1.Probe{
 		Handler: corev1.Handler{
@@ -86,6 +88,8 @@ var controllerContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsReadiness,
 		TimeoutSeconds:      timeoutSecondsReadiness,
+		PeriodSeconds:       periodSecondsReadiness,
+		FailureThreshold:    failureThresholdReadiness,
 	},
 	SecurityContext: containerSecurityGeneral,
 	Resources:       cpuMemory,
@@ -112,6 +116,8 @@ var webhookContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsLiveness,
 		TimeoutSeconds:      timeoutSecondsLiveness,
+		PeriodSeconds:       periodSecondsLiveness,
+		FailureThreshold:    failureThresholdLiveness,
 	},
 	ReadinessProbe: &corev1.Probe{
 		Handler: corev1.Handler{
@@ -119,6 +125,8 @@ var webhookContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsReadiness,
 		TimeoutSeconds:      timeoutSecondsReadiness,
+		PeriodSeconds:       periodSecondsReadiness,
+		FailureThreshold:    failureThresholdReadiness,
 	},
 	SecurityContext: containerSecurityWebhook,
 	Resources:       cpuMemory,
@@ -150,6 +158,8 @@ var cainjectorContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsLiveness,
 		TimeoutSeconds:      timeoutSecondsLiveness,
+		PeriodSeconds:       periodSecondsLiveness,
+		FailureThreshold:    failureThresholdLiveness,
 	},
 	ReadinessProbe: &corev1.Probe{
 		Handler: corev1.Handler{
@@ -157,6 +167,8 @@ var cainjectorContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsReadiness,
 		TimeoutSeconds:      timeoutSecondsReadiness,
+		PeriodSeconds:       periodSecondsReadiness,
+		FailureThreshold:    failureThresholdReadiness,
 	},
 	SecurityContext: containerSecurityGeneral,
 	Resources:       cpuMemory,
@@ -173,6 +185,8 @@ var configmapWatcherContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsLiveness,
 		TimeoutSeconds:      timeoutSecondsLiveness,
+		PeriodSeconds:       periodSecondsLiveness,
+		FailureThreshold:    failureThresholdLiveness,
 	},
 	ReadinessProbe: &corev1.Probe{
 		Handler: corev1.Handler{
@@ -180,6 +194,8 @@ var configmapWatcherContainer = corev1.Container{
 		},
 		InitialDelaySeconds: initialDelaySecondsReadiness,
 		TimeoutSeconds:      timeoutSecondsReadiness,
+		PeriodSeconds:       periodSecondsReadiness,
+		FailureThreshold:    failureThresholdReadiness,
 	},
 	SecurityContext: containerSecurityGeneral,
 	Resources:       cpuMemory,

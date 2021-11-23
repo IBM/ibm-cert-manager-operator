@@ -196,8 +196,10 @@ const ClusterRoleName = "cert-manager"
 var runAsNonRoot = true
 
 // Liveness/Readiness Probe
-var initialDelaySecondsLiveness int32 = 30
-var timeoutSecondsLiveness int32 = 5
+var initialDelaySecondsLiveness int32 = 60
+var timeoutSecondsLiveness int32 = 10
+var periodSecondsLiveness int32 = 30
+var failureThresholdLiveness int32 = 10
 var livenessExecActionController = v1.ExecAction{
 	Command: []string{"sh", "-c", "pgrep cert-manager -l"},
 }
@@ -211,8 +213,10 @@ var livenessExecActionConfigmapWatcher = v1.ExecAction{
 	Command: []string{"sh", "-c", "pgrep watcher -l"},
 }
 
-var initialDelaySecondsReadiness int32 = 10
-var timeoutSecondsReadiness int32 = 2
+var initialDelaySecondsReadiness int32 = 60
+var timeoutSecondsReadiness int32 = 10
+var periodSecondsReadiness int32 = 30
+var failureThresholdReadiness int32 = 10
 var readinessExecActionController = v1.ExecAction{
 	Command: []string{"sh", "-c", "exec echo start cert-manager"},
 }
