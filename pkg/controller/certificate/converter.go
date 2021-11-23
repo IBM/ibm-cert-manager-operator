@@ -17,7 +17,7 @@
 package certificate
 
 import (
-	"net"
+	"net/url"
 	"strings"
 
 	v1 "github.com/ibm/ibm-cert-manager-operator/pkg/apis/certmanager/v1"
@@ -29,20 +29,20 @@ func sanitizeDNSNames(names []string) ([]string, []string) {
 	dnsNames := make([]string, 0)
 	ipAddresses := make([]string, 0)
 	for _, n := range names {
-		if isIP(n) {
-			ipAddresses = append(ipAddresses, n)
-		} else {
+		if isURL(n) {
 			dnsNames = append(dnsNames, n)
+		} else {
+			ipAddresses = append(ipAddresses, n)
 		}
 	}
 	return dnsNames, ipAddresses
 }
 
-func isIP(s string) bool {
-	if ip := net.ParseIP(s); ip != nil {
-		return true
+func isURL(s string) bool {
+	if _, err := url.Parse(s); err != nil {
+		return false
 	}
-	return false
+	return true
 }
 
 func convertCommonName(s string, names []string) string {
