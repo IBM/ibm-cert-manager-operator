@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -69,7 +70,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Certificates in the cluster
-	err = c.Watch(&source.Kind{Type: &certmanagerv1.Certificate{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &certmanagerv1.Certificate{}}, &handler.EnqueueRequestForObject{}, isExpiredPredicate{})
 	if err != nil {
 		return err
 	}
@@ -333,4 +334,33 @@ func (r *Reconcilepodrefresh) updateDaemonSetAnnotations(daemonsetsToUpdate []ap
 		log.Info("Cert-Manager Restarting Resource:", "Certificate=", cert, "Secret=", secret, "DaemonSet=", daemonset.ObjectMeta.Name, "TimeNow=", timeNow)
 	}
 	return nil
+}
+
+type isExpiredPredicate struct{}
+
+func (isExpiredPredicate) Create(e event.CreateEvent) bool {
+	return false
+}
+
+func (isExpiredPredicate) Delete(e event.DeleteEvent) bool {
+	return false
+}
+
+func (isExpiredPredicate) Update(e event.UpdateEvent) bool {
+	oldCert := (e.ObjectOld).(*certmanagerv1.Certificate)
+	updatedCert := (e.ObjectNew).(*certmanagerv1.Certificate)
+	if oldCert.Status.NotAfter == nil {
+		return false
+	}
+	if updatedCert.Status.NotAfter == nil {
+		return false
+	}
+	if oldCert.Status.NotAfter.Time == updatedCert.Status.NotAfter.Time {
+		return false
+	}
+	return true
+}
+
+func (isExpiredPredicate) Generic(e event.GenericEvent) bool {
+	return false
 }
