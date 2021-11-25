@@ -349,16 +349,14 @@ func (isExpiredPredicate) Delete(e event.DeleteEvent) bool {
 func (isExpiredPredicate) Update(e event.UpdateEvent) bool {
 	oldCert := (e.ObjectOld).(*certmanagerv1.Certificate)
 	updatedCert := (e.ObjectNew).(*certmanagerv1.Certificate)
-	if oldCert.Status.NotAfter == nil {
-		return false
+	if oldCert.Status.NotAfter == nil && updatedCert.Status.NotAfter != nil {
+		return true
 	}
-	if updatedCert.Status.NotAfter == nil {
-		return false
+	if updatedCert.Status.NotAfter != nil && oldCert.Status.NotAfter != nil &&
+		!oldCert.Status.NotAfter.Time.Equal(updatedCert.Status.NotAfter.Time) {
+		return true
 	}
-	if oldCert.Status.NotAfter.Time == updatedCert.Status.NotAfter.Time {
-		return false
-	}
-	return true
+	return false
 }
 
 func (isExpiredPredicate) Generic(e event.GenericEvent) bool {
