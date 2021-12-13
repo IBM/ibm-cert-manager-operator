@@ -109,16 +109,16 @@ func (r *Reconcilepodrefresh) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
-	if len(cert.Status.Conditions) > 0 && cert.Status.NotAfter != nil {
-		if c := cert.Status.Conditions; c != nil {
-			if err := r.restart(cert.Spec.SecretName, cert.Name, c[0].LastTransitionTime.Format("2006-1-2.1504")); err != nil {
-				reqLogger.Error(err, "Failed to fresh pod")
-				return reconcile.Result{}, err
-			}
+	if cert.Status.NotBefore != nil && cert.Status.NotAfter != nil {
+		if err := r.restart(cert.Spec.SecretName, cert.Name, cert.Status.NotBefore.Format("2006-1-2.1504")); err != nil {
+			reqLogger.Error(err, "Failed to fresh pod")
+			return reconcile.Result{}, err
 		}
+		return reconcile.Result{}, nil
 	}
-
-	return reconcile.Result{}, nil
+	// requeue the request when certificate status is not ready to
+	// ensure we don't lost a certificate update
+	return reconcile.Result{RequeueAfter: 5 * time.Second}, nil
 }
 
 // pod refresh is enabled. It will edit the deployments, statefulsets, and daemonsets

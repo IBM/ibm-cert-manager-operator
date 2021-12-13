@@ -1,5 +1,5 @@
 channels:
-- currentCSV: ibm-cert-manager-operator.v3.16.0
+- currentCSV: ibm-cert-manager-operator.v3.17.0
   name: dev
 - currentCSV: ibm-cert-manager-operator.v3.9.0
   name: beta
