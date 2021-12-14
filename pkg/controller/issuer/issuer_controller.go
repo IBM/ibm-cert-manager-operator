@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -68,7 +69,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Issuer
-	err = c.Watch(&source.Kind{Type: &certmanagerv1alpha1.Issuer{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &certmanagerv1alpha1.Issuer{}}, &handler.EnqueueRequestForObject{}, ignoreStatusPredicate{})
 	if err != nil {
 		return err
 	}
@@ -215,4 +216,22 @@ func (r *ReconcileIssuer) Reconcile(request reconcile.Request) (reconcile.Result
 	reqLogger.Info("### DEBUG #### Created v1 Issuer")
 
 	return reconcile.Result{}, nil
+}
+
+type ignoreStatusPredicate struct{}
+
+func (i ignoreStatusPredicate) Create(e event.CreateEvent) bool {
+	return true
+}
+
+func (i ignoreStatusPredicate) Delete(e event.DeleteEvent) bool {
+	return false
+}
+
+func (i ignoreStatusPredicate) Update(e event.UpdateEvent) bool {
+	return e.MetaOld.GetGeneration() != e.MetaNew.GetGeneration()
+}
+
+func (i ignoreStatusPredicate) Generic(e event.GenericEvent) bool {
+	return false
 }
