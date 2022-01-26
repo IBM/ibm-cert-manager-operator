@@ -13,12 +13,6 @@
 # limitations under the License.
 
 ############################################################
-# install git hooks
-############################################################
-INSTALL_HOOKS := $(shell find .git/hooks -type l -exec rm {} \; && \
-                         find common/scripts/.githooks -type f -exec ln -sf ../../{} .git/hooks/ \; )
-
-############################################################
 # GKE section
 ############################################################
 PROJECT ?= oceanic-guard-191815

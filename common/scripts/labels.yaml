@@ -1,5 +1,0 @@
-metadata:
-  labels:
-    app.kubernetes.io/instance: ibm-cert-manager-operator
-    app.kubernetes.io/managed-by: ibm-cert-manager-operator
-    app.kubernetes.io/name: cert-manager
