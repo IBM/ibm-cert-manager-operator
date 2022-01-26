@@ -22,6 +22,6 @@ set -o pipefail
 
 crdDir=${1:-config/crd/bases}
 
-for f in $(ls $crdDir | grep certmanager.k8s.io_*); do
+for f in $(ls "$crdDir" | grep certmanager.k8s.io_*); do
     yq eval '.metadata.annotations."api-approved.kubernetes.io" = "unapproved"' "${crdDir}"/"${f}" -i
 done
