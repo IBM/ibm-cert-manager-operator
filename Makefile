@@ -100,7 +100,7 @@ help: ## Display this help.
 
 manifests: yq controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-	common/scripts/patch-metadata.sh
+	common/scripts/patch-metadata.sh $(YQ)
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -108,7 +108,7 @@ generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and
 # All available format: format-go format-protos format-python
 # Default value will run all formats, override these make target with your requirements:
 #    eg: fmt: format-go format-protos
-fmt: format-go format-protos format-python
+fmt: format-go
 
 vet: ## Run go vet against code.
 	go vet ./...

@@ -20,8 +20,9 @@ set -o errtrace
 set -o nounset
 set -o pipefail
 
-crdDir=${1:-config/crd/bases}
+yq=${1}
+crdDir=${2:-config/crd/bases}
 
 for f in "$crdDir"/certmanager.k8s.io_*; do
-    yq eval '.metadata.annotations."api-approved.kubernetes.io" = "unapproved"' "${f}" -i
+    "${yq}" eval '.metadata.annotations."api-approved.kubernetes.io" = "unapproved"' "${f}" -i
 done
