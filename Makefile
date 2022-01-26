@@ -80,8 +80,6 @@ SHELL = /usr/bin/env bash -o pipefail
 
 all: build
 
-include common/Makefile.common.mk
-
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -199,6 +197,10 @@ KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
 	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
 
+YQ = $(shell pwd)/bin/yq
+yq: ## Download kustomize locally if necessary.
+	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.17.2)
+
 ENVTEST = $(shell pwd)/bin/setup-envtest
 envtest: ## Download envtest-setup locally if necessary.
 	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
@@ -283,3 +285,5 @@ lint: lint-all
 # TODO: remove this target after removing from test-infra
 coverage:
 	echo "COVERAGE REMOVED"
+
+include common/Makefile.common.mk
