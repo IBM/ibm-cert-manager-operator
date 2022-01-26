@@ -47,9 +47,8 @@ spec:
       hostNetwork: false
       hostPID: false
       containers:
-        - name: ibm-cert-manager-operator
+        - name: manager
           image: quay.io/bitscuit/ibm-cert-manager-operator:3.17.0
-          name: manager
           command:
           - ibm-cert-manager-operator
           args:
