@@ -56,7 +56,7 @@ lint-scripts:
 	@${FINDFILES} -name '*.sh' -print0 | ${XARGS} shellcheck
 
 lint-yaml:
-	@${FINDFILES} \( -name '*.yml' -o -name '*.yaml' \) -print0 | ${XARGS} grep -L -e "{{" | ${CLEANXARGS} yamllint -c ./common/config/.yamllint.yml
+	@${FINDFILES} \( -name '*.yml' -o -name '*.yaml' \) -print0 | { ${XARGS} grep -L -e "{{" || true; } | ${CLEANXARGS} yamllint -c ./common/config/.yamllint.yml
 
 lint-helm:
 	@${FINDFILES} -name 'Chart.yaml' -print0 | ${XARGS} -L 1 dirname | ${CLEANXARGS} helm lint
