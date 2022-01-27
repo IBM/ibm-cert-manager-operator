@@ -76,7 +76,6 @@ require (
 )
 
 replace (
-
 	// CVE-2020-26160
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt v3.2.1+incompatible
 	// CVE-2020-29652
