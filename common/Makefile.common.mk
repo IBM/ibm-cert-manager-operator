@@ -34,17 +34,6 @@ config-docker: get-cluster-credentials
 # lint section
 ############################################################
 
-LOCAL_OS := $(shell uname)
-ifeq ($(LOCAL_OS),Linux)
-    TARGET_OS ?= linux
-    XARGS_FLAGS="-r"
-else ifeq ($(LOCAL_OS),Darwin)
-    TARGET_OS ?= darwin
-    XARGS_FLAGS=
-else
-    $(error "This system's OS $(LOCAL_OS) isn't recognized/supported")
-endif
-
 FINDFILES=find . \( -path ./.git -o -path ./.github \) -prune -o -type f
 XARGS = xargs -0 ${XARGS_FLAGS}
 CLEANXARGS = xargs ${XARGS_FLAGS}
