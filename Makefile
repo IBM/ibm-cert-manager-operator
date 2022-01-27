@@ -66,11 +66,11 @@ IMG ?= ibm-cert-manager-operator
 ENVTEST_K8S_VERSION = 1.22
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
-endif
+# ifeq (,$(shell go env GOBIN))
+# GOBIN=$(shell go env GOPATH)/bin
+# else
+# GOBIN=$(shell go env GOBIN)
+# endif
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # This is a requirement for 'setup-envtest.sh' in the test target.
