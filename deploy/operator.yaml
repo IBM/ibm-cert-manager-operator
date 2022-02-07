@@ -40,7 +40,7 @@ spec:
       hostPID: false
       containers:
         - name: ibm-cert-manager-operator
-          image: quay.io/opencloudio/ibm-cert-manager-operator:3.8.3
+          image: quay.io/opencloudio/ibm-cert-manager-operator:latest
           command:
           - ibm-cert-manager-operator
           args:
@@ -59,15 +59,15 @@ spec:
               value: "ibm-cert-manager-operator"
             # DO NOT DELETE. Add operand image SHAs here. See common/scripts/get_image_sha_digest.sh and make get-all-operand-image-sha
             - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-controller:0.10.10
+              value: quay.io/opencloudio/icp-cert-manager-controller:0.10.11
             - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-webhook:0.10.10
+              value: quay.io/opencloudio/icp-cert-manager-webhook:0.10.11
             - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-cainjector:0.10.10
+              value: quay.io/opencloudio/icp-cert-manager-cainjector:0.10.11
             - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.10.10
+              value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.10.11
             - name: ICP_CONFIGMAP_WATCHER_IMAGE
-              value: quay.io/opencloudio/icp-configmap-watcher:3.3.7
+              value: quay.io/opencloudio/icp-configmap-watcher:3.3.8
           resources:
             limits:
               cpu: 100m

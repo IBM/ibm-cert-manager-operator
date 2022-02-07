@@ -1,0 +1,541 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    olm.skipRange: '>=3.5.0 <3.8.4'
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "CertManager",
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/instance": "ibm-cert-manager-operator",
+              "app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+              "app.kubernetes.io/name": "cert-manager"
+            },
+            "name": "default"
+          },
+          "spec": {
+            "disableHostNetwork": true,
+            "enableWebhook": true,
+            "imageRegistry": "quay.io/opencloudio",
+            "version": "3.8.4",
+            "enableCertRefresh": true
+          },
+          "status": {
+            "certManagerStatus": ""
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Issuer",
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/instance": "ibm-cert-manager-operator",
+              "app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+              "app.kubernetes.io/name": "cert-manager"
+            },
+            "name": "cs-ss-issuer"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "Certificate",
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/instance": "ibm-cert-manager-operator",
+              "app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+              "app.kubernetes.io/name": "cert-manager"
+            },
+            "name": "cs-ca-certificate"
+          },
+          "spec": {
+            "secretName": "cs-ca-certificate-secret",
+            "issuerRef": {
+              "name": "cs-ss-issuer",
+              "kind": "Issuer"
+            },
+            "commonName": "cs-ca-certificate",
+            "isCA": true,
+            "duration": "17520h0m0s",
+            "renewBefore": "720h0m0s"
+          }
+        },
+        {
+          "apiVersion": "certmanager.k8s.io/v1alpha1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/instance": "ibm-cert-manager-operator",
+              "app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+              "app.kubernetes.io/name": "cert-manager"
+            },
+            "name": "cs-ca-clusterissuer"
+          },
+          "spec": {
+            "ca": {
+              "secretName": "cs-ca-certificate-secret"
+            }
+          }
+        }
+      ]
+    capabilities: Seamless Upgrades
+    categories: Security
+    certified: "false"
+    containerImage: quay.io/opencloudio/ibm-cert-manager-operator:latest
+    createdAt: "2022-02-07T22:48:00Z"
+    description: Operator for managing deployment of cert-manager service.
+    support: IBM
+  labels:
+    operatorframework.io/arch.amd64: supported
+    operatorframework.io/arch.ppc64le: supported
+    operatorframework.io/arch.s390x: supported
+    operatorframework.io/os.linux: supported
+  name: ibm-cert-manager-operator.v3.8.4
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: Represents a certificate
+      displayName: Certificate
+      kind: Certificate
+      name: certificates.certmanager.k8s.io
+      version: v1alpha1
+    - description: Represents a cluster issuer
+      displayName: Cluster Issuer
+      kind: ClusterIssuer
+      name: clusterissuers.certmanager.k8s.io
+      version: v1alpha1
+    - description: Represents an issuer
+      displayName: Issuer
+      kind: Issuer
+      name: issuers.certmanager.k8s.io
+      version: v1alpha1
+    - description: CertManager is the Schema for the certmanagers API
+      kind: CertManager
+      name: certmanagers.operator.ibm.com
+      statusDescriptors:
+      - description: It will be as "OK when all objects are created successfully
+        displayName: CertManager Status
+        path: certManagerStatus
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
+      version: v1alpha1
+      displayName: CertManager
+      resources:
+      - kind: Deployment
+        name: ''
+        version: v1
+      - kind: ClusterRole
+        name: clusterroles.rbac.authorization.k8s.io
+        version: v1
+      - kind: ClusterRoleBinding
+        name: clusterrolebindings.rbac.authorization.k8s.io
+        version: v1
+      - kind: CustomResourceDefinition
+        name: customresourcedefinitions.apiextensions.k8s.io
+        version: v1beta1
+      - kind: ServiceAccount
+        name: ''
+        version: v1
+      - kind: ValidatingWebhookConfiguration
+        name: validatingwebhookconfigurations.admissionregistration.k8s.io
+        version: v1beta1
+      - kind: MutatingWebhookConfiguration
+        name: mutatingwebhookconfigurations.admissionregistration.k8s.io
+        version: v1beta1
+      - kind: Service
+        name: ''
+        version: v1
+      - kind: APIService
+        name: apiservices.apiregistration.k8s.io
+        version: v1
+      specDescriptors:
+      - description: Disables the use of hostNetwork by the webhook
+        displayName: DisableHostNetwork
+        path: disableHostNetwork
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Enables the webhook component of cert-manager when set to true
+        displayName: EnableWebhook
+        path: enableWebhook
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Appends the text to the image tag when it deploys cert-manager
+        displayName: ImagePostFix
+        path: imagePostFix
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: Sets the image registry to this when deploying cert-manager
+        displayName: ImageRegistry
+        path: imageRegistry
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+      - description: The namespace where namespace scoped resources referenced by cert-manager clusterissuers must be placed
+        displayName: ResourceNamespace
+        path: resourceNamespace
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:text'
+  description: "**Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator. \n\n If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).\n\n You can use the ibm-cert-manager-operator to install the IBM certificate manager service for the IBM Cloud Platform Common Services. You can use IBM certificate manager service to issue and manage x509 certificates from various sources, such as Let’s Encrypt and Hashicorp Vault, a simple signing key pair, or self-signed. It ensures certificates are valid and up to date and will renew certificates before they expire. \n\nFor more information about the available IBM Cloud Platform Common Services, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs). \n## Supported platforms \n\n Red Hat OpenShift Container Platform 4.3 or newer installed on one of the following platforms: \n\n- Linux x86_64 \n- Linux on Power (ppc64le) \n- Linux on IBM Z and LinuxONE \n## Prerequisites\n\n \n For the list of operator dependencies, see the IBM Knowledge Center [Common Services dependencies documentation](http://ibm.biz/cpcs_opdependencies). \n For the list of prerequisites for installing the operator, see the IBM Knowledge Center [Preparing to install services documentation](http://ibm.biz/cpcs_opinstprereq). \n## Documentation \n\n To install the operator with the IBM Common Services Operator follow the the installation and configuration instructions within the IBM Knowledge Center. \n- If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak, for a list of IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks). \n- If you are using the operator with an IBM Containerized Software, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall)."
+  displayName: IBM Cert Manager
+  icon:
+  - base64data: iVBORw0KGgoAAAANSUhEUgAAAK8AAACvCAMAAAC8TH5HAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAB1UExURQAAAJGS77CC4pCS75yM64uV8pSQ7puA85OV87OB4auF5Hyd+H2c936b9n6b94Ca9n+b9n+b9n+b9qOJ56SI55yM6qSI536b96aH5q2D45mN64OZ9ZWQ7oyU8XWg+6uG5oqg/p6L6m+k/ZuY+3mr/6qQ9LqM80D8C0oAAAAbdFJOUwA67R4KKxMBBP6ak6vZgVtJxG5ot+hQ7YDVkwC2C58AAAuSSURBVHja7ZyJerK8EoCDCSTKjoiIS13of/+XeGYm4NLKrvj1OYxt7aa8TiazJZGxSSaZZJJJJvmcSCn/Eq7Cz79DLJk0rb+kXdM9nz0m/4p2mZufz3lAZvEn1HsGye2J9128h7/Gezj8Nd7D3+I9/xu8SjWHrS76bfN8A+NsYxjowCvbPN+QSGB6kWi6QHteyQLPfx+wYsH2eHSthgu05lXMy/PceRcwxtnjdnts4mjLq5hBceVdcVsya71FMeov0JIXMuQwR+DoXX5EMgf0uz2GrDYbb8mrmE+4Z/NdvDCApN+jX3uFdrySqfW70wzFbFLwWtVNkXa8ONlIvfx9Dk0xSyvYq0NpxasYJ9o8emcUVCw6EjGvuUpLXgfVm9cP1fAZp1yyCKeGBf8pB96g9jUZ57c6s1vIIAUfjXqY9eFg1yiuKJnOECzeW+TJm0+rxRGGWfcP7/dld8bZwqcp/dJqIs9hrJIJ/JD2abV5j1StfJn1/pofo/Kx0ae1KfAO7/Vld7anfVpf28M5kKPDc9kYLRW4RDhIwYV/PozVUAF39Qre3BmrvsM04nisjHHyJlUjZEOefuBj8UIA81zHfGJ84BYeHAP9LKseP1r5LNnvOlHeXJgqRZbUPzT97PHvBVb48VCX09W54du2u3ZJwjD0It/gqmCue/yoolm4b7tQjmohh7cGAWzHC8x/qOFOZmBG4bbERDkQrVYyiGP7iPwPLGrgsAofYbePonEJ2CHxAuvjxEjLvfUj7J1BaP0irY3i888SA63l3alWgwKjbXueZztOSBoucOE33huIZdsWHChXRds72O069PyHhSEBDiOynbAEBiGreCGJKoa5zT8GVBzt4QNgXc+wbq4YvW+hSMkDYNa4EYihWqlYtmouSsYTo4XvgWezHKDcI+7xuPbMMp7JH0GEfhZGRMDIG5FRtLG1IGCNvTp/d9nFZhMx/DXYH/cgSBv6SscM+Tyf0P450Lw+iCmbOGAMonOeO/XlMyTjgAsfmWAN9Y53RFy0hDAovXBDSBFBVAIHDdUJ2lre3J6AVG9Hcln5NQyKCUcrd390g5/BtjpNR2KNGwTVpRDSmk6et6jwCv0ScVhpxopxl3DBIjzVjrYk5gVuEPAaw7UP+aFV+0ex5Aq8y/hTYhiE/UXjhibrlBUisUm8hmHwqujuH3IqQLA/0dT+Af8Q34hT8du3QXlR4nrdkxhJ0554nwAXhpvj+hLUo2u/zWoJM1aXy70ZP8e97APWJ+WGbN1AXNP8tedAasM96PLu4Ik2jhpHZLkqgdGM5TNjuKzNnhkiUmneH8CSCe9wpXV429HDlCu7GcV9JwemWoEbWr3rGZx2iMs5F4+T3S1p89DoYGvkUeLCKC67m+uBsVwVuGpI+QVohGtZ6rHrU+Cu/UaP/ps4KY3iWhlipwNwd4Arh1WLCIy4lpA/2yiF4XZ9ehgMuaRgt7r6FMWiC9DuL64YWtyCrQKuEOLe1iJsG+eO2W8eo+POdrvVtdULrgG0Dbg76xW1uCDcm5GCguzDAeNlz0qPqgfzGunJeAl4aOug6KYQ7l2WhI7DZEMqZ7L5a1uBZWTQF3/QVHvmUosOBX0ZVkbfkgNtDYCbDcDVsIKbQYCJBCY/gak7FHQh+bqiX7LwsnuYfr1gqUTCUsPWgsWdF1H2I1/ZoYBMSLs3o3/blyke+FRiEPE9c1Huq9dpV60GWQNmvybSIrCnee0SGIlDJzJfVzwrttTq7bfkUNCSzV71a19pScNOGHrmi9pWV/Uue6lXYpEcBFfgslSOPG0MBTASc/YK3455PEqvyYY5r0G4AeH6gWHqSCyVxQ2s9ksJw9B/ATBYVUy8fdRL6ZhhlPo1HpIyHelM38OmCuA6oWvzwTah69DTbiW6qxdMCdPdAIGLbrC8lyIimxHRgrhQcA+cdoqluxXc0u7qhcTGNBAYeKkB9CTASfJjVuTo7mvoRsO676Ci+LRanVbd91YgLggp2GI1/kpRq7MAXnuDjBhC8Qpkl3UepwIXgblseDQq2XBcUK8bru0hGgbni7ynzrMNs1xOuJDmNQMAsfAI2B0CjOaAvKuuK2aES8C8XU8Sn98H9SKw12/SwfwVzNyArOLOL1lxEpO37/lKFujlpW3UfTSZwpxaQCkXb+JVd3OAAg1xrQ4vFGzC0MDrbuvLSGtRiSVYuonjeNU5MxMWAVudZzct1azdLmUXzGZLV7BCySxG6Zrq4MsFXqv79A7WiLu1OwwLFgElr7VA3LQjLtZnCCx7+KNo7a4BuG3lhRmKWXQ0LME40Gbxsqt6BQH3arExZ+viCl67Ib1rGHFLQPIQL7JFnHTjRfUCb68whR1mXM3dttpjcWvIAS6uNCRxlmVxxypeCVJw3wjl0/LzmrfaVG4kBgFT6ge57wJ4M7OTfmlNS4j+McpB4G2rTfBGkhAwp2UcWfB2cw/FFogBKQvxrhtTLMnMZYJiFG4eeLM0zVLRg3dIzmJvAbfRgiXjS81rXfeBLIE3TTuVQneZeH8Fb4HXFQ0rcGKJcsNFXsRdduYdViSQBQNy0LCilaSIu+R3TeqP8KKLQAXXzjgw3hR5l3erFvoldOOVr9Cv5eK6v1tzXch0UZfLNGEPvGQi3fU7tMi1m45PgCtb4Nin974Lftmd9yUtJZ94q/NgUG9KvA9rWOjgwKATMTqv3mpcbcDgQxaLRbpYyp+89/5tLMF98GTAVZsP4LfpAuXRYnALBwof+0AxejR0EVVpO4ARbvpz96D1GV7FvNoJB4lNDLiQOKofIQSTicQcnzeq5ZUsxTpi8ctQJeVrJmNj8wbEWxHhYNxjXff8UiT1vww1Oq9R59Dgz1gGb5Kff5a62jA/4tD222Ml75J4zd+8uglmfcQB76s2nktsM2w2z8p2yamWG90eTNrd9ly/ALnAtlP8LO5a1FdSo9sv7h3cVvGqGHkXT9Sr+3ZcjO4faNNYUMErkHf2tIeuqBNhjc0bHXEDoVHBa20qeRm1liw1Mq9H29z68Ard+hs7f0BzWD/3S8g7q+TV3RohR8VVLqq34pgR2G8NL9O8alx3Rrvy7Cr3q2LkXTyPClrBY55JgPqCthFGVbxsgbxxRd2jxKCGTS/zpelW0beD8pB4NxVhVw7t2HSvj0m9lfUx5A/zzWw2q0yPHzYHjWEOuDXvWLnhAtL1Gah3XrWsImkL/WjAkoX7au+r00bQ7my+qFr4ekETpFvyUGsOKOAgZrNNZaE2InCx9XF/qVmFQwNGBVevs42n31K9+5oqFxw0GURc22UayXjBenHrY1Z7UJ/FpOCkRsFjWe+SNsLuef2xCm0QMfvwe60pxnGf5v7iNTR/xWZWb8GjWcOFgBtK3FLBM+uTCpatd5aigue1Pngs4yVcp8VphmT+YYuQGIhxm/Fu37w+j0mPBk4+BIy4ett8q52lGJTneJsbHwHGwx/FQYp2Q6wtogCWH8DNLtdt0S1Pi6RICx8JG1nFCluOV9yWLgrrjAI4HfVQNtYu5emw9ri0EyZGWpCNORYxvVuAGZeHgLIuEVZB5UnAqGLryfsLvDx31Gfa6czSSW+D7XRFVZgEyizlRfEm3yJFSaiM+HQ5Ee5ll3SNVgCczkvi+SJ5c+PMMtIV0BLu6RL32P8Lry8pcVHJcZoYlniDcCNJ49Xp+/uk5QK20PP0kLWYP8qsg2zuvl/VyAlQS1bQ7SnjfQ814O7WeF4jX/P/5l//fT2V77svePeNd/gFNam/FN/eZPd9io0B/ojOwMWVsA8/wO1RZvc/nOgTbqfi7okAfDbUe+KDjcVsPq9X81eJPK/g/So476kfWUG1S6vjmcIqYpGkGwT7r4t8FfffdIP7ajmdNlnC2Qto2fWNtixjudRr4a+VLF0uTa4vJF8XKuXbg/Hr33TjffKn3gp/kkkmmWSSSSaZZJJJJplkkkkmmWSS/yf5H6HANgUotAMHAAAAAElFTkSuQmCC
+    mediatype: image/png
+  install:
+    spec:
+      permissions:
+      - rules:
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - cert-manager-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - roles
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - serviceaccounts
+          verbs:
+          - get
+          - update
+          - patch
+          - create
+          - delete
+        - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - patch
+          - update
+          - delete
+        - apiGroups:
+          - ibmcpcs.ibm.com
+          resources:
+          - secretshares
+          verbs:
+          - create
+          - get
+        serviceAccountName: ibm-cert-manager-operator
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - certmanagers
+          - certmanagers/status
+          - certmanagers/finalizers
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - customresourcedefinitions
+          verbs:
+          - '*'
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - clusterroles
+          - clusterrolebindings
+          - rolebindings
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - delete
+        - apiGroups:
+          - apiregistration.k8s.io
+          resources:
+          - apiservices
+          verbs:
+          - '*'
+        - apiGroups:
+          - admissionregistration.k8s.io
+          resources:
+          - mutatingwebhookconfigurations
+          - validatingwebhookconfigurations
+          verbs:
+          - '*'
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - certificates
+          - certificaterequests
+          - orders
+          - challenges
+          - clusterissuers
+          - issuers
+          verbs:
+          - '*'
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - certificates/status
+          - certificaterequests/status
+          - challenges/status
+          - orders/status
+          - issuers/status
+          - clusterissuers/status
+          - certificates/finalizers
+          - challenges/finalizers
+          - ingresses/finalizers
+          - orders/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - secrets
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - events
+          verbs:
+          - create
+          - patch
+        - apiGroups:
+          - ""
+          resources:
+          - serviceaccounts
+          verbs:
+          - list
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - delete
+        - apiGroups:
+          - extensions
+          resources:
+          - ingresses
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - delete
+          - update
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - statefulsets
+          - daemonsets
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - update
+          - watch
+          - patch
+        - apiGroups:
+          - admission.certmanager.k8s.io
+          resources:
+          - certificates
+          - clusterissuers
+          - issuers
+          - certificaterequests
+          verbs:
+          - '*'
+        - apiGroups:
+          - security.openshift.io
+          resourceNames:
+          - restricted
+          - hostnetwork
+          resources:
+          - securitycontextconstraints
+          verbs:
+          - use
+        - apiGroups:
+          - authorization.k8s.io
+          resources:
+          - subjectaccessreviews
+          verbs:
+          - '*'
+        - apiGroups:
+          - operator.open-cluster-management.io
+          resources:
+          - multiclusterhubs
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - ibmcpcs.ibm.com
+          resources:
+          - secretshares
+          verbs:
+          - list
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
+          - list
+          - watch
+        serviceAccountName: ibm-cert-manager-operator
+      deployments:
+      - name: ibm-cert-manager-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: ibm-cert-manager-operator
+          strategy: {}
+          template:
+            metadata:
+              annotations:
+                productName: IBM Cloud Platform Common Services
+                productID: 068a62892a1e4db39641342e592daa25
+                productMetric: FREE
+              labels:
+                app.kubernetes.io/instance: ibm-cert-manager-operator
+                app.kubernetes.io/managed-by: ibm-cert-manager-operator
+                app.kubernetes.io/name: cert-manager
+                name: ibm-cert-manager-operator
+            spec:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: kubernetes.io/arch
+                        operator: In
+                        values:
+                        - amd64
+                        - ppc64le
+                        - s390x
+              hostIPC: false
+              hostNetwork: false
+              hostPID: false
+              containers:
+              - args:
+                - --zap-level=1
+                command:
+                - ibm-cert-manager-operator
+                env:
+                - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-controller:0.10.11
+                - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-webhook:0.10.11
+                - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-cainjector:0.10.11
+                - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
+                  value: quay.io/opencloudio/icp-cert-manager-acmesolver:0.10.11
+                - name: ICP_CONFIGMAP_WATCHER_IMAGE
+                  value: quay.io/opencloudio/icp-configmap-watcher:3.3.8
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: OPERATOR_NAME
+                  value: ibm-cert-manager-operator
+                image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+                imagePullPolicy: Always
+                name: ibm-cert-manager-operator
+                resources:
+                  limits:
+                    cpu: 100m
+                    memory: 300Mi
+                  requests:
+                    cpu: 10m
+                    memory: 50Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
+                  privileged: false
+                  readOnlyRootFilesystem: true
+              serviceAccountName: ibm-cert-manager-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - Cert-Manager
+  - IBM
+  - Cloud
+  maintainers:
+  - email: https://www.ibm.com/mysupport/
+    name: IBM Support
+  maturity: alpha
+  provider:
+    name: IBM
+  replaces: ibm-cert-manager-operator.v3.8.3
+  version: 3.8.4
