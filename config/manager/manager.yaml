@@ -51,8 +51,6 @@ spec:
           image: quay.io/bitscuit/ibm-cert-manager-operator:3.17.0
           command:
           - ibm-cert-manager-operator
-          args:
-          - --zap-level=1
           imagePullPolicy: Always
           livenessProbe:
             httpGet:
