@@ -186,11 +186,18 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "CertificateRequest")
 		os.Exit(1)
 	}
-	if err = (&certmanagerv1controllers.CertificateReconciler{
+	if err = (&certmanagerv1controllers.CertificateRefreshReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Certificate")
+		setupLog.Error(err, "unable to create controller", "controller", "CertificateRefresh")
+		os.Exit(1)
+	}
+	if err = (&certmanagerv1controllers.PodRefreshReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "PodRefresh")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
