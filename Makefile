@@ -25,6 +25,8 @@ endif
 
 VCS_REF ?= $(shell git rev-parse HEAD)
 
+PREV_VERSION ?= 3.17.0
+
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
@@ -226,6 +228,7 @@ endef
 
 .PHONY: bundle
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
+	common/scripts/patch-csv.sh v$(PREV_VERSION)
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)

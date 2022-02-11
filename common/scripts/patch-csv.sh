@@ -20,15 +20,18 @@ set -o errtrace
 set -o nounset
 set -o pipefail
 
-yq=${1}
-crdDir=${2:-config/crd/bases}
+sed="sed"
+unamestr=$(uname)
+if [[ "$unamestr" == "Darwin" ]] ; then
+    SED=gsed
+    type $SED >/dev/null 2>&1 || {
+        echo >&2 "$SED it's not installed. Try: brew install gnu-sed" ;
+        exit 1;
+    }
+fi
 
-# add unapproved api annotation to v1alpha1 APIs which have domian k8s.io
-for f in "$crdDir"/certmanager.k8s.io_*; do
-    "${yq}" eval '.metadata.annotations."api-approved.kubernetes.io" = "unapproved"' "${f}" -i
-done
+version=${1}
+csv=${3:-config/manifests/bases/ibm-cert-manager-operator.clusterserviceversion.yaml}
 
 # add labels to resources
-"${yq}" eval '.metadata.labels."app.kubernetes.io/instance" = "ibm-cert-manager-operator"' config/rbac/role.yaml -i
-"${yq}" eval '.metadata.labels."app.kubernetes.io/managed-by" = "ibm-cert-manager-operator"' config/rbac/role.yaml -i
-"${yq}" eval '.metadata.labels."app.kubernetes.io/name" = "cert-manager"' config/rbac/role.yaml -i
+"${sed}" -e "s|replaces: ibm-cert-manager-operator\(.*\)|replaces: ibm-cert-manager-operator.${version}|" -i "${csv}"
