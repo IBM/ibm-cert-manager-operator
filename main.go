@@ -37,6 +37,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlpkg "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
@@ -49,7 +50,6 @@ import (
 	certmanagerv1controllers "github.com/ibm/ibm-cert-manager-operator/controllers/cert-manager"
 	certmanagercontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/certmanager"
 	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/operator"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	//+kubebuilder:scaffold:imports
 )
 
