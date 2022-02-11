@@ -105,7 +105,7 @@ type ChallengeStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Challenge is the Schema for the challenges API
+// Challenge is the Schema for the challenges API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
 // +kubebuilder:printcolumn:name="Domain",type="string",JSONPath=".spec.dnsName"
 // +kubebuilder:printcolumn:name="Reason",type="string",JSONPath=".status.reason",description="",priority=1

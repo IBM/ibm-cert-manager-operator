@@ -616,7 +616,7 @@ type ClusterIssuerList struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Issuer is the Schema for the issuers API
+// Issuer is the Schema for the issuers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
 type Issuer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

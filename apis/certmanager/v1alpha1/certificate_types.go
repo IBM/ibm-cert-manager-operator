@@ -164,7 +164,7 @@ const (
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Certificate is the Schema for the certificates API
+// Certificate is the Schema for the certificates API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status",description=""
 // +kubebuilder:printcolumn:name="Secret",type="string",JSONPath=".spec.secretName",description=""
 // +kubebuilder:printcolumn:name="Issuer",type="string",JSONPath=".spec.issuerRef.name",description="",priority=1

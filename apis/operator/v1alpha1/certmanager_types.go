@@ -67,7 +67,7 @@ type CertManagerStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// CertManager is the Schema for the certmanagers API
+// CertManager is the Schema for the certmanagers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
 type CertManager struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

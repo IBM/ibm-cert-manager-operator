@@ -30,8 +30,10 @@ if [[ "$unamestr" == "Darwin" ]] ; then
     }
 fi
 
-version=${1}
+prev_version=${1}
+curr_version=${2}
 csv=${3:-config/manifests/bases/ibm-cert-manager-operator.clusterserviceversion.yaml}
 
 # add labels to resources
-"${sed}" -e "s|replaces: ibm-cert-manager-operator\(.*\)|replaces: ibm-cert-manager-operator.${version}|" -i "${csv}"
+"${sed}" -e "s|replaces: ibm-cert-manager-operator\(.*\)|replaces: ibm-cert-manager-operator.${prev_version}|" -i "${csv}"
+"${sed}" -e "s|olm.skipRange: <\(.*\)|olm.skipRange: <${curr_version}|" -i "${csv}"

@@ -25,7 +25,7 @@ import (
 // +kubebuilder:object:root=true
 
 // A Certificate resource should be created to ensure an up to date and signed
-// x509 certificate is stored in the Kubernetes Secret resource named in `spec.secretName`.
+// x509 certificate is stored in the Kubernetes Secret resource named in `spec.secretName`. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
 //
 // The stored certificate will be renewed before it expires (as configured by `spec.renewBefore`).
 // +kubebuilder:subresource:status
