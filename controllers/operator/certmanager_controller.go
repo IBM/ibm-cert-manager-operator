@@ -99,6 +99,8 @@ type CertManagerReconciler struct {
 
 //+kubebuilder:rbac:groups="auditregistration.k8s.io",resources=auditsinks,verbs=get;list;watch;update
 
+//+kubebuilder:rbac:groups="authorization.k8s.io",resources=subjectaccessreviews,verbs=create
+
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
