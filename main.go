@@ -28,9 +28,11 @@ import (
 
 	admRegv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
@@ -40,6 +42,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	cache "github.com/IBM/controller-filtered-cache/filteredcache"
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 
 	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
@@ -50,6 +53,7 @@ import (
 	certmanagerv1controllers "github.com/ibm/ibm-cert-manager-operator/controllers/cert-manager"
 	certmanagercontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/certmanager"
 	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/operator"
+	constants "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -86,6 +90,12 @@ func main() {
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 
+	gvkLabelMap := map[schema.GroupVersionKind]cache.Selector{
+		corev1.SchemeGroupVersion.WithKind("Secret"): {
+			FieldSelector: constants.SecretTypeTLS,
+		},
+	}
+
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -95,6 +105,7 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "1557e857.ibm.com",
+		NewCache:               cache.NewFilteredCacheBuilder(gvkLabelMap),
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -133,6 +144,9 @@ func main() {
 		return []string{obj.(*appsv1.Deployment).Name}
 	}
 	if err := cache.IndexField(context.Background(), &appsv1.Deployment{}, "metadata.name", indexFunc); err != nil {
+		panic(err)
+	}
+	if err := cache.IndexField(context.Background(), &appsv1.Deployment{}, "metadata.type", indexFunc); err != nil {
 		panic(err)
 	}
 
