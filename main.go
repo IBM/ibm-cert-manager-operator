@@ -146,7 +146,10 @@ func main() {
 	if err := cache.IndexField(context.Background(), &appsv1.Deployment{}, "metadata.name", indexFunc); err != nil {
 		panic(err)
 	}
-	if err := cache.IndexField(context.Background(), &appsv1.Deployment{}, "metadata.type", indexFunc); err != nil {
+	indexFunc = func(obj ctrlpkg.Object) []string {
+		return []string{obj.(*corev1.Secret).Name}
+	}
+	if err := cache.IndexField(context.Background(), &corev1.Secret{}, "metadata.type", indexFunc); err != nil {
 		panic(err)
 	}
 
