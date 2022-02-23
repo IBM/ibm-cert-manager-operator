@@ -25,6 +25,7 @@ import (
 	apiextensionclientsetv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	metaerrors "k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -338,7 +339,7 @@ func CheckRhacm(client client.Client) (string, string, error) {
 	}
 
 	if len(multiClusterHubList.Items) < 1 {
-		return "", "", errors.New("the MultiClusterHub CRD exists, but no CR created")
+		return "", "", &metaerrors.NoKindMatchError{GroupKind: multiClusterHubList.GroupVersionKind().GroupKind()}
 	}
 
 	// there should only be one MultiClusterHub CR in a cluster
