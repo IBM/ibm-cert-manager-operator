@@ -572,6 +572,15 @@ spec:
           - patch
           - update
         - apiGroups:
+          - ibmcpcs.ibm.com
+          resources:
+          - secretshares
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+        - apiGroups:
           - networking.k8s.io
           resources:
           - httproutes
@@ -641,6 +650,14 @@ spec:
           - get
           - patch
           - update
+        - apiGroups:
+          - operator.open-cluster-management.io
+          resources:
+          - multiclusterhubs
+          verbs:
+          - get
+          - list
+          - watch
         - apiGroups:
           - rbac.authorization.k8s.io
           resources:
