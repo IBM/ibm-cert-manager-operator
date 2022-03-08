@@ -95,6 +95,9 @@ spec:
     - kind: ClusterIssuer
       name: clusterissuers.cert-manager.io
       version: v1
+    - kind: ClusterIssuer
+      name: clusterissuers.certmanager.k8s.io
+      version: v1alpha1
     - description: 'An Issuer represents a certificate issuing authority which can
         be referenced as part of `issuerRef` fields. It is scoped to a single namespace
         and can therefore only be referenced by resources within the same namespace.
