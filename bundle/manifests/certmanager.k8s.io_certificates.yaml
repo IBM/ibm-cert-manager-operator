@@ -273,8 +273,8 @@ spec:
                       description: Status of the condition, one of ('True', 'False',
                         'Unknown').
                       enum:
-                      - "True"
-                      - "False"
+                      - 'True'
+                      - 'False'
                       - Unknown
                       type: string
                     type:
@@ -300,7 +300,8 @@ spec:
     subresources: {}
 status:
   acceptedNames:
-    kind: ""
-    plural: ""
+    kind: ''
+    plural: ''
   conditions: []
   storedVersions: []
+---
