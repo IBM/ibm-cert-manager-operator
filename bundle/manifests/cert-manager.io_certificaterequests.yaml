@@ -62,12 +62,12 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: "A CertificateRequest is used to request a signed certificate
-          from one of the configured issuers. \n All fields within the CertificateRequest's
-          `spec` are immutable after creation. A CertificateRequest will either succeed
-          or fail, as denoted by its `status.state` field. \n A CertificateRequest
-          is a one-shot resource, meaning it represents a single point in time request
-          for a certificate and cannot be re-used."
+        description: "A CertificateRequest is used to request a signed certificate\
+          \ from one of the configured issuers. \n All fields within the CertificateRequest's\
+          \ `spec` are immutable after creation. A CertificateRequest will either\
+          \ succeed or fail, as denoted by its `status.state` field. \n A CertificateRequest\
+          \ is a one-shot resource, meaning it represents a single point in time request\
+          \ for a certificate and cannot be re-used."
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -233,8 +233,8 @@ spec:
                       description: Status of the condition, one of (`True`, `False`,
                         `Unknown`).
                       enum:
-                      - "True"
-                      - "False"
+                      - 'True'
+                      - 'False'
                       - Unknown
                       type: string
                     type:
@@ -261,7 +261,8 @@ spec:
       status: {}
 status:
   acceptedNames:
-    kind: ""
-    plural: ""
+    kind: ''
+    plural: ''
   conditions: []
   storedVersions: []
+---
