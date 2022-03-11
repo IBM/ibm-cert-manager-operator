@@ -112,6 +112,9 @@ const CainjectorLabels = "app=ibm-cert-manager-cainjector"
 // ConfigmapWatcherLabels is a string of the configmap-watcher's labels
 const ConfigmapWatcherLabels = "app.kubernetes.io/name=configmap-watcher"
 
+// secretWatchLabel is a string of secrets that watched by cert manager operator labels
+const SecretWatchLabel string = "operator.ibm.com/watched-by-cert-manager"
+
 // DefaultNamespace is the namespace the cert-manager services will be deployed in if the operator is deployed in all namespaces or locally
 const DefaultNamespace = "ibm-common-services"
 
