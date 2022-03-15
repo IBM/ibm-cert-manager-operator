@@ -25,7 +25,7 @@ endif
 
 VCS_REF ?= $(shell git rev-parse HEAD)
 
-PREV_VERSION ?= 3.18.0
+PREV_VERSION ?= 3.18.1
 
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.
@@ -58,7 +58,7 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 #
 # For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
 # ibm.com/ibm-cert-manager-operator-bundle:$VERSION and ibm.com/ibm-cert-manager-operator-catalog:$VERSION.
-IMAGE_TAG_BASE ?= ibm.com/ibm-cert-manager-operator
+IMAGE_TAG_BASE ?= $(REGISTRY)/ibm-cert-manager-operator
 
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
