@@ -25,7 +25,7 @@ endif
 
 VCS_REF ?= $(shell git rev-parse HEAD)
 
-PREV_VERSION ?= 3.18.0
+PREV_VERSION ?= 3.18.1
 
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.

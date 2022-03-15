@@ -148,5 +148,5 @@ spec:
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
   - image: quay.io/opencloudio/icp-configmap-watcher:3.13.0
     name: ICP_CONFIGMAP_WATCHER_IMAGE
-  replaces: ibm-cert-manager-operator.v3.18.0
+  replaces: ibm-cert-manager-operator.v3.18.1
   version: 0.0.0
