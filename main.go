@@ -92,7 +92,7 @@ func main() {
 
 	gvkLabelMap := map[schema.GroupVersionKind]cache.Selector{
 		corev1.SchemeGroupVersion.WithKind("Secret"): {
-			FieldSelector: constants.SecretTypeTLS,
+			LabelSelector: constants.SecretWatchLabel,
 		},
 	}
 
@@ -144,12 +144,6 @@ func main() {
 		return []string{obj.(*appsv1.Deployment).Name}
 	}
 	if err := cache.IndexField(context.Background(), &appsv1.Deployment{}, "metadata.name", indexFunc); err != nil {
-		panic(err)
-	}
-	indexFunc = func(obj ctrlpkg.Object) []string {
-		return []string{obj.(*corev1.Secret).Name}
-	}
-	if err := cache.IndexField(context.Background(), &corev1.Secret{}, "metadata.type", indexFunc); err != nil {
 		panic(err)
 	}
 
