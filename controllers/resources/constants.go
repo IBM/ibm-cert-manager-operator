@@ -98,7 +98,7 @@ var webhookAnnotation = map[string]string{
 }
 
 // SecretTypeTLS is a string of the secret's TLS type
-const SecretTypeTLS =  "type=kubernetes.io/tls"
+const SecretTypeTLS = "type=kubernetes.io/tls"
 
 // ControllerLabels is a string of the cert-manager-controller's labels
 const ControllerLabels = "app=ibm-cert-manager-controller"
