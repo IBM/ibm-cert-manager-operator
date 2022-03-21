@@ -46,7 +46,7 @@ const certManagerComponentName = "cert-manager"
 
 // ControllerLabelMap is a map of all the labels used by cert-manager-controller
 var ControllerLabelMap = map[string]string{
-	"app": "ibm-cert-manager-controller",
+	"app":                          "ibm-cert-manager-controller",
 	"app.kubernetes.io/name":       "ibm-cert-manager-controller",
 	"app.kubernetes.io/component":  certManagerComponentName,
 	"app.kubernetes.io/managed-by": "operator",
@@ -56,7 +56,7 @@ var ControllerLabelMap = map[string]string{
 
 // WebhookLabelMap is a map of all the labels used by the cert-manager-webhook
 var WebhookLabelMap = map[string]string{
-	"app": "ibm-cert-manager-webhook",
+	"app":                          "ibm-cert-manager-webhook",
 	"app.kubernetes.io/name":       "ibm-cert-manager-webhook",
 	"app.kubernetes.io/component":  certManagerComponentName,
 	"app.kubernetes.io/managed-by": "operator",
@@ -67,7 +67,7 @@ var WebhookLabelMap = map[string]string{
 
 // CainjectorLabelMap is a map of all the labels used by the cert-manager-cainjector
 var CainjectorLabelMap = map[string]string{
-	"app": "ibm-cert-manager-cainjector",
+	"app":                          "ibm-cert-manager-cainjector",
 	"app.kubernetes.io/name":       "ibm-cert-manager-cainjector",
 	"app.kubernetes.io/component":  certManagerComponentName,
 	"app.kubernetes.io/managed-by": "operator",
