@@ -145,6 +145,7 @@ var cainjectorContainer = corev1.Container{
 	Name:            CertManagerCainjectorName,
 	Image:           cainjectorImage,
 	ImagePullPolicy: pullPolicy,
+	Args:            []string{leaderElectNS},
 	Env: []corev1.EnvVar{
 		{
 			Name: "POD_NAMESPACE",
