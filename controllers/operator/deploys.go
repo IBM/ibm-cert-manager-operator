@@ -139,6 +139,11 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 
 	case res.CertManagerCainjectorName:
 		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.CainjectorImageName, res.ControllerImageVersion, instance.Spec.ImagePostFix, res.CaInjectorImageEnvVar)
+		var leaderElect = "--leader-election-namespace=" + ns
+		var args = make([]string, len(res.DefaultArgs))
+		copy(args, res.DefaultArgs)
+		args = append(args, leaderElect)
+		returningDeploy.Spec.Template.Spec.Containers[0].Args = args
 		//add resource limits and requests for cainjector only if present in CR else use default as defined in constants.go
 		if instance.Spec.CertManagerCAInjector.Resources.Limits != nil {
 			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Limits = instance.Spec.CertManagerCAInjector.Resources.Limits
