@@ -64,6 +64,7 @@ func (r *V1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
+		logd.Error(err, "Error getting v1 Certificate")
 		return ctrl.Result{}, err
 	}
 
@@ -73,6 +74,7 @@ func (r *V1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
+		logd.Error(err, "Error getting Secret")
 		return ctrl.Result{}, err
 	}
 

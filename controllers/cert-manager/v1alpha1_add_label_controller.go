@@ -65,6 +65,7 @@ func (r *V1Alpha1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		// the corresponding v1 cert exists
 		return ctrl.Result{}, nil
 	} else if !errors.IsNotFound(err) {
+		logd.Error(err, "Error getting v1 Certificate")
 		return ctrl.Result{}, err
 	}
 
@@ -74,6 +75,7 @@ func (r *V1Alpha1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
+		logd.Error(err, "Error getting v1alpha1 Certificate")
 		return ctrl.Result{}, err
 	}
 
@@ -83,6 +85,7 @@ func (r *V1Alpha1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
+		logd.Error(err, "Error getting Secret")
 		return ctrl.Result{}, err
 	}
 
