@@ -339,7 +339,7 @@ var ControllerCertificatesClusterRole = &rbacv1.ClusterRole{
 			Resources: []string{"orders"},
 		},
 		{
-			Verbs:     []string{"get", "list", "watch", "create", "update", "delete"},
+			Verbs:     []string{"get", "list", "watch", "create", "update", "delete", "patch"},
 			APIGroups: []string{""},
 			Resources: []string{"secrets"},
 		},
