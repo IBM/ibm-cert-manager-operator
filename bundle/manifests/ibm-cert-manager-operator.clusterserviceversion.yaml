@@ -188,6 +188,7 @@ spec:
           - delete
           - get
           - list
+          - patch
           - update
           - watch
         - apiGroups:
@@ -829,7 +830,7 @@ spec:
     name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
   - image: quay.io/opencloudio/icp-cert-manager-acmesolver:1.5.0-jetstack.1.7.1
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-  - image: quay.io/opencloudio/icp-configmap-watcher:3.13.0
+  - image: quay.io/opencloudio/icp-configmap-watcher:3.14.0
     name: ICP_CONFIGMAP_WATCHER_IMAGE
   replaces: ibm-cert-manager-operator.v3.18.1
   version: 3.19.0
