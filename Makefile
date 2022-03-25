@@ -243,6 +243,12 @@ bundle-build: ## Build the bundle image.
 bundle-push: ## Push the bundle image.
 	$(MAKE) docker-push IMG=$(BUNDLE_IMG)
 
+bundle-run: bundle bundle-build bundle-push
+	operator-sdk run bundle $(REGISTRY)/ibm-cert-manager-operator-bundle:v$(VERSION) --install-mode OwnNamespace
+
+olm-cleanup:
+	operator-sdk cleanup ibm-cert-manager-operator
+
 .PHONY: opm
 OPM = ./bin/opm
 opm: ## Download opm locally if necessary.
