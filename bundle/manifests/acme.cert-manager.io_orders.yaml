@@ -1,6 +1,8 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    cert-manager.io/inject-ca-from-secret: cert-manager-webhook-ca
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: ibm-cert-manager-operator
@@ -8,17 +10,6 @@ metadata:
     app.kubernetes.io/name: cert-manager
   name: orders.acme.cert-manager.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: cert-manager-webhook
-          namespace: ibm-cert-manager-operator-system
-          path: /convert
-      conversionReviewVersions:
-      - v1
-      - v1beta1
   group: acme.cert-manager.io
   names:
     categories:
@@ -254,6 +245,6 @@ status:
   acceptedNames:
     kind: ''
     plural: ''
-  conditions: []
-  storedVersions: []
+  conditions: null
+  storedVersions: null
 ---

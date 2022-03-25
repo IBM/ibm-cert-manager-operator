@@ -1,6 +1,8 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    cert-manager.io/inject-ca-from-secret: cert-manager-webhook-ca
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: ibm-cert-manager-operator
@@ -8,17 +10,6 @@ metadata:
     app.kubernetes.io/name: cert-manager
   name: clusterissuers.cert-manager.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: cert-manager-webhook
-          namespace: ibm-cert-manager-operator-system
-          path: /convert
-      conversionReviewVersions:
-      - v1
-      - v1beta1
   group: cert-manager.io
   names:
     categories:
@@ -317,6 +308,8 @@ spec:
                                   - name
                                   type: object
                                 environment:
+                                  description: name of the Azure environment (default
+                                    AzurePublicCloud)
                                   enum:
                                   - AzurePublicCloud
                                   - AzureChinaCloud
@@ -324,10 +317,29 @@ spec:
                                   - AzureUSGovernmentCloud
                                   type: string
                                 hostedZoneName:
+                                  description: name of the DNS zone that should be
+                                    used
                                   type: string
+                                managedIdentity:
+                                  description: managed identity configuration, can
+                                    not be used at the same time as clientID, clientSecretSecretRef
+                                    or tenantID
+                                  properties:
+                                    clientID:
+                                      description: client ID of the managed identity,
+                                        can not be used at the same time as resourceID
+                                      type: string
+                                    resourceID:
+                                      description: resource ID of the managed identity,
+                                        can not be used at the same time as clientID
+                                      type: string
+                                  type: object
                                 resourceGroupName:
+                                  description: resource group the DNS zone is located
+                                    in
                                   type: string
                                 subscriptionID:
+                                  description: ID of the Azure subscription
                                   type: string
                                 tenantID:
                                   description: when specifying ClientID and ClientSecret
@@ -455,11 +467,11 @@ spec:
                                 to manage DNS01 challenge records.
                               properties:
                                 nameserver:
-                                  description: "The IP address or hostname of an authoritative\
-                                    \ DNS server supporting RFC2136 in the form host:port.\
-                                    \ If the host is an IPv6 address it must be enclosed\
-                                    \ in square brackets (e.g [2001:db8::1])\_; port\
-                                    \ is optional. This field is required."
+                                  description: The IP address or hostname of an authoritative
+                                    DNS server supporting RFC2136 in the form host:port.
+                                    If the host is an IPv6 address it must be enclosed
+                                    in square brackets (e.g [2001:db8::1]) ; port
+                                    is optional. This field is required.
                                   type: string
                                 tsigAlgorithm:
                                   description: 'The TSIG Algorithm configured in the
@@ -599,7 +611,7 @@ spec:
                                 serviceType:
                                   description: Optional service type for Kubernetes
                                     solver service. Supported values are NodePort
-                                    or ClusterIP (default).
+                                    or ClusterIP. If unset, defaults to NodePort.
                                   type: string
                               type: object
                             ingress:
@@ -1050,7 +1062,7 @@ spec:
                                 serviceType:
                                   description: Optional service type for Kubernetes
                                     solver service. Supported values are NodePort
-                                    or ClusterIP (default).
+                                    or ClusterIP. If unset, defaults to NodePort.
                                   type: string
                               type: object
                           type: object
@@ -1419,6 +1431,6 @@ status:
   acceptedNames:
     kind: ''
     plural: ''
-  conditions: []
-  storedVersions: []
+  conditions: null
+  storedVersions: null
 ---
