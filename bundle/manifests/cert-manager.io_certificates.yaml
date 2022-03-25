@@ -70,6 +70,29 @@ spec:
           spec:
             description: Desired state of the Certificate resource.
             properties:
+              additionalOutputFormats:
+                description: AdditionalOutputFormats defines extra output formats
+                  of the private key and signed certificate chain to be written to
+                  this Certificate's target Secret. This is an Alpha Feature and is
+                  only enabled with the `--feature-gates=AdditionalCertificateOutputFormats=true`
+                  option on both the controller and webhook components.
+                items:
+                  description: CertificateAdditionalOutputFormat defines an additional
+                    output format of a Certificate resource. These contain supplementary
+                    data formats of the signed certificate chain and paired private
+                    key.
+                  properties:
+                    type:
+                      description: Type is the name of the format type that should
+                        be written to the Certificate's target Secret.
+                      enum:
+                      - DER
+                      - CombinedPEM
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
               commonName:
                 description: 'CommonName is a common name to be used on the Certificate.
                   The CommonName should have a length of 64 characters or fewer to
@@ -212,10 +235,11 @@ spec:
                   algorithm:
                     description: Algorithm is the private key algorithm of the corresponding
                       private key for this certificate. If provided, allowed values
-                      are either `RSA` or `ECDSA` If `algorithm` is specified and
-                      `size` is not provided, key size of 256 will be used for `ECDSA`
-                      key algorithm and key size of 2048 will be used for `RSA` key
-                      algorithm.
+                      are either `RSA`,`Ed25519` or `ECDSA` If `algorithm` is specified
+                      and `size` is not provided, key size of 256 will be used for
+                      `ECDSA` key algorithm and key size of 2048 will be used for
+                      `RSA` key algorithm. key size is ignored when using the `Ed25519`
+                      key algorithm.
                     enum:
                     - RSA
                     - ECDSA
@@ -246,7 +270,8 @@ spec:
                       values are `2048`, `4096` or `8192`, and will default to `2048`
                       if not specified. If `algorithm` is set to `ECDSA`, valid values
                       are `256`, `384` or `521`, and will default to `256` if not
-                      specified. No other values are allowed.
+                      specified. If `algorithm` is set to `Ed25519`, Size is ignored.
+                      No other values are allowed.
                     type: integer
                 type: object
               renewBefore:
@@ -272,6 +297,27 @@ spec:
                   It will be populated with a private key and certificate, signed
                   by the denoted issuer.
                 type: string
+              secretTemplate:
+                description: SecretTemplate defines annotations and labels to be copied
+                  to the Certificate's Secret. Labels and annotations on the Secret
+                  will be changed as they appear on the SecretTemplate when added
+                  or removed. SecretTemplate annotations are added in conjunction
+                  with, and cannot overwrite, the base set of annotations cert-manager
+                  sets on the Certificate's Secret.
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotations is a key value map to be copied to the
+                      target Kubernetes Secret.
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: Labels is a key value map to be copied to the target
+                      Kubernetes Secret.
+                    type: object
+                type: object
               subject:
                 description: Full X509 name specification (https://golang.org/pkg/crypto/x509/pkix/#Name).
                 properties:

@@ -177,9 +177,10 @@ spec:
                       configurations must be provided in order to obtain certificates
                       from an ACME server. For more information, see: https://cert-manager.io/docs/configuration/acme/'
                     items:
-                      description: Configures an issuer to solve challenges using
-                        the specified options. Only one of HTTP01 or DNS01 may be
-                        provided.
+                      description: An ACMEChallengeSolver describes how to solve ACME
+                        challenges for the issuer it is part of. A selector may be
+                        provided to use different solving strategies for different
+                        DNS names. Only one of HTTP01 or DNS01 must be provided.
                       properties:
                         dns01:
                           description: Configures cert-manager to attempt to complete
@@ -305,6 +306,8 @@ spec:
                                   - name
                                   type: object
                                 environment:
+                                  description: name of the Azure environment (default
+                                    AzurePublicCloud)
                                   enum:
                                   - AzurePublicCloud
                                   - AzureChinaCloud
@@ -312,10 +315,29 @@ spec:
                                   - AzureUSGovernmentCloud
                                   type: string
                                 hostedZoneName:
+                                  description: name of the DNS zone that should be
+                                    used
                                   type: string
+                                managedIdentity:
+                                  description: managed identity configuration, can
+                                    not be used at the same time as clientID, clientSecretSecretRef
+                                    or tenantID
+                                  properties:
+                                    clientID:
+                                      description: client ID of the managed identity,
+                                        can not be used at the same time as resourceID
+                                      type: string
+                                    resourceID:
+                                      description: resource ID of the managed identity,
+                                        can not be used at the same time as clientID
+                                      type: string
+                                  type: object
                                 resourceGroupName:
+                                  description: resource group the DNS zone is located
+                                    in
                                   type: string
                                 subscriptionID:
+                                  description: ID of the Azure subscription
                                   type: string
                                 tenantID:
                                   description: when specifying ClientID and ClientSecret
@@ -568,6 +590,28 @@ spec:
                             domain names (e.g. `*.example.com`) using the HTTP01 challenge
                             mechanism.
                           properties:
+                            gatewayHTTPRoute:
+                              description: The Gateway API is a sig-network community
+                                API that models service networking in Kubernetes (https://gateway-api.sigs.k8s.io/).
+                                The Gateway solver will create HTTPRoutes with the
+                                specified labels in the same namespace as the challenge.
+                                This solver is experimental, and fields / behaviour
+                                may change in the future.
+                              properties:
+                                labels:
+                                  additionalProperties:
+                                    type: string
+                                  description: The labels that cert-manager will use
+                                    when creating the temporary HTTPRoute needed for
+                                    solving the HTTP-01 challenge. These labels must
+                                    match the label selector of at least one Gateway.
+                                  type: object
+                                serviceType:
+                                  description: Optional service type for Kubernetes
+                                    solver service. Supported values are NodePort
+                                    or ClusterIP. If unset, defaults to NodePort.
+                                  type: string
+                              type: object
                             ingress:
                               description: The ingress based HTTP01 challenge solver
                                 will solve challenges by creating or modifying Ingress
@@ -584,7 +628,7 @@ spec:
                                 ingressTemplate:
                                   description: Optional ingress template used to configure
                                     the ACME challenge solver ingress used for HTTP01
-                                    challenges
+                                    challenges.
                                   properties:
                                     metadata:
                                       description: ObjectMeta overrides for the ingress
@@ -1015,7 +1059,8 @@ spec:
                                   type: object
                                 serviceType:
                                   description: Optional service type for Kubernetes
-                                    solver service
+                                    solver service. Supported values are NodePort
+                                    or ClusterIP. If unset, defaults to NodePort.
                                   type: string
                               type: object
                           type: object
@@ -1211,11 +1256,11 @@ spec:
                         type: object
                     type: object
                   caBundle:
-                    description: PEM encoded CA bundle used to validate Vault server
-                      certificate. Only used if the Server URL is using HTTPS protocol.
-                      This parameter is ignored for plain HTTP protocol connection.
-                      If not set the system root certificates are used to validate
-                      the TLS connection.
+                    description: PEM-encoded CA bundle (base64-encoded) used to validate
+                      Vault server certificate. Only used if the Server URL is using
+                      HTTPS protocol. This parameter is ignored for plain HTTP protocol
+                      connection. If not set the system root certificates are used
+                      to validate the TLS connection.
                     format: byte
                     type: string
                   namespace:

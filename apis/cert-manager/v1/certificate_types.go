@@ -46,16 +46,17 @@ type Certificate struct {
 
 	// Status of the Certificate. This is set and managed automatically.
 	// +optional
-	Status CertificateStatus `json:"status,omitempty"`
+	Status CertificateStatus `json:"status"`
 }
 
 // +kubebuilder:object:root=true
 
-// CertificateList contains a list of Certificate
+// CertificateList is a list of Certificates
 type CertificateList struct {
 	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Certificate `json:"items"`
+	metav1.ListMeta `json:"metadata"`
+
+	Items []Certificate `json:"items"`
 }
 
 // +kubebuilder:validation:Enum=RSA;ECDSA
@@ -67,6 +68,9 @@ const (
 
 	// Denotes the ECDSA private key type.
 	ECDSAKeyAlgorithm PrivateKeyAlgorithm = "ECDSA"
+
+	// Denotes the Ed25519 private key type.
+	Ed25519KeyAlgorithm PrivateKeyAlgorithm = "Ed25519"
 )
 
 // +kubebuilder:validation:Enum=PKCS1;PKCS8
@@ -140,6 +144,14 @@ type CertificateSpec struct {
 	// denoted issuer.
 	SecretName string `json:"secretName"`
 
+	// SecretTemplate defines annotations and labels to be copied to the
+	// Certificate's Secret. Labels and annotations on the Secret will be changed
+	// as they appear on the SecretTemplate when added or removed. SecretTemplate
+	// annotations are added in conjunction with, and cannot overwrite, the base
+	// set of annotations cert-manager sets on the Certificate's Secret.
+	// +optional
+	SecretTemplate *CertificateSecretTemplate `json:"secretTemplate,omitempty"`
+
 	// Keystores configures additional keystore output formats stored in the
 	// `secretName` Secret resource.
 	// +optional
@@ -182,6 +194,14 @@ type CertificateSpec struct {
 	// +kubebuilder:validation:ExclusiveMaximum=false
 	// +optional
 	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty"` // Validated by the validating webhook.
+
+	// AdditionalOutputFormats defines extra output formats of the private key
+	// and signed certificate chain to be written to this Certificate's target
+	// Secret. This is an Alpha Feature and is only enabled with the
+	// `--feature-gates=AdditionalCertificateOutputFormats=true` option on both
+	// the controller and webhook components.
+	// +optional
+	AdditionalOutputFormats []CertificateAdditionalOutputFormat `json:"additionalOutputFormats,omitempty"`
 }
 
 // CertificatePrivateKey contains configuration options for private keys
@@ -209,10 +229,11 @@ type CertificatePrivateKey struct {
 	Encoding PrivateKeyEncoding `json:"encoding,omitempty"`
 
 	// Algorithm is the private key algorithm of the corresponding private key
-	// for this certificate. If provided, allowed values are either `RSA` or `ECDSA`
+	// for this certificate. If provided, allowed values are either `RSA`,`Ed25519` or `ECDSA`
 	// If `algorithm` is specified and `size` is not provided,
 	// key size of 256 will be used for `ECDSA` key algorithm and
 	// key size of 2048 will be used for `RSA` key algorithm.
+	// key size is ignored when using the `Ed25519` key algorithm.
 	// +optional
 	Algorithm PrivateKeyAlgorithm `json:"algorithm,omitempty"`
 
@@ -221,6 +242,7 @@ type CertificatePrivateKey struct {
 	// and will default to `2048` if not specified.
 	// If `algorithm` is set to `ECDSA`, valid values are `256`, `384` or `521`,
 	// and will default to `256` if not specified.
+	// If `algorithm` is set to `Ed25519`, Size is ignored.
 	// No other values are allowed.
 	// +optional
 	Size int `json:"size,omitempty"` // Validated by webhook. Be mindful of adding OpenAPI validation- see https://github.com/jetstack/cert-manager/issues/3644
@@ -241,6 +263,45 @@ var (
 	// requirements will be generated whenever a re-issuance occurs.
 	RotationPolicyAlways PrivateKeyRotationPolicy = "Always"
 )
+
+// CertificateOutputFormatType specifies which additional output formats should
+// be written to the Certificate's target Secret.
+// Allowed values are `DER` or `CombinedPEM`.
+// When Type is set to `DER` an additional entry `key.der` will be written to
+// the Secret, containing the binary format of the private key.
+// When Type is set to `CombinedPEM` an additional entry `tls-combined.pem`
+// will be written to the Secret, containing the PEM formatted private key and
+// signed certificate chain (tls.key + tls.crt concatenated).
+// +kubebuilder:validation:Enum=DER;CombinedPEM
+type CertificateOutputFormatType string
+
+const (
+	// CertificateOutputFormatDERKey is the name of the data entry in the Secret
+	// resource used to store the DER formatted private key.
+	CertificateOutputFormatDERKey string = "key.der"
+	// CertificateOutputFormatDER  writes the Certificate's private key in DER
+	// binary format to the `key.der` target Secret Data key.
+	CertificateOutputFormatDER CertificateOutputFormatType = "DER"
+	// CertificateOutputFormatCombinedPEMKey is the name of the data entry in the Secret
+	// resource used to store the combined PEM (key + signed certificate).
+	CertificateOutputFormatCombinedPEMKey string = "tls-combined.pem"
+	// CertificateOutputFormatCombinedPEM  writes the Certificate's signed
+	// certificate chain and private key, in PEM format, to the
+	// `tls-combined.pem` target Secret Data key. The value at this key will
+	// include the private key PEM document, followed by at least one new line
+	// character, followed by the chain of signed certificate PEM documents
+	// (`<private key> + \n + <signed certificate chain>`).
+	CertificateOutputFormatCombinedPEM CertificateOutputFormatType = "CombinedPEM"
+)
+
+// CertificateAdditionalOutputFormat defines an additional output format of a
+// Certificate resource. These contain supplementary data formats of the signed
+// certificate chain and paired private key.
+type CertificateAdditionalOutputFormat struct {
+	// Type is the name of the format type that should be written to the
+	// Certificate's target Secret.
+	Type CertificateOutputFormatType `json:"type"`
+}
 
 // X509Subject Full X509 name specification
 type X509Subject struct {
@@ -440,6 +501,17 @@ const (
 	// It will be removed by the 'issuing' controller upon completing issuance.
 	CertificateConditionIssuing CertificateConditionType = "Issuing"
 )
+
+// CertificateSecretTemplate defines the default labels and annotations
+// to be copied to the Kubernetes Secret resource named in `CertificateSpec.secretName`.
+type CertificateSecretTemplate struct {
+	// Annotations is a key value map to be copied to the target Kubernetes Secret.
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// Labels is a key value map to be copied to the target Kubernetes Secret.
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+}
 
 func init() {
 	SchemeBuilder.Register(&Certificate{}, &CertificateList{})
