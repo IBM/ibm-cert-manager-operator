@@ -83,7 +83,7 @@ type CertManagerReconciler struct {
 //+kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign
 
 //+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;delete
-//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;delete
+//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;delete
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=events,verbs=get;create;update;patch
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
