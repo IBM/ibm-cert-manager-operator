@@ -99,8 +99,7 @@ func (r *V1Alpha1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		secretInstance.SetLabels(oldLabelsMap)
 	}
 
-	r.updateSecret(secretInstance)
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, r.updateSecret(secretInstance)
 }
 
 // getSecret finds corresponding secret of the certmanagerv1alpha1 certificate
