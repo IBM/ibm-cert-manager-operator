@@ -97,9 +97,6 @@ var webhookAnnotation = map[string]string{
 	"watcher.ibm.com/configmap-resource": "kube-system/extension-apiserver-authentication",
 }
 
-// SecretTypeTLS is a string of the secret's TLS type
-const SecretTypeTLS = "type=kubernetes.io/tls"
-
 // ControllerLabels is a string of the cert-manager-controller's labels
 const ControllerLabels = "app=ibm-cert-manager-controller"
 
@@ -111,6 +108,9 @@ const CainjectorLabels = "app=ibm-cert-manager-cainjector"
 
 // ConfigmapWatcherLabels is a string of the configmap-watcher's labels
 const ConfigmapWatcherLabels = "app.kubernetes.io/name=configmap-watcher"
+
+// SecretWatchLabel is a string of secrets that watched by cert manager operator labels
+const SecretWatchLabel string = "operator.ibm.com/watched-by-cert-manager"
 
 // DefaultNamespace is the namespace the cert-manager services will be deployed in if the operator is deployed in all namespaces or locally
 const DefaultNamespace = "ibm-common-services"

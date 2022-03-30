@@ -92,7 +92,7 @@ func main() {
 
 	gvkLabelMap := map[schema.GroupVersionKind]cache.Selector{
 		corev1.SchemeGroupVersion.WithKind("Secret"): {
-			FieldSelector: constants.SecretTypeTLS,
+			LabelSelector: constants.SecretWatchLabel,
 		},
 	}
 
@@ -144,12 +144,6 @@ func main() {
 		return []string{obj.(*appsv1.Deployment).Name}
 	}
 	if err := cache.IndexField(context.Background(), &appsv1.Deployment{}, "metadata.name", indexFunc); err != nil {
-		panic(err)
-	}
-	indexFunc = func(obj ctrlpkg.Object) []string {
-		return []string{obj.(*corev1.Secret).Name}
-	}
-	if err := cache.IndexField(context.Background(), &corev1.Secret{}, "metadata.type", indexFunc); err != nil {
 		panic(err)
 	}
 
@@ -215,6 +209,20 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PodRefresh")
+		os.Exit(1)
+	}
+	if err = (&certmanagerv1controllers.V1AddLabelReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "V1AddLabel")
+		os.Exit(1)
+	}
+	if err = (&certmanagerv1controllers.V1Alpha1AddLabelReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "V1Alpha1AddLabel")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
