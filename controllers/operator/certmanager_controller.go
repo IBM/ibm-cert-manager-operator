@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metaerrors "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
@@ -124,6 +125,26 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 		// Error reading the object - requeue the request.
 		return ctrl.Result{}, err
+	}
+
+	configMapName := "ibm-cpp-config"
+	conditionalDeployCM := &corev1.ConfigMap{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{
+		Name:      configMapName,
+		Namespace: res.DeployNamespace,
+	}, conditionalDeployCM); err != nil {
+		if errors.IsNotFound(err) {
+			logd.Info("ibm-cpp-config ConfigMap does not exist, continuing...")
+		} else {
+			logd.Error(err, "Failed to get ibm-cpp-config ConfigMap, reconciling...")
+			return ctrl.Result{}, err
+		}
+	}
+
+	if v, ok := conditionalDeployCM.Data["deployCSCertManagerOperands"]; ok {
+		if v == "false" {
+			return ctrl.Result{}, nil
+		}
 	}
 
 	if req.Name != "default" {
