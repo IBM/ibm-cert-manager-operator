@@ -139,7 +139,7 @@ const CertManagerWebhookName = "cert-manager-webhook"
 const ConfigmapWatcherName = "configmap-watcher"
 
 // ImageRegistry is the default image registry for the operand deployments
-const ImageRegistry = "quay.io/opencloudio"
+const ImageRegistry = "icr.io/cpopen/cpfs"
 
 // ControllerImageVersion is the default image version used for the cert-manager-controller
 const ControllerImageVersion = "0.12.0"
