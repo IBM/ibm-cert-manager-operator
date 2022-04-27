@@ -9,7 +9,7 @@ metadata:
 spec:
   disableHostNetwork: true
   enableWebhook: true
-  imageRegistry: quay.io/opencloudio
+  imageRegistry: icr.io/cpopen/cpfs
   version: "3.18.0"
   enableCertRefresh: true
 status:
