@@ -148,4 +148,5 @@ spec:
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
   - image: icr.io/cpopen/cpfs/icp-configmap-watcher:3.14.0
     name: ICP_CONFIGMAP_WATCHER_IMAGE
+  replaces: ibm-cert-manager-operator.v3.19.0
   version: 0.0.0
