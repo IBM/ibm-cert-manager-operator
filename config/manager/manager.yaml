@@ -83,7 +83,7 @@ spec:
             - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
               value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.6.0-jetstack.1.7.1
             - name: ICP_CONFIGMAP_WATCHER_IMAGE
-              value: icr.io/cpopen/cpfs/icp-configmap-watcher:3.15.0
+              value: icr.io/cpopen/cpfs/icp-configmap-watcher:3.16.0
           resources:
             limits:
               cpu: 100m
