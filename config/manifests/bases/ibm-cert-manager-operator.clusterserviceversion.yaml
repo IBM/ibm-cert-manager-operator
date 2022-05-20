@@ -9,7 +9,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
-    olm.skipRange: <3.20.0
+    olm.skipRange: <3.21.0
     support: IBM
   labels:
     operatorframework.io/arch.amd64: supported
@@ -148,5 +148,5 @@ spec:
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
   - image: icr.io/cpopen/cpfs/icp-configmap-watcher:3.14.0
     name: ICP_CONFIGMAP_WATCHER_IMAGE
-  replaces: ibm-cert-manager-operator.v3.19.0
+  replaces: ibm-cert-manager-operator.v3.20.0
   version: 0.0.0
