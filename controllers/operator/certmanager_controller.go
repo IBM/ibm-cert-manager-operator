@@ -116,7 +116,7 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	reqLogger.Info("Reconciling CertManager")
 	// Fetch the CertManager instance
 	instance := &operatorv1alpha1.CertManager{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
+	err := r.Reader.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
