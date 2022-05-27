@@ -153,6 +153,7 @@ func main() {
 
 	if err = (&operatorcontrollers.CertManagerReconciler{
 		Client:       mgr.GetClient(),
+		Reader:       mgr.GetAPIReader(),
 		Kubeclient:   kubeclient,
 		APIextclient: apiextclient,
 		Scheme:       mgr.GetScheme(),
