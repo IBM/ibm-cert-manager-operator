@@ -50,6 +50,7 @@ var logd = log.Log.WithName("controller_certmanager")
 // CertManagerReconciler reconciles a CertManager object
 type CertManagerReconciler struct {
 	Client       client.Client
+	Reader       client.Reader
 	Kubeclient   kubernetes.Interface
 	APIextclient apiextensionclientset.Interface
 	Scheme       *runtime.Scheme
@@ -130,7 +131,7 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	configMapName := "ibm-cpp-config"
 	conditionalDeployCM := &corev1.ConfigMap{}
-	if err := r.Client.Get(context.TODO(), types.NamespacedName{
+	if err := r.Reader.Get(context.TODO(), types.NamespacedName{
 		Name:      configMapName,
 		Namespace: res.DeployNamespace,
 	}, conditionalDeployCM); err != nil {
