@@ -28,6 +28,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -188,7 +189,9 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 func removeDeploy(client kubernetes.Interface, name, namespace string) error {
 	if err := client.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{}); err != nil {
 		logd.V(1).Info("Error removing deployment", "name", name, "namespace", namespace, "error message", err)
-		return err
+		if !k8serrors.IsNotFound(err) {
+			return err
+		}
 	}
 	logd.V(2).Info("Deployment removed", "deploy name", name, "deploy namespace", namespace)
 	return nil
