@@ -284,11 +284,12 @@ func (r *CertificateReconciler) purgeOldV1() error {
 	return nil
 }
 
-// isExpired Determines if v1alpha1 Certificate is expired or not based on three
+// isExpired Determines if v1alpha1 Certificate is expired or not based on four
 // conditions:
 // 1. existence of NotAfter status
 // 2. existence of certificate secret
-// 3. is current date after expiration date
+// 3. is v1a1 certificate different from converted v1 certificate
+// 4. is current date after expiration date
 // TODO: could optionally inspect the secret to check if NotAfter date matches with Certificate status
 func isExpired(c *certmanagerv1alpha1.Certificate, s *corev1.Secret) bool {
 	if c.Status.NotAfter == nil {
@@ -297,7 +298,23 @@ func isExpired(c *certmanagerv1alpha1.Certificate, s *corev1.Secret) bool {
 	if s == nil {
 		return true
 	}
+	if isChanged(c) {
+		return true
+	}
 	return time.Now().After(getExpiration(*c.Status.NotAfter))
+}
+
+// compare v1alpha certificate and converted v1 certificate
+func isChanged(c *certmanagerv1alpha1.Certificate ) bool {
+	existingCertificate := &certmanagerv1.Certificate{}
+	err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: certificate.Namespace, Name: certificate.Name}, existingCertificate)
+	if err != nil{
+		reqLogger.Error(err, "failed to get v1 Certificate")
+		return true
+	}
+	if !equality.Semantic.DeepEqual(c.Labels, existingCertificate.Labels) || !equality.Semantic.DeepEqual(c.Spec, existingCertificate.Labels){
+		return true
+	}
 }
 
 // getExpiration Gets the time when Certificate would have been renewed by
