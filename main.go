@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"os"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -60,8 +61,9 @@ import (
 var log = logf.Log.WithName("cmd")
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme     = runtime.NewScheme()
+	setupLog   = ctrl.Log.WithName("setup")
+	syncPeriod = time.Minute * 5
 )
 
 func init() {
@@ -100,6 +102,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
+		SyncPeriod:             &syncPeriod,
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
@@ -150,7 +153,6 @@ func main() {
 	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
 	apiextclient, _ := apiextensionclientset.NewForConfig(mgr.GetConfig())
 	ns, _ := os.LookupEnv("WATCH_NAMESPACE")
-
 	if err = (&operatorcontrollers.CertManagerReconciler{
 		Client:       mgr.GetClient(),
 		Reader:       mgr.GetAPIReader(),

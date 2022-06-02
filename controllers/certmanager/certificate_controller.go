@@ -185,7 +185,7 @@ func (r *CertificateReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if isExpired(instance, certv1, secret) {
+	if isExpired(instance, certificate, certv1, secret) {
 		reqLogger.Info("v1alpha1 Certificate is expired, creating v1 version")
 		if err := r.Client.Create(context.TODO(), certificate); err != nil {
 			if errors.IsAlreadyExists(err) {
@@ -299,10 +299,10 @@ func (r *CertificateReconciler) purgeOldV1() error {
 // conditions:
 // 1. existence of NotAfter status
 // 2. existence of certificate secret
-// 3. existence converted v1 certificate and is v1a1 certificate different from converted v1 certificate
+// 3. existence converted v1 certificate and is converted v1 certificate different from we expect
 // 4. is current date after expiration date
 // TODO: could optionally inspect the secret to check if NotAfter date matches with Certificate status
-func isExpired(c *certmanagerv1alpha1.Certificate, c_v1 *certmanagerv1.Certificate, s *corev1.Secret) bool {
+func isExpired(c *certmanagerv1alpha1.Certificate, c_v1_expect *certmanagerv1.Certificate, c_v1 *certmanagerv1.Certificate, s *corev1.Secret) bool {
 	if c.Status.NotAfter == nil {
 		return true
 	}
@@ -310,49 +310,11 @@ func isExpired(c *certmanagerv1alpha1.Certificate, c_v1 *certmanagerv1.Certifica
 		return true
 	}
 	if c_v1 != nil {
-		if isChanged(c, c_v1) {
+		if !equality.Semantic.DeepEqual(c_v1, c_v1_expect) {
 			return true
 		}
 	}
 	return time.Now().After(getExpiration(*c.Status.NotAfter))
-}
-
-// compare v1alpha certificate and converted v1 certificate
-func isChanged(c *certmanagerv1alpha1.Certificate, c_v1 *certmanagerv1.Certificate) bool {
-	if !equality.Semantic.DeepEqual(c.Labels, c_v1.Labels) {
-		return true
-	}
-	// subject sbould be different
-	if c.Spec.CommonName != c_v1.Spec.CommonName {
-		return true
-	}
-	if c.Spec.Duration != c_v1.Spec.Duration {
-		return true
-	}
-	if c.Spec.RenewBefore != c_v1.Spec.RenewBefore {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(c.Spec.DNSNames, c_v1.Spec.DNSNames) {
-		return true
-	}
-	// ip address should be different
-	if c.Spec.SecretName != c_v1.Spec.SecretName {
-		return true
-	}
-	if c.Spec.IssuerRef.Name != c_v1.Spec.IssuerRef.Name {
-		return true
-	}
-	if c.Spec.IssuerRef.Kind != c_v1.Spec.IssuerRef.Kind {
-		return true
-	}
-	// issuer.group should be different
-	if c.Spec.IsCA != c_v1.Spec.IsCA {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(c.Spec.Usages, c_v1.Spec.Usages) {
-		return true
-	}
-	return false
 }
 
 // getExpiration Gets the time when Certificate would have been renewed by
