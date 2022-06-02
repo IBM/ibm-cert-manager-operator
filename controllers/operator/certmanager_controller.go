@@ -271,7 +271,7 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 		return err
 	}
 
-	if err := configmapWatcherDeploy(instance, r.Client, r.Kubeclient, r.Scheme, r.NS); err != nil {
+	if err := removeDeploy(r.Kubeclient, res.ConfigmapWatcherName, r.NS); err != nil {
 		return err
 	}
 
