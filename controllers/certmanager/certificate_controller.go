@@ -310,7 +310,7 @@ func isExpired(c *certmanagerv1alpha1.Certificate, c_v1_expect *certmanagerv1.Ce
 		return true
 	}
 	if c_v1 != nil {
-		if !equality.Semantic.DeepEqual(c_v1, c_v1_expect) {
+		if !equality.Semantic.DeepEqual(c_v1.Spec, c_v1_expect.Spec) {
 			return true
 		}
 	}
