@@ -174,7 +174,18 @@ func (r *CertificateReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if isExpired(instance, secret) {
+	certv1 := &certmanagerv1.Certificate{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: certificate.Namespace, Name: certificate.Name}, certv1); err != nil {
+		if errors.IsNotFound(err) {
+			reqLogger.Info("No v1 Certificate for this v1alpha1", "certificate name:", instance.Name, "certificate namespace", instance.Namespace)
+			certv1 = nil
+		} else {
+			reqLogger.Error(err, "failed to get v1 Certificate")
+			return ctrl.Result{}, err
+		}
+	}
+
+	if isExpired(instance, certv1, secret) {
 		reqLogger.Info("v1alpha1 Certificate is expired, creating v1 version")
 		if err := r.Client.Create(context.TODO(), certificate); err != nil {
 			if errors.IsAlreadyExists(err) {
@@ -288,26 +299,57 @@ func (r *CertificateReconciler) purgeOldV1() error {
 // conditions:
 // 1. existence of NotAfter status
 // 2. existence of certificate secret
-// 3. is v1a1 certificate different from converted v1 certificate
+// 3. existence converted v1 certificate and is v1a1 certificate different from converted v1 certificate
 // 4. is current date after expiration date
 // TODO: could optionally inspect the secret to check if NotAfter date matches with Certificate status
-func isExpired(c *certmanagerv1alpha1.Certificate, s *corev1.Secret) bool {
+func isExpired(c *certmanagerv1alpha1.Certificate, c_v1 *certmanagerv1.Certificate, s *corev1.Secret) bool {
 	if c.Status.NotAfter == nil {
 		return true
 	}
 	if s == nil {
 		return true
 	}
-	if isChanged(c) {
-		return true
+	if c_v1 != nil {
+		if isChanged(c, c_v1) {
+			return true
+		}
 	}
 	return time.Now().After(getExpiration(*c.Status.NotAfter))
 }
 
 // compare v1alpha certificate and converted v1 certificate
-func isChanged(c *certmanagerv1alpha1.Certificate) bool {
-	existingCertificate := &certmanagerv1.Certificate{}
-	if !equality.Semantic.DeepEqual(c.Labels, existingCertificate.Labels) || !equality.Semantic.DeepEqual(c.Spec, existingCertificate.Labels) {
+func isChanged(c *certmanagerv1alpha1.Certificate, c_v1 *certmanagerv1.Certificate) bool {
+	if !equality.Semantic.DeepEqual(c.Labels, c_v1.Labels) {
+		return true
+	}
+	// subject sbould be different
+	if c.Spec.CommonName != c_v1.Spec.CommonName {
+		return true
+	}
+	if c.Spec.Duration != c_v1.Spec.Duration {
+		return true
+	}
+	if c.Spec.RenewBefore != c_v1.Spec.RenewBefore {
+		return true
+	}
+	if !equality.Semantic.DeepEqual(c.Spec.DNSNames, c_v1.Spec.DNSNames) {
+		return true
+	}
+	// ip address should be different
+	if c.Spec.SecretName != c_v1.Spec.SecretName {
+		return true
+	}
+	if c.Spec.IssuerRef.Name != c_v1.Spec.IssuerRef.Name {
+		return true
+	}
+	if c.Spec.IssuerRef.Kind != c_v1.Spec.IssuerRef.Kind {
+		return true
+	}
+	// issuer.group should be different
+	if c.Spec.IsCA != c_v1.Spec.IsCA {
+		return true
+	}
+	if !equality.Semantic.DeepEqual(c.Spec.Usages, c_v1.Spec.Usages) {
 		return true
 	}
 	return false
