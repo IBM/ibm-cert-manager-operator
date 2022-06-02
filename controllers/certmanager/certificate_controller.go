@@ -302,15 +302,15 @@ func (r *CertificateReconciler) purgeOldV1() error {
 // 3. existence converted v1 certificate and is converted v1 certificate different from we expect
 // 4. is current date after expiration date
 // TODO: could optionally inspect the secret to check if NotAfter date matches with Certificate status
-func isExpired(c *certmanagerv1alpha1.Certificate, c_v1_expect *certmanagerv1.Certificate, c_v1 *certmanagerv1.Certificate, s *corev1.Secret) bool {
+func isExpired(c *certmanagerv1alpha1.Certificate, certficateV1Expect *certmanagerv1.Certificate, certficateV1 *certmanagerv1.Certificate, s *corev1.Secret) bool {
 	if c.Status.NotAfter == nil {
 		return true
 	}
 	if s == nil {
 		return true
 	}
-	if c_v1 != nil {
-		if !equality.Semantic.DeepEqual(c_v1.Spec, c_v1_expect.Spec) {
+	if certficateV1 != nil {
+		if !equality.Semantic.DeepEqual(certficateV1.Spec, certficateV1Expect.Spec) {
 			return true
 		}
 	}
