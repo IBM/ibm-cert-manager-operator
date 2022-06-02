@@ -174,7 +174,18 @@ func (r *CertificateReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if isExpired(instance, secret) {
+	certv1 := &certmanagerv1.Certificate{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: certificate.Namespace, Name: certificate.Name}, certv1); err != nil {
+		if errors.IsNotFound(err) {
+			reqLogger.Info("No v1 Certificate for this v1alpha1", "certificate name:", instance.Name, "certificate namespace", instance.Namespace)
+			certv1 = nil
+		} else {
+			reqLogger.Error(err, "failed to get v1 Certificate")
+			return ctrl.Result{}, err
+		}
+	}
+
+	if isExpired(instance, certificate, certv1, secret) {
 		reqLogger.Info("v1alpha1 Certificate is expired, creating v1 version")
 		if err := r.Client.Create(context.TODO(), certificate); err != nil {
 			if errors.IsAlreadyExists(err) {
@@ -284,18 +295,24 @@ func (r *CertificateReconciler) purgeOldV1() error {
 	return nil
 }
 
-// isExpired Determines if v1alpha1 Certificate is expired or not based on three
+// isExpired Determines if v1alpha1 Certificate is expired or not based on four
 // conditions:
 // 1. existence of NotAfter status
 // 2. existence of certificate secret
-// 3. is current date after expiration date
+// 3. existence converted v1 certificate and is converted v1 certificate different from we expect
+// 4. is current date after expiration date
 // TODO: could optionally inspect the secret to check if NotAfter date matches with Certificate status
-func isExpired(c *certmanagerv1alpha1.Certificate, s *corev1.Secret) bool {
+func isExpired(c *certmanagerv1alpha1.Certificate, certficateV1Expect *certmanagerv1.Certificate, certficateV1 *certmanagerv1.Certificate, s *corev1.Secret) bool {
 	if c.Status.NotAfter == nil {
 		return true
 	}
 	if s == nil {
 		return true
+	}
+	if certficateV1 != nil {
+		if !equality.Semantic.DeepEqual(certficateV1.Spec, certficateV1Expect.Spec) {
+			return true
+		}
 	}
 	return time.Now().After(getExpiration(*c.Status.NotAfter))
 }
