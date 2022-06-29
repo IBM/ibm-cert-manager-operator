@@ -18,6 +18,7 @@ package operator
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
@@ -30,10 +31,12 @@ import (
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metaerrors "k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/klog"
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -397,6 +400,89 @@ func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	})
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
+	objects, err := YamlToObjects(yamlContent)
+	if err != nil {
+		return err
+	}
+
+	var errMsg error
+
+	for _, obj := range objects {
+		gvk := obj.GetObjectKind().GroupVersionKind()
+
+		objInCluster, err := r.GetObject(obj)
+		if errors.IsNotFound(err) {
+			klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
+			if err := r.CreateObject(obj); err != nil {
+				errMsg = err
+			}
+			continue
+		} else if err != nil {
+			errMsg = err
+			continue
+		}
+
+		if objInCluster.GetDeletionTimestamp() != nil {
+			errMsg = fmt.Errorf("resource %s/%s is being deleted, retry later, kind: %s, apiversion: %s/%s", obj.GetNamespace(), obj.GetName(), gvk.Kind, gvk.Group, gvk.Version)
+			continue
+		}
+
+		forceUpdate := false
+		if len(alwaysUpdate) != 0 {
+			forceUpdate = alwaysUpdate[0]
+		}
+		update := forceUpdate
+
+		if update {
+			klog.Infof("Updating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
+			resourceVersion := objInCluster.GetResourceVersion()
+			obj.SetResourceVersion(resourceVersion)
+			if err := r.UpdateObject(obj); err != nil {
+				errMsg = err
+			}
+		}
+	}
+
+	return errMsg
+}
+
+// GetObject get k8s resource with the unstructured object
+func (r *CertManagerReconciler) GetObject(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+	found := &unstructured.Unstructured{}
+	found.SetGroupVersionKind(obj.GetObjectKind().GroupVersionKind())
+
+	err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, found)
+
+	return found, err
+}
+
+// CreateObject create k8s resource with the unstructured object
+func (r *CertManagerReconciler) CreateObject(obj *unstructured.Unstructured) error {
+	err := r.Client.Create(context.TODO(), obj)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("could not Create resource: %v", err)
+	}
+	return nil
+}
+
+// DeleteObject delete k8s resource with the unstructured object
+func (r *CertManagerReconciler) DeleteObject(obj *unstructured.Unstructured) error {
+	err := r.Client.Delete(context.TODO(), obj)
+	if err != nil && !errors.IsNotFound(err) {
+		return fmt.Errorf("could not Delete resource: %v", err)
+	}
+	return nil
+}
+
+// UpdateObject update k8s resource with the unstructured object
+func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) error {
+	if err := r.Client.Update(context.TODO(), obj); err != nil {
+		return fmt.Errorf("could not update resource: %v", err)
 	}
 	return nil
 }
