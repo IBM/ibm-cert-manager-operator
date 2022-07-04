@@ -312,6 +312,12 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// Create certManager CRDs
+	if err := r.CreateV1CRDs(); err != nil {
+		klog.Errorf("Fail to create CRDs: %s", err)
+		return err
+	}
+
 	// Create a new controller
 	c, err := controller.New("certmanager-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
@@ -415,7 +421,7 @@ func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alway
 	for _, obj := range objects {
 		gvk := obj.GetObjectKind().GroupVersionKind()
 
-		objInCluster, err := r.GetObject(obj)
+		_, err := r.GetObject(obj)
 		if errors.IsNotFound(err) {
 			klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
 			if err := r.CreateObject(obj); err != nil {
@@ -425,26 +431,6 @@ func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alway
 		} else if err != nil {
 			errMsg = err
 			continue
-		}
-
-		if objInCluster.GetDeletionTimestamp() != nil {
-			errMsg = fmt.Errorf("resource %s/%s is being deleted, retry later, kind: %s, apiversion: %s/%s", obj.GetNamespace(), obj.GetName(), gvk.Kind, gvk.Group, gvk.Version)
-			continue
-		}
-
-		forceUpdate := false
-		if len(alwaysUpdate) != 0 {
-			forceUpdate = alwaysUpdate[0]
-		}
-		update := forceUpdate
-
-		if update {
-			klog.Infof("Updating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
-			resourceVersion := objInCluster.GetResourceVersion()
-			obj.SetResourceVersion(resourceVersion)
-			if err := r.UpdateObject(obj); err != nil {
-				errMsg = err
-			}
 		}
 	}
 
@@ -483,6 +469,19 @@ func (r *CertManagerReconciler) DeleteObject(obj *unstructured.Unstructured) err
 func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) error {
 	if err := r.Client.Update(context.TODO(), obj); err != nil {
 		return fmt.Errorf("could not update resource: %v", err)
+	}
+	return nil
+}
+
+// createCertManagerV1Crds
+func (r *CertManagerReconciler) CreateV1CRDs() error {
+	CRDs := []string{
+		res.certificaterequestsCRD, res.certificatesCRD, res.clusterissuersCRD, res.issuersCRD, res.ordersCRD, res.challengesCRD,
+	}
+	for _, CRD := range CRDs {
+		if err := r.CreateOrUpdateFromYaml([]byte(CRD)); err != nil {
+			return err
+		}
 	}
 	return nil
 }
