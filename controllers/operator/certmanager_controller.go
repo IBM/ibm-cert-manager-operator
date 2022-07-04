@@ -476,7 +476,7 @@ func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) err
 // createCertManagerV1Crds
 func (r *CertManagerReconciler) CreateV1CRDs() error {
 	CRDs := []string{
-		res.certificaterequestsCRD, res.certificatesCRD, res.clusterissuersCRD, res.issuersCRD, res.ordersCRD, res.challengesCRD,
+		certificaterequestsCRD, certificatesCRD, clusterissuersCRD, issuersCRD, ordersCRD, challengesCRD,
 	}
 	for _, CRD := range CRDs {
 		if err := r.CreateOrUpdateFromYaml([]byte(CRD)); err != nil {
