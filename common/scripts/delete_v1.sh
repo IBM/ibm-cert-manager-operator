@@ -1,4 +1,3 @@
-@@ -0,0 +1,29 @@
 #!/bin/bash
 #
 # Copyright 2020 IBM Corporation
