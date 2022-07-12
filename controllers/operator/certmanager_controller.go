@@ -475,6 +475,7 @@ func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) err
 
 // createCertManagerV1Crds
 func (r *CertManagerReconciler) CreateV1CRDs() error {
+	klog.Infof("Creating CertManager CRDs")
 	CRDs := []string{
 		certificaterequestsCRD, certificatesCRD, clusterissuersCRD, issuersCRD, ordersCRD, challengesCRD,
 	}
