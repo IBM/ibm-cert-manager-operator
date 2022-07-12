@@ -24,8 +24,12 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilwait "k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/discovery"
+	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -323,8 +327,55 @@ func (r *PodRefreshReconciler) updateDaemonSetAnnotations(daemonsetsToUpdate []a
 	return nil
 }
 
+func (r *PodRefreshReconciler) waitResourceReady(apiGroupVersion, kind string) error {
+	klog.Infof("wait for resource ready")
+	cfg, err := config.GetConfig()
+	if err != nil {
+		klog.Errorf("Failed to get config: %v", err)
+		return err
+	}
+	dc := discovery.NewDiscoveryClientForConfigOrDie(cfg)
+	if err := utilwait.PollImmediate(time.Second*10, time.Minute*5, func() (done bool, err error) {
+		exist, err := r.ResourceExists(dc, apiGroupVersion, kind)
+		if err != nil {
+			return exist, err
+		}
+		if !exist {
+			klog.Infof("waiting for resource ready with kind: %s, apiGroupVersion: %s", kind, apiGroupVersion)
+		}
+		return exist, nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ResourceExists returns true if the given resource kind exists
+// in the given api groupversion
+func (r *PodRefreshReconciler) ResourceExists(dc discovery.DiscoveryInterface, apiGroupVersion, kind string) (bool, error) {
+	_, apiLists, err := dc.ServerGroupsAndResources()
+	if err != nil {
+		return false, err
+	}
+	for _, apiList := range apiLists {
+		if apiList.GroupVersion == apiGroupVersion {
+			for _, r := range apiList.APIResources {
+				if r.Kind == kind {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *PodRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// wait for crd ready
+	if err := r.waitResourceReady("apiextensions.k8s.io/v1", "CustomResourceDefinition"); err != nil {
+		return err
+	}
+
 	// Create a new controller
 	c, err := controller.New("podrefresh-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {

@@ -310,6 +310,87 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 	return nil
 }
 
+func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
+	objects, err := YamlToObjects(yamlContent)
+	if err != nil {
+		return err
+	}
+
+	var errMsg error
+
+	for _, obj := range objects {
+		gvk := obj.GetObjectKind().GroupVersionKind()
+
+		_, err := r.GetObject(obj)
+		if errors.IsNotFound(err) {
+			klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
+			if err := r.CreateObject(obj); err != nil {
+				errMsg = err
+			}
+			continue
+		} else if err != nil {
+			errMsg = err
+			continue
+		}
+	}
+
+	return errMsg
+}
+
+// GetObject get k8s resource with the unstructured object
+func (r *CertManagerReconciler) GetObject(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+	found := &unstructured.Unstructured{}
+	found.SetGroupVersionKind(obj.GetObjectKind().GroupVersionKind())
+
+	err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, found)
+
+	return found, err
+}
+
+// CreateObject create k8s resource with the unstructured object
+func (r *CertManagerReconciler) CreateObject(obj *unstructured.Unstructured) error {
+	err := r.Client.Create(context.TODO(), obj)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("could not Create resource: %v", err)
+	}
+	return nil
+}
+
+// DeleteObject delete k8s resource with the unstructured object
+func (r *CertManagerReconciler) DeleteObject(obj *unstructured.Unstructured) error {
+	err := r.Client.Delete(context.TODO(), obj)
+	if err != nil && !errors.IsNotFound(err) {
+		return fmt.Errorf("could not Delete resource: %v", err)
+	}
+	return nil
+}
+
+// UpdateObject update k8s resource with the unstructured object
+func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) error {
+	if err := r.Client.Update(context.TODO(), obj); err != nil {
+		return fmt.Errorf("could not update resource: %v", err)
+	}
+	return nil
+}
+
+// createCertManagerV1Crds
+// add IBM label to this CRD
+func (r *CertManagerReconciler) CreateV1CRDs() error {
+	klog.Infof("Creating CertManager CRDs")
+	CRDs := []string{
+		certificaterequestsCRD, certificatesCRD, clusterissuersCRD, issuersCRD, ordersCRD, challengesCRD,
+	}
+	for _, CRD := range CRDs {
+		// Create crd
+		if err := r.CreateOrUpdateFromYaml([]byte(CRD)); err != nil {
+			return err
+		}
+		// add IBM label
+
+	}
+	return nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Create certManager CRDs
@@ -406,83 +487,6 @@ func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	})
 	if err != nil {
 		return err
-	}
-	return nil
-}
-
-func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
-	objects, err := YamlToObjects(yamlContent)
-	if err != nil {
-		return err
-	}
-
-	var errMsg error
-
-	for _, obj := range objects {
-		gvk := obj.GetObjectKind().GroupVersionKind()
-
-		_, err := r.GetObject(obj)
-		if errors.IsNotFound(err) {
-			klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
-			if err := r.CreateObject(obj); err != nil {
-				errMsg = err
-			}
-			continue
-		} else if err != nil {
-			errMsg = err
-			continue
-		}
-	}
-
-	return errMsg
-}
-
-// GetObject get k8s resource with the unstructured object
-func (r *CertManagerReconciler) GetObject(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	found := &unstructured.Unstructured{}
-	found.SetGroupVersionKind(obj.GetObjectKind().GroupVersionKind())
-
-	err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, found)
-
-	return found, err
-}
-
-// CreateObject create k8s resource with the unstructured object
-func (r *CertManagerReconciler) CreateObject(obj *unstructured.Unstructured) error {
-	err := r.Client.Create(context.TODO(), obj)
-	if err != nil && !errors.IsAlreadyExists(err) {
-		return fmt.Errorf("could not Create resource: %v", err)
-	}
-	return nil
-}
-
-// DeleteObject delete k8s resource with the unstructured object
-func (r *CertManagerReconciler) DeleteObject(obj *unstructured.Unstructured) error {
-	err := r.Client.Delete(context.TODO(), obj)
-	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("could not Delete resource: %v", err)
-	}
-	return nil
-}
-
-// UpdateObject update k8s resource with the unstructured object
-func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) error {
-	if err := r.Client.Update(context.TODO(), obj); err != nil {
-		return fmt.Errorf("could not update resource: %v", err)
-	}
-	return nil
-}
-
-// createCertManagerV1Crds
-func (r *CertManagerReconciler) CreateV1CRDs() error {
-	klog.Infof("Creating CertManager CRDs")
-	CRDs := []string{
-		certificaterequestsCRD, certificatesCRD, clusterissuersCRD, issuersCRD, ordersCRD, challengesCRD,
-	}
-	for _, CRD := range CRDs {
-		if err := r.CreateOrUpdateFromYaml([]byte(CRD)); err != nil {
-			return err
-		}
 	}
 	return nil
 }
