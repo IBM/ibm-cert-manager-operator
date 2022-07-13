@@ -63,6 +63,10 @@ var nameLabel = map[string]string{
 	"app.kubernetes.io/name": "cert-manager",
 }
 
+var old_labels = map[string]string{
+	"operators.coreos.com/ibm-cert-manager-operator." + res.DeployNamespace: "",
+}
+
 // CertManagerReconciler reconciles a CertManager object
 type CertManagerReconciler struct {
 	Client       client.Client
@@ -391,6 +395,8 @@ func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, c
 	}
 	if v1IsLarger {
 		update = true
+	} else {
+		klog.Infof("No need to update this object:%s", obj.GetName())
 	}
 
 	if update {
@@ -402,7 +408,6 @@ func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, c
 		}
 	}
 	return nil
-
 }
 
 // create CertManager V1 Crds
@@ -427,11 +432,15 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 			//this object not exist we need to create it
 			if errors.IsNotFound(err) {
 				klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
-				// set label
-				if !r.CheckLabel(*obj, instanceLabel) {
-					obj.SetLabels(instanceLabel)
-					obj.SetLabels(managedbyLabel)
-					obj.SetLabels(nameLabel)
+				// add label locally
+				labels := map[string]string{
+					"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
+					"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+					"app.kubernetes.io/name":       "cert-manager",
+				}
+
+				if !r.CheckLabel(*obj, labels) {
+					obj.SetLabels(labels)
 				}
 				if e := r.CreateObject(obj); e != nil {
 					errMsg = e
@@ -439,9 +448,9 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 				continue
 				// if the object exist
 			} else if err == nil {
-				//check if it haven't ibm label
-				if !r.CheckLabel(*crd, instanceLabel) {
-					klog.Infof("this crd:%s in namespace:%s is not managed by ibm-cert-manager, skip it", crd.GetName(), crd.GetNamespace())
+				//check if it haven't ibm label, skip it
+				if !r.CheckLabel(*crd, managedbyLabel) && !r.CheckLabel(*crd, old_labels) {
+					klog.Infof("this crd:%s is not managed by ibm-cert-manager, skip it", crd.GetName())
 					continue
 					//if it have ibm label
 				} else {
@@ -450,7 +459,9 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 				}
 				// if can't getObject
 			} else if err != nil {
+				klog.Infof("can't get object:%s: %v", obj.GetName(), err)
 				errMsg = err
+				continue
 			}
 		}
 	}
@@ -461,7 +472,7 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Create certManager CRDs
 	if err := r.CreateOrUpdateV1CRDs(); err != nil {
-		klog.Errorf("Fail to create CRDs: %s", err)
+		klog.Errorf("Fail to create CRDs: %v", err)
 		return err
 	}
 
