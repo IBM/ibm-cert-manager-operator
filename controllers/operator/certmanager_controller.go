@@ -386,27 +386,17 @@ func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) err
 }
 
 // Updating resource
-func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, crd *unstructured.Unstructured) error {
-	update := false
+func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, crd *unstructured.Unstructured, labels map[string]string) error {
 	gvk := obj.GetObjectKind().GroupVersionKind()
-	v1IsLarger, convertErr := CompareVersion(obj.GetAnnotations()["version"], crd.GetAnnotations()["version"])
-	if convertErr != nil {
-		return convertErr
-	}
-	if v1IsLarger {
-		update = true
-	} else {
-		klog.Infof("No need to update this object:%s", obj.GetName())
+
+	klog.Infof("Updating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
+	resourceVersion := crd.GetResourceVersion()
+	obj.SetResourceVersion(resourceVersion)
+	obj.SetLabels(labels)
+	if err := r.UpdateObject(obj); err != nil {
+		return err
 	}
 
-	if update {
-		klog.Infof("Updating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
-		resourceVersion := crd.GetResourceVersion()
-		obj.SetResourceVersion(resourceVersion)
-		if err := r.UpdateObject(obj); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -414,6 +404,11 @@ func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, c
 // add IBM label to this CRD
 func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 	klog.Infof("Creating CertManager CRDs")
+	labels := map[string]string{
+		"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
+		"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+		"app.kubernetes.io/name":       "cert-manager",
+	}
 	var errMsg error
 	CRDs := []string{
 		certificaterequestsCRD, certificatesCRD, clusterissuersCRD, issuersCRD, ordersCRD, challengesCRD,
@@ -433,12 +428,6 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 			if errors.IsNotFound(err) {
 				klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
 				// add label locally
-				labels := map[string]string{
-					"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
-					"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
-					"app.kubernetes.io/name":       "cert-manager",
-				}
-
 				if !r.CheckLabel(*obj, labels) {
 					obj.SetLabels(labels)
 				}
@@ -455,7 +444,7 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 					//if it have ibm label
 				} else {
 					// update it
-					r.UpdateResourse(obj, crd)
+					r.UpdateResourse(obj, crd, labels)
 				}
 				// if can't getObject
 			} else if err != nil {
