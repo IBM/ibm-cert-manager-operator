@@ -310,7 +310,29 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 	return nil
 }
 
-func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
+func (r *CertManagerReconciler) CheckLabel(unstruct unstructured.Unstructured, labels map[string]string) bool {
+	for k, v := range labels {
+		if !r.HasLabel(unstruct, k) {
+			return false
+		}
+		if unstruct.GetLabels()[k] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func (r *CertManagerReconciler) HasLabel(cr unstructured.Unstructured, labelName string) bool {
+	if cr.GetLabels() == nil {
+		return false
+	}
+	if _, ok := cr.GetLabels()[labelName]; !ok {
+		return false
+	}
+	return true
+}
+
+func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte) error {
 	objects, err := YamlToObjects(yamlContent)
 	if err != nil {
 		return err
@@ -321,7 +343,7 @@ func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alway
 	for _, obj := range objects {
 		gvk := obj.GetObjectKind().GroupVersionKind()
 
-		_, err := r.GetObject(obj)
+		cr, err := r.GetObject(obj)
 		if errors.IsNotFound(err) {
 			klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
 			if err := r.CreateObject(obj); err != nil {
@@ -331,6 +353,25 @@ func (r *CertManagerReconciler) CreateOrUpdateFromYaml(yamlContent []byte, alway
 		} else if err != nil {
 			errMsg = err
 			continue
+		}
+
+		// need to move these three labels to constants.go
+		var instanceLabel = map[string]string{
+			"app.kubernetes.io/instance": "ibm-cert-manager-operator",
+		}
+
+		var managedbyLabel = map[string]string{
+			"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+		}
+
+		var nameLabel = map[string]string{
+			"app.kubernetes.io/name": "cert-manager",
+		}
+
+		if !r.CheckLabel(*cr, instanceLabel) {
+			cr.SetLabels(instanceLabel)
+			cr.SetLabels(managedbyLabel)
+			cr.SetLabels(nameLabel)
 		}
 	}
 
