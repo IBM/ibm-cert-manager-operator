@@ -327,6 +327,7 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 	return nil
 }
 
+// check this object has this label ot not
 func (r *CertManagerReconciler) CheckLabel(unstruct unstructured.Unstructured, labels map[string]string) bool {
 	for k, v := range labels {
 		if !r.HasLabel(unstruct, k) {
@@ -385,7 +386,7 @@ func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) err
 	return nil
 }
 
-// Updating resource
+// Updating resource and add resourceVersion
 func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, crd *unstructured.Unstructured, labels map[string]string) error {
 	gvk := obj.GetObjectKind().GroupVersionKind()
 
@@ -400,8 +401,10 @@ func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, c
 	return nil
 }
 
-// create CertManager V1 Crds
-// add IBM label to this CRD
+// 1.create CertManager V1 Crds
+// 2.add IBM label to this CRD
+// 3.check existed crd is managed by ibm or not
+// 4. if it is managed by ibm we can upgrade it
 func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 	klog.Infof("Creating CertManager CRDs")
 	labels := map[string]string{
@@ -419,8 +422,8 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 		if err != nil {
 			return err
 		}
-		// obj is the obj in yaml file
-		// crd is the obj in cluster
+		// obj is the object in yaml file
+		// crd is the object in the cluster
 		for _, obj := range objects {
 			gvk := obj.GetObjectKind().GroupVersionKind()
 			crd, err := r.GetObject(obj)
