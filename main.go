@@ -45,15 +45,15 @@ import (
 	cache "github.com/IBM/controller-filtered-cache/filteredcache"
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 
-	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
-	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
 	certmanagerv1controllers "github.com/ibm/ibm-cert-manager-operator/controllers/cert-manager"
 	certmanagercontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/certmanager"
 	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/operator"
 	constants "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
+	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/acme.cert-manager/v1"
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
+	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/meta.cert-manager/v1"
 	//+kubebuilder:scaffold:imports
 )
 

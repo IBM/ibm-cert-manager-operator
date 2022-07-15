@@ -18,9 +18,10 @@ package certmanager
 
 import (
 	"context"
+	"time"
 
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	"github.com/ibm/ibm-cert-manager-operator/controllers/operator"
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
 	"golang.org/x/mod/semver"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -28,8 +29,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	utilwait "k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/discovery"
+	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -188,8 +193,54 @@ func (i ignoreStatusPredicate) Generic(e event.GenericEvent) bool {
 	return false
 }
 
+func (r *IssuerReconciler) waitResourceReady(apiGroupVersion, kind string) error {
+	klog.Infof("wait for resource ready")
+	cfg, err := config.GetConfig()
+	if err != nil {
+		klog.Errorf("Failed to get config: %v", err)
+		return err
+	}
+	dc := discovery.NewDiscoveryClientForConfigOrDie(cfg)
+	if err := utilwait.PollImmediate(time.Second*10, time.Minute*5, func() (done bool, err error) {
+		exist, err := r.ResourceExists(dc, apiGroupVersion, kind)
+		if err != nil {
+			return exist, err
+		}
+		if !exist {
+			klog.Infof("waiting for resource ready with kind: %s, apiGroupVersion: %s", kind, apiGroupVersion)
+		}
+		return exist, nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ResourceExists returns true if the given resource kind exists
+// in the given api groupversion
+func (r *IssuerReconciler) ResourceExists(dc discovery.DiscoveryInterface, apiGroupVersion, kind string) (bool, error) {
+	_, apiLists, err := dc.ServerGroupsAndResources()
+	if err != nil {
+		return false, err
+	}
+	for _, apiList := range apiLists {
+		if apiList.GroupVersion == apiGroupVersion {
+			for _, r := range apiList.APIResources {
+				if r.Kind == kind {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *IssuerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// wait for crd ready
+	if err := r.waitResourceReady("cert-manager.io/v1", "Issuer"); err != nil {
+		return err
+	}
 	// Create a new controller
 	c, err := controller.New("issuer-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {

@@ -17,11 +17,23 @@
 package operator
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"reflect"
+	"strconv"
+	"strings"
 
+	utilyaml "github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/serializer/json"
+	"k8s.io/apimachinery/pkg/runtime/serializer/streaming"
+	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
@@ -77,4 +89,99 @@ func copySecret(client client.Client, secretToCopy string, srcNamespace string, 
 
 	return nil
 
+}
+
+// YamlToObjects convert YAML content to unstructured objects
+func YamlToObjects(yamlContent []byte) ([]*unstructured.Unstructured, error) {
+	var objects []*unstructured.Unstructured
+
+	// This step is for converting large yaml file, we can remove it after using "apimachinery" v0.19.0
+	if len(yamlContent) > 1024*64 {
+		object, err := YamlToObject(yamlContent)
+		if err != nil {
+			return nil, err
+		}
+		objects = append(objects, object)
+		return objects, nil
+	}
+
+	yamlDecoder := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+
+	reader := json.YAMLFramer.NewFrameReader(ioutil.NopCloser(bytes.NewReader(yamlContent)))
+	decoder := streaming.NewDecoder(reader, yamlDecoder)
+	for {
+		obj, _, err := decoder.Decode(nil, nil)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			klog.Infof("error convert object: %v", err)
+			continue
+		}
+
+		switch t := obj.(type) {
+		case *unstructured.Unstructured:
+			objects = append(objects, t)
+		default:
+			return nil, fmt.Errorf("failed to convert object %s", reflect.TypeOf(obj))
+		}
+	}
+
+	return objects, nil
+}
+
+// YamlToObject converting large yaml file, we can remove it after using "apimachinery" v0.19.0
+func YamlToObject(yamlContent []byte) (*unstructured.Unstructured, error) {
+	obj := &unstructured.Unstructured{}
+	jsonSpec, err := utilyaml.YAMLToJSON(yamlContent)
+	if err != nil {
+		return nil, fmt.Errorf("could not convert yaml to json: %v", err)
+	}
+
+	if err := obj.UnmarshalJSON(jsonSpec); err != nil {
+		return nil, fmt.Errorf("could not unmarshal resource: %v", err)
+	}
+
+	return obj, nil
+}
+
+// CompareVersion takes vx.y.z, vx.y.z -> bool: if v1 is larger than v2
+func CompareVersion(v1, v2 string) (v1IsLarger bool, err error) {
+	if v1 == "" {
+		v1 = "0.0.0"
+	}
+	v1Slice := strings.Split(v1, ".")
+	if len(v1Slice) == 1 {
+		v1 = "0.0." + v1
+	}
+
+	if v2 == "" {
+		v2 = "0.0.0"
+	}
+	v2Slice := strings.Split(v2, ".")
+	if len(v2Slice) == 1 {
+		v2 = "0.0." + v2
+	}
+
+	v1Slice = strings.Split(v1, ".")
+	v2Slice = strings.Split(v2, ".")
+	for index := range v1Slice {
+		v1SplitInt, e1 := strconv.Atoi(v1Slice[index])
+		if e1 != nil {
+			return false, e1
+		}
+		v2SplitInt, e2 := strconv.Atoi(v2Slice[index])
+		if e2 != nil {
+			return false, e2
+		}
+
+		if v1SplitInt > v2SplitInt {
+			return true, nil
+		} else if v1SplitInt == v2SplitInt {
+			continue
+		} else {
+			return false, nil
+		}
+	}
+	return false, nil
 }

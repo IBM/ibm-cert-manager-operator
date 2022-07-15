@@ -20,9 +20,9 @@ import (
 	"net/url"
 	"strings"
 
-	v1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	v1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
-	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
+	v1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/v1apis/meta.cert-manager/v1"
 )
 
 func sanitizeDNSNames(names []string) ([]string, []string) {

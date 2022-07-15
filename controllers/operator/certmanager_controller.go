@@ -18,6 +18,7 @@ package operator
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
@@ -30,10 +31,12 @@ import (
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metaerrors "k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/klog"
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -46,6 +49,23 @@ import (
 )
 
 var logd = log.Log.WithName("controller_certmanager")
+
+// need to move these three labels to constants.go
+var instanceLabel = map[string]string{
+	"app.kubernetes.io/instance": "ibm-cert-manager-operator",
+}
+
+var managedbyLabel = map[string]string{
+	"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+}
+
+var nameLabel = map[string]string{
+	"app.kubernetes.io/name": "cert-manager",
+}
+
+var old_labels = map[string]string{
+	"operators.coreos.com/ibm-cert-manager-operator." + res.DeployNamespace: "",
+}
 
 // CertManagerReconciler reconciles a CertManager object
 type CertManagerReconciler struct {
@@ -307,8 +327,147 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 	return nil
 }
 
+// check this object has this label ot not
+func (r *CertManagerReconciler) CheckLabel(unstruct unstructured.Unstructured, labels map[string]string) bool {
+	for k, v := range labels {
+		if !r.HasLabel(unstruct, k) {
+			return false
+		}
+		if unstruct.GetLabels()[k] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func (r *CertManagerReconciler) HasLabel(cr unstructured.Unstructured, labelName string) bool {
+	if cr.GetLabels() == nil {
+		return false
+	}
+	if _, ok := cr.GetLabels()[labelName]; !ok {
+		return false
+	}
+	return true
+}
+
+// GetObject get k8s resource with the unstructured object
+func (r *CertManagerReconciler) GetObject(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+	found := &unstructured.Unstructured{}
+	found.SetGroupVersionKind(obj.GetObjectKind().GroupVersionKind())
+
+	err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, found)
+
+	return found, err
+}
+
+// CreateObject create k8s resource with the unstructured object
+func (r *CertManagerReconciler) CreateObject(obj *unstructured.Unstructured) error {
+	err := r.Client.Create(context.TODO(), obj)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("could not Create resource: %v", err)
+	}
+	return nil
+}
+
+// DeleteObject delete k8s resource with the unstructured object
+func (r *CertManagerReconciler) DeleteObject(obj *unstructured.Unstructured) error {
+	err := r.Client.Delete(context.TODO(), obj)
+	if err != nil && !errors.IsNotFound(err) {
+		return fmt.Errorf("could not Delete resource: %v", err)
+	}
+	return nil
+}
+
+// UpdateObject update k8s resource with the unstructured object
+func (r *CertManagerReconciler) UpdateObject(obj *unstructured.Unstructured) error {
+	if err := r.Client.Update(context.TODO(), obj); err != nil {
+		return fmt.Errorf("could not update resource: %v", err)
+	}
+	return nil
+}
+
+// Updating resource and add resourceVersion
+func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, crd *unstructured.Unstructured, labels map[string]string) error {
+	gvk := obj.GetObjectKind().GroupVersionKind()
+
+	klog.Infof("Updating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
+	resourceVersion := crd.GetResourceVersion()
+	obj.SetResourceVersion(resourceVersion)
+	obj.SetLabels(labels)
+	if err := r.UpdateObject(obj); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// 1.create CertManager V1 Crds
+// 2.add IBM label to this CRD
+// 3.check existed crd is managed by ibm or not
+// 4. if it is managed by ibm we can upgrade it
+func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
+	klog.Infof("Creating CertManager CRDs")
+	labels := map[string]string{
+		"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
+		"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+		"app.kubernetes.io/name":       "cert-manager",
+	}
+	var errMsg error
+	CRDs := []string{
+		certificaterequestsCRD, certificatesCRD, clusterissuersCRD, issuersCRD, ordersCRD, challengesCRD,
+	}
+	for _, CRD := range CRDs {
+
+		objects, err := YamlToObjects([]byte(CRD))
+		if err != nil {
+			return err
+		}
+		// obj is the object in yaml file
+		// crd is the object in the cluster
+		for _, obj := range objects {
+			gvk := obj.GetObjectKind().GroupVersionKind()
+			crd, err := r.GetObject(obj)
+			//this object not exist we need to create it
+			if errors.IsNotFound(err) {
+				klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
+				// add label locally
+				if !r.CheckLabel(*obj, labels) {
+					obj.SetLabels(labels)
+				}
+				if e := r.CreateObject(obj); e != nil {
+					errMsg = e
+				}
+				continue
+				// if the object exist
+			} else if err == nil {
+				//check if it haven't ibm label, skip it
+				if !r.CheckLabel(*crd, managedbyLabel) && !r.CheckLabel(*crd, old_labels) {
+					klog.Infof("this crd:%s is not managed by ibm-cert-manager, skip it", crd.GetName())
+					continue
+					//if it have ibm label
+				} else {
+					// update it
+					r.UpdateResourse(obj, crd, labels)
+				}
+				// if can't getObject
+			} else if err != nil {
+				klog.Infof("can't get object:%s: %v", obj.GetName(), err)
+				errMsg = err
+				continue
+			}
+		}
+	}
+	return errMsg
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// Create certManager CRDs
+	if err := r.CreateOrUpdateV1CRDs(); err != nil {
+		klog.Errorf("Fail to create CRDs: %v", err)
+		return err
+	}
+
 	// Create a new controller
 	c, err := controller.New("certmanager-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
