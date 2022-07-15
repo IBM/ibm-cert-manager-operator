@@ -372,7 +372,7 @@ func (r *PodRefreshReconciler) ResourceExists(dc discovery.DiscoveryInterface, a
 // SetupWithManager sets up the controller with the Manager.
 func (r *PodRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// wait for crd ready
-	if err := r.waitResourceReady("apiextensions.k8s.io/v1", "CustomResourceDefinition"); err != nil {
+	if err := r.waitResourceReady("cert-manager.io/v1", "Certificate"); err != nil {
 		return err
 	}
 

@@ -484,7 +484,7 @@ func (r *CertificateReconciler) ResourceExists(dc discovery.DiscoveryInterface, 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertificateReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// wait for crd ready
-	if err := r.waitResourceReady("apiextensions.k8s.io/v1", "CustomResourceDefinition"); err != nil {
+	if err := r.waitResourceReady("cert-manager.io/v1", "Certificate"); err != nil {
 		return err
 	}
 
