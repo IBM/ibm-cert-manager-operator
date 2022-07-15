@@ -108,7 +108,7 @@ func (r *V1AddLabelReconciler) updateSecret(secret *corev1.Secret) error {
 	return r.Client.Update(context.TODO(), secret)
 }
 
-func (r *CertificateRefreshReconciler) waitResourceReady(apiGroupVersion, kind string) error {
+func (r *V1AddLabelReconciler) waitResourceReady(apiGroupVersion, kind string) error {
 	klog.Infof("wait for resource ready")
 	cfg, err := config.GetConfig()
 	if err != nil {
@@ -133,7 +133,7 @@ func (r *CertificateRefreshReconciler) waitResourceReady(apiGroupVersion, kind s
 
 // ResourceExists returns true if the given resource kind exists
 // in the given api groupversion
-func (r *CertificateRefreshReconciler) ResourceExists(dc discovery.DiscoveryInterface, apiGroupVersion, kind string) (bool, error) {
+func (r *V1AddLabelReconciler) ResourceExists(dc discovery.DiscoveryInterface, apiGroupVersion, kind string) (bool, error) {
 	_, apiLists, err := dc.ServerGroupsAndResources()
 	if err != nil {
 		return false, err
