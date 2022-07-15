@@ -29,16 +29,6 @@ spec:
       kind: CertificateRequest
       name: certificaterequests.certmanager.k8s.io
       version: v1alpha1
-    - description: "A Certificate resource should be created to ensure an up to date
-        and signed x509 certificate is stored in the Kubernetes Secret resource named
-        in `spec.secretName`. Documentation For additional details regarding install
-        parameters check: https://ibm.biz/icpfs39install. License By installing this
-        product you accept the license terms https://ibm.biz/icpfs39license. \n The
-        stored certificate will be renewed before it expires (as configured by `spec.renewBefore`)."
-      displayName: Certificate
-      kind: Certificate
-      name: certificates.cert-manager.io
-      version: v1
     - description: 'Certificate is the Schema for the certificates API. Documentation
         For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
         License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
@@ -60,15 +50,6 @@ spec:
       kind: Challenge
       name: challenges.certmanager.k8s.io
       version: v1alpha1
-    - description: 'An Issuer represents a certificate issuing authority which can
-        be referenced as part of `issuerRef` fields. It is scoped to a single namespace
-        and can therefore only be referenced by resources within the same namespace.
-        Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
-        License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
-      displayName: Issuer
-      kind: Issuer
-      name: issuers.cert-manager.io
-      version: v1
     - description: 'Issuer is the Schema for the issuers API. Documentation For additional
         details regarding install parameters check: https://ibm.biz/icpfs39install.
         License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'

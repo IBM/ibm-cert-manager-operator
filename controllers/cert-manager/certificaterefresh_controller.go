@@ -38,10 +38,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
 )
 
 var logd = log.Log.WithName("controller_certificaterefresh")
@@ -462,8 +462,55 @@ func (r *CertificateRefreshReconciler) findV1Alpha1Certs(issuers []certmanagerv1
 	return v1alpha1Certs, nil
 }
 
+func (r *CertificateRefreshReconciler) waitResourceReady(apiGroupVersion, kind string) error {
+	klog.Infof("wait for resource ready")
+	cfg, err := config.GetConfig()
+	if err != nil {
+		klog.Errorf("Failed to get config: %v", err)
+		return err
+	}
+	dc := discovery.NewDiscoveryClientForConfigOrDie(cfg)
+	if err := utilwait.PollImmediate(time.Second*10, time.Minute*5, func() (done bool, err error) {
+		exist, err := r.ResourceExists(dc, apiGroupVersion, kind)
+		if err != nil {
+			return exist, err
+		}
+		if !exist {
+			klog.Infof("waiting for resource ready with kind: %s, apiGroupVersion: %s", kind, apiGroupVersion)
+		}
+		return exist, nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ResourceExists returns true if the given resource kind exists
+// in the given api groupversion
+func (r *CertificateRefreshReconciler) ResourceExists(dc discovery.DiscoveryInterface, apiGroupVersion, kind string) (bool, error) {
+	_, apiLists, err := dc.ServerGroupsAndResources()
+	if err != nil {
+		return false, err
+	}
+	for _, apiList := range apiLists {
+		if apiList.GroupVersion == apiGroupVersion {
+			for _, r := range apiList.APIResources {
+				if r.Kind == kind {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertificateRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// wait for crd ready
+	if err := r.waitResourceReady("cert-manager.io/v1", "Certificate"); err != nil {
+		return err
+	}
+
 	// Create a new controller
 	c, err := controller.New("certificaterefresh-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {

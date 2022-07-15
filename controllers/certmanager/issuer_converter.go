@@ -17,10 +17,10 @@
 package certmanager
 
 import (
-	acme "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
-	v1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	"github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
-	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
+	acme "github.com/ibm/ibm-cert-manager-operator/v1apis/acme.cert-manager/v1"
+	v1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/v1apis/meta.cert-manager/v1"
 )
 
 func convertACME(a *v1alpha1.ACMEIssuer) *acme.ACMEIssuer {

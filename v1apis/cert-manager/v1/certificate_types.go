@@ -19,7 +19,7 @@ package v1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/v1apis/meta.cert-manager/v1"
 )
 
 // +kubebuilder:object:root=true
