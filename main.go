@@ -158,6 +158,7 @@ func main() {
 		Scheme:       mgr.GetScheme(),
 		Recorder:     mgr.GetEventRecorderFor("ibm-cert-manager-operator"),
 		NS:           ns,
+		FirstRun:     true,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CertManager")
 		os.Exit(1)

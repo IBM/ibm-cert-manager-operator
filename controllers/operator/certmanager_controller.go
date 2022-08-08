@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"time"
 
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 	"golang.org/x/mod/semver"
@@ -46,6 +47,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
+	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/meta.cert-manager/v1"
 )
 
 var logd = log.Log.WithName("controller_certmanager")
@@ -76,6 +79,7 @@ type CertManagerReconciler struct {
 	Scheme       *runtime.Scheme
 	Recorder     record.EventRecorder
 	NS           string
+	FirstRun     bool
 }
 
 //+kubebuilder:rbac:groups=operator.ibm.com,resources=certmanagers,verbs=get;list;watch;create;update;patch;delete
@@ -163,8 +167,16 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
+	if r.FirstRun {
+		if r.FoundCommunityCertManager() {
+			logd.Info("skip deploy operand")
+			return ctrl.Result{}, nil
+		}
+	}
+
 	if v, ok := conditionalDeployCM.Data["deployCSCertManagerOperands"]; ok {
 		if v == "false" {
+			logd.Info("skip deploy operand")
 			return ctrl.Result{}, nil
 		}
 	}
@@ -327,7 +339,166 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 	return nil
 }
 
-// check this object has this label ot not
+// check communityCertManager is deployed or not
+// try to deploy certificate if succeed try to get cert-manager-controller deployment
+func (r *CertManagerReconciler) FoundCommunityCertManager() bool {
+	r.FirstRun = false
+	// deploy certificate and issuer
+	if err := r.DeployCert(); err != nil {
+		logd.Error(err, "Can't deploy example Issuer/Certificate")
+		return false
+	}
+
+	// check certificate status is ready
+	statusReady, err := r.StatusIsReady()
+	if err != nil {
+		logd.Error(err, "Can't get status")
+		return false
+	}
+
+	// delete certificate and issuer
+	if err := r.DeleteCert(); err != nil {
+		logd.Error(err, "Can't delete example Issuer/Certificate")
+		return false
+	}
+
+	if statusReady {
+		// try to get cert-manager-controller deployment
+		if err := r.GetCertManagerControllerDeployment(); err != nil {
+			if errors.IsNotFound(err) {
+				logd.Info("Found community cert-manager")
+				return true
+			}
+			logd.Error(err, "Can't get cert-manager-controller deployment")
+			return false
+		}
+
+		logd.Info("Found IBM cert-manager")
+		return false
+	}
+
+	logd.Info("There is no cert-manager in the cluster")
+	return false
+
+}
+
+// get the status of example certificate
+func (r *CertManagerReconciler) StatusIsReady() (bool, error) {
+
+	ready_true_condition := certmanagerv1.CertificateCondition{
+		Type:   certmanagerv1.CertificateConditionReady,
+		Status: metacertmanagerv1.ConditionTrue,
+	}
+
+	time.Sleep(10 * time.Second)
+
+	exampleCert := &certmanagerv1.Certificate{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: res.DeployNamespace, Name: "example-certificate"}, exampleCert); err != nil {
+		logd.Error(err, "Can't get examplecertificate")
+		return false, err
+	}
+
+	if CertificateHasCondition(exampleCert, ready_true_condition) {
+		return true, nil
+	} else {
+		return false, nil
+	}
+
+}
+
+// deploy a test issuer and certificate
+func (r *CertManagerReconciler) DeployCert() error {
+	var placeholder = "placeholder"
+
+	if err := r.CreateFromYaml([]byte(Namespacelize(exampleIssuer, placeholder, res.DeployNamespace))); err != nil {
+		logd.Error(err, "Can't create exampleissuer")
+		return err
+	}
+
+	if err := r.CreateFromYaml([]byte(Namespacelize(exampleCert, placeholder, res.DeployNamespace))); err != nil {
+		logd.Error(err, "Can't create exampleCert")
+		return err
+	}
+
+	return nil
+}
+
+// delete a test issuer and certificate
+func (r *CertManagerReconciler) DeleteCert() error {
+	var placeholder = "placeholder"
+
+	if err := r.DeleteFromYaml([]byte(Namespacelize(exampleCert, placeholder, res.DeployNamespace))); err != nil {
+		logd.Error(err, "Can't delete exampleCert")
+		return err
+	}
+
+	if err := r.DeleteFromYaml([]byte(Namespacelize(exampleIssuer, placeholder, res.DeployNamespace))); err != nil {
+		logd.Error(err, "Can't delete exampleissuer")
+		return err
+	}
+
+	return nil
+}
+
+func (r *CertManagerReconciler) GetCertManagerControllerDeployment() error {
+	deploy := &appsv1.Deployment{}
+	deployName := "cert-manager-controller"
+	deployNs := res.DeployNamespace
+
+	err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: deployName, Namespace: deployNs}, deploy)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *CertManagerReconciler) CreateFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
+	objects, err := YamlToObjects(yamlContent)
+	if err != nil {
+		return err
+	}
+
+	var errMsg error
+
+	for _, obj := range objects {
+
+		_, err := r.GetObject(obj)
+		if errors.IsNotFound(err) {
+			if err := r.CreateObject(obj); err != nil {
+				errMsg = err
+			}
+			continue
+		} else if err != nil {
+			errMsg = err
+			continue
+		}
+	}
+	return errMsg
+}
+
+func (r *CertManagerReconciler) DeleteFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
+	objects, err := YamlToObjects(yamlContent)
+	if err != nil {
+		return err
+	}
+
+	var errMsg error
+
+	for _, obj := range objects {
+
+		_, err := r.GetObject(obj)
+		if err != nil {
+			errMsg = err
+			return err
+		}
+		if err := r.DeleteObject(obj); err != nil {
+			errMsg = err
+		}
+	}
+	return errMsg
+}
+
+// check this object has this label or not
 func (r *CertManagerReconciler) CheckLabel(unstruct unstructured.Unstructured, labels map[string]string) bool {
 	for k, v := range labels {
 		if !r.HasLabel(unstruct, k) {
