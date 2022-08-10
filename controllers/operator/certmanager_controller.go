@@ -20,9 +20,12 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
+	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
 	"golang.org/x/mod/semver"
 	admRegv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -32,6 +35,7 @@ import (
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metaerrors "k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -45,29 +49,20 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-
-	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
-	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/meta.cert-manager/v1"
 )
 
 var logd = log.Log.WithName("controller_certmanager")
-
-// need to move these three labels to constants.go
-var instanceLabel = map[string]string{
-	"app.kubernetes.io/instance": "ibm-cert-manager-operator",
-}
 
 var managedbyLabel = map[string]string{
 	"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
 }
 
-var nameLabel = map[string]string{
-	"app.kubernetes.io/name": "cert-manager",
-}
-
 var old_labels = map[string]string{
 	"operators.coreos.com/ibm-cert-manager-operator." + res.DeployNamespace: "",
+}
+
+var ControllerAppLabel = map[string]string{
+	"app": "ibm-cert-manager-controller",
 }
 
 // CertManagerReconciler reconciles a CertManager object
@@ -79,7 +74,6 @@ type CertManagerReconciler struct {
 	Scheme       *runtime.Scheme
 	Recorder     record.EventRecorder
 	NS           string
-	FirstRun     bool
 }
 
 //+kubebuilder:rbac:groups=operator.ibm.com,resources=certmanagers,verbs=get;list;watch;create;update;patch;delete
@@ -167,18 +161,59 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if r.FirstRun {
-		if r.FoundCommunityCertManager() {
-			logd.Info("skip deploy operand")
+	if v, ok := conditionalDeployCM.Data["deployCSCertManagerOperands"]; ok {
+		if v == "false" {
+			logd.Info("deployCSCertManagerOperand value in ibm-cpp-configmap is false, so skipping operand installation")
 			return ctrl.Result{}, nil
 		}
 	}
 
-	if v, ok := conditionalDeployCM.Data["deployCSCertManagerOperands"]; ok {
-		if v == "false" {
-			logd.Info("skip deploy operand")
-			return ctrl.Result{}, nil
+	v1Issuer := &certmanagerv1.Issuer{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Issuer",
+			APIVersion: "cert-manager.io/v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "example-issuer",
+			Namespace: res.DeployNamespace,
+		},
+		Spec: certmanagerv1.IssuerSpec{
+			IssuerConfig: certmanagerv1.IssuerConfig{
+				SelfSigned: &certmanagerv1.SelfSignedIssuer{},
+			},
+		},
+	}
+
+	deleteError := r.DeleteIssuer(v1Issuer)
+	if deleteError != nil {
+		if !errors.IsNotFound(deleteError) {
+			logd.Error(err, "Failed to delete exampleIssuer, reconciling...")
+			return ctrl.Result{}, err
 		}
+	}
+
+	foundCommunityCertManager, err := r.FoundCommunityCertManager(v1Issuer)
+	if err != nil {
+		if !strings.Contains(fmt.Sprint(err), "failed to call webhook") {
+			getValidatingWebhookConfiguration, err := r.checkValidatingWebhookConfiguration()
+			if err != nil {
+				logd.Error(err, "Failed to check ValidatingWebhookConfiguration, reconciling...")
+				return ctrl.Result{}, err
+			}
+			if !getValidatingWebhookConfiguration {
+				logd.Info("fall to call webhook")
+				return ctrl.Result{}, nil
+			}
+		} else {
+			logd.Info("Kuberentes can't create issuer, Requeuing")
+			return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+		}
+
+	}
+
+	if foundCommunityCertManager {
+		logd.Info("Found another cert-manager controller running on cluster, so skipping operand installation")
+		return ctrl.Result{}, nil
 	}
 
 	if req.Name != "default" {
@@ -339,104 +374,104 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1alpha1.CertManag
 	return nil
 }
 
-// check communityCertManager is deployed or not
-// try to deploy certificate if succeed try to get cert-manager-controller deployment
-func (r *CertManagerReconciler) FoundCommunityCertManager() bool {
-	r.FirstRun = false
-	// deploy certificate and issuer
-	if err := r.DeployCert(); err != nil {
-		logd.Error(err, "Can't deploy example Issuer/Certificate")
-		return false
+// check if the name and label of ValidatingWebhookConfiguration is belong to ibm
+func (r *CertManagerReconciler) checkValidatingWebhookConfiguration() (bool, error) {
+	validating := &admRegv1.ValidatingWebhookConfiguration{}
+	// check the name of this ValidatingWebhookConfiguration
+	err := r.Client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, validating)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
 	}
 
-	// check certificate status is ready
-	statusReady, err := r.StatusIsReady()
+	ControllerName := validating.GetLabels()["app"]
+	if ControllerName != "ibm-cert-manager-controller" {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+// check communityCertManager is deployed or not
+// try to deploy issuer if succeed try to get cert-manager-controller deployment
+func (r *CertManagerReconciler) FoundCommunityCertManager(v1Issuer *certmanagerv1.Issuer) (bool, error) {
+
+	if err := r.DeployIssuer(v1Issuer); err != nil {
+		logd.V(2).Info("Can't deploy example Issuer", "", err)
+		return false, err
+	}
+
+	// check issuer has status
+	hasStatus, err := r.hasStatus()
 	if err != nil {
 		logd.Error(err, "Can't get status")
-		return false
+		return false, err
 	}
 
-	// delete certificate and issuer
-	if err := r.DeleteCert(); err != nil {
-		logd.Error(err, "Can't delete example Issuer/Certificate")
-		return false
+	// delete issuer
+	if err := r.DeleteIssuer(v1Issuer); err != nil {
+		logd.Error(err, "Can't delete example Issuer")
+		return false, err
 	}
 
-	if statusReady {
+	if hasStatus {
 		// try to get cert-manager-controller deployment
 		if err := r.GetCertManagerControllerDeployment(); err != nil {
 			if errors.IsNotFound(err) {
 				logd.Info("Found community cert-manager")
-				return true
+				return true, nil
 			}
 			logd.Error(err, "Can't get cert-manager-controller deployment")
-			return false
+			return false, err
 		}
 
 		logd.Info("Found IBM cert-manager")
-		return false
-	}
-
-	logd.Info("There is no cert-manager in the cluster")
-	return false
-
-}
-
-// get the status of example certificate
-func (r *CertManagerReconciler) StatusIsReady() (bool, error) {
-
-	ready_true_condition := certmanagerv1.CertificateCondition{
-		Type:   certmanagerv1.CertificateConditionReady,
-		Status: metacertmanagerv1.ConditionTrue,
-	}
-
-	time.Sleep(10 * time.Second)
-
-	exampleCert := &certmanagerv1.Certificate{}
-	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: res.DeployNamespace, Name: "example-certificate"}, exampleCert); err != nil {
-		logd.Error(err, "Can't get examplecertificate")
-		return false, err
-	}
-
-	if CertificateHasCondition(exampleCert, ready_true_condition) {
-		return true, nil
-	} else {
 		return false, nil
 	}
 
+	logd.Info("There is no cert-manager in the cluster")
+	return false, nil
+
 }
 
-// deploy a test issuer and certificate
-func (r *CertManagerReconciler) DeployCert() error {
-	var placeholder = "placeholder"
+// get the status of example issuer
+func (r *CertManagerReconciler) hasStatus() (bool, error) {
+	time.Sleep(10 * time.Second)
 
-	if err := r.CreateFromYaml([]byte(Namespacelize(exampleIssuer, placeholder, res.DeployNamespace))); err != nil {
-		logd.Error(err, "Can't create exampleissuer")
-		return err
+	exampleIssuer := &certmanagerv1.Issuer{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: res.DeployNamespace, Name: "example-issuer"}, exampleIssuer); err != nil {
+		logd.Error(err, "Can't get example-issuer")
+		return false, err
 	}
 
-	if err := r.CreateFromYaml([]byte(Namespacelize(exampleCert, placeholder, res.DeployNamespace))); err != nil {
-		logd.Error(err, "Can't create exampleCert")
-		return err
+	return IssuerHasCondition(exampleIssuer), nil
+
+}
+
+// deploy a test issuer
+func (r *CertManagerReconciler) DeployIssuer(issuer *certmanagerv1.Issuer) error {
+	err := r.Client.Create(context.TODO(), issuer)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("could not Create resource: %v", err)
 	}
 
 	return nil
 }
 
-// delete a test issuer and certificate
-func (r *CertManagerReconciler) DeleteCert() error {
-	var placeholder = "placeholder"
+// delete a test issuer
+func (r *CertManagerReconciler) DeleteIssuer(issuer *certmanagerv1.Issuer) error {
+	found := &certmanagerv1.Issuer{}
 
-	if err := r.DeleteFromYaml([]byte(Namespacelize(exampleCert, placeholder, res.DeployNamespace))); err != nil {
-		logd.Error(err, "Can't delete exampleCert")
+	if err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: issuer.GetName(), Namespace: issuer.GetNamespace()}, found); err != nil {
 		return err
 	}
 
-	if err := r.DeleteFromYaml([]byte(Namespacelize(exampleIssuer, placeholder, res.DeployNamespace))); err != nil {
-		logd.Error(err, "Can't delete exampleissuer")
-		return err
+	err := r.Client.Delete(context.TODO(), found)
+	if err != nil && !errors.IsNotFound(err) {
+		return fmt.Errorf("could not Delete resource: %v", err)
 	}
-
 	return nil
 }
 
@@ -449,6 +484,13 @@ func (r *CertManagerReconciler) GetCertManagerControllerDeployment() error {
 	if err != nil {
 		return err
 	}
+
+	// check the label of this deployment
+	ControllorName := deploy.GetLabels()["app"]
+	if ControllorName != "ibm-cert-manager-controller" {
+		return fmt.Errorf("this controller don't have correct label")
+	}
+
 	return nil
 }
 
