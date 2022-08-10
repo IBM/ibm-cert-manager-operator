@@ -191,20 +191,8 @@ func Namespacelize(resource, placeholder, ns string) string {
 	return strings.ReplaceAll(resource, placeholder, ns)
 }
 
-// CertificateHasCondition will return true if the given Certificate has a
-// condition matching the provided CertificateCondition.
-// Only the Type and Status field will be used in the comparison, meaning that
-// this function will return 'true' even if the Reason, Message and
-// LastTransitionTime fields do not match.
-func CertificateHasCondition(crt *certmanagerv1.Certificate, c certmanagerv1.CertificateCondition) bool {
-	if crt == nil {
-		return false
-	}
-	existingConditions := crt.Status.Conditions
-	for _, cond := range existingConditions {
-		if c.Type == cond.Type && c.Status == cond.Status {
-			return true
-		}
-	}
-	return false
+func IssuerHasCondition(issuer *certmanagerv1.Issuer) bool {
+
+	existingConditions := issuer.Status.Conditions
+	return existingConditions != nil
 }
