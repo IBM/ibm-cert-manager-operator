@@ -9,7 +9,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
-    olm.skipRange: <3.21.2
+    olm.skipRange: <3.21.3
     support: IBM
   labels:
     operatorframework.io/arch.amd64: supported
@@ -138,13 +138,13 @@ spec:
   relatedImages:
   - image: icr.io/cpopen/ibm-cert-manager-operator:latest
     name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.7.2-jetstack.1.7.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.7.3-jetstack.1.7.1
     name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.7.2-jetstack.1.7.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.7.3-jetstack.1.7.1
     name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.7.2-jetstack.1.7.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.7.3-jetstack.1.7.1
     name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.7.2-jetstack.1.7.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.7.3-jetstack.1.7.1
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-  replaces: ibm-cert-manager-operator.v3.21.1
+  replaces: ibm-cert-manager-operator.v3.21.2
   version: 0.0.0
