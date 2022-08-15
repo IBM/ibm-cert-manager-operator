@@ -836,5 +836,5 @@ spec:
     name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
   - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.7.3-jetstack.1.7.1
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-  replaces: ibm-cert-manager-operator.v3.21.3
+  replaces: ibm-cert-manager-operator.v3.21.2
   version: 3.21.3
