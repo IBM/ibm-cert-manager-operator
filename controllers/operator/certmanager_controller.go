@@ -394,8 +394,8 @@ func (r *CertManagerReconciler) checkValidatingWebhookConfiguration() (bool, err
 	return true, nil
 }
 
-// check communityCertManager is deployed or not
-// try to deploy issuer if succeed try to get cert-manager-controller deployment
+// used to check communityCertManager is deployed or not
+// try to deploy issuer if it has status, and check cert-manager-controller deployment has ibm label or not
 func (r *CertManagerReconciler) FoundCommunityCertManager(v1Issuer *certmanagerv1.Issuer) (bool, error) {
 
 	if err := r.DeployIssuer(v1Issuer); err != nil {
@@ -446,7 +446,8 @@ func (r *CertManagerReconciler) hasStatus() (bool, error) {
 		return false, err
 	}
 
-	return IssuerHasCondition(exampleIssuer), nil
+	hasCondition := exampleIssuer.Status.Conditions != nil
+	return hasCondition, nil
 
 }
 
@@ -475,6 +476,7 @@ func (r *CertManagerReconciler) DeleteIssuer(issuer *certmanagerv1.Issuer) error
 	return nil
 }
 
+// get the deployment of cert-manager-controller
 func (r *CertManagerReconciler) GetCertManagerControllerDeployment() error {
 	deploy := &appsv1.Deployment{}
 	deployName := "cert-manager-controller"
@@ -492,52 +494,6 @@ func (r *CertManagerReconciler) GetCertManagerControllerDeployment() error {
 	}
 
 	return nil
-}
-
-func (r *CertManagerReconciler) CreateFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
-	objects, err := YamlToObjects(yamlContent)
-	if err != nil {
-		return err
-	}
-
-	var errMsg error
-
-	for _, obj := range objects {
-
-		_, err := r.GetObject(obj)
-		if errors.IsNotFound(err) {
-			if err := r.CreateObject(obj); err != nil {
-				errMsg = err
-			}
-			continue
-		} else if err != nil {
-			errMsg = err
-			continue
-		}
-	}
-	return errMsg
-}
-
-func (r *CertManagerReconciler) DeleteFromYaml(yamlContent []byte, alwaysUpdate ...bool) error {
-	objects, err := YamlToObjects(yamlContent)
-	if err != nil {
-		return err
-	}
-
-	var errMsg error
-
-	for _, obj := range objects {
-
-		_, err := r.GetObject(obj)
-		if err != nil {
-			errMsg = err
-			return err
-		}
-		if err := r.DeleteObject(obj); err != nil {
-			errMsg = err
-		}
-	}
-	return errMsg
 }
 
 // check this object has this label or not
