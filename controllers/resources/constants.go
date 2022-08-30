@@ -62,7 +62,6 @@ var WebhookLabelMap = map[string]string{
 	"app.kubernetes.io/managed-by": "operator",
 	"app.kubernetes.io/instance":   certManagerComponentName,
 	"release":                      certManagerComponentName,
-	"watcher.ibm.com/opt-in":       "true",
 }
 
 // CainjectorLabelMap is a map of all the labels used by the cert-manager-cainjector
@@ -91,10 +90,6 @@ var securityAnnotationWebhook = map[string]string{"openshift.io/scc": "hostnetwo
 	"productName":   "IBM Cloud Platform Common Services",
 	"productID":     "068a62892a1e4db39641342e592daa25",
 	"productMetric": "FREE",
-}
-
-var webhookAnnotation = map[string]string{
-	"watcher.ibm.com/configmap-resource": "kube-system/extension-apiserver-authentication",
 }
 
 // ControllerLabels is a string of the cert-manager-controller's labels
