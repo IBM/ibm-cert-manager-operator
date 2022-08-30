@@ -50,7 +50,6 @@ var WebhookDeployment = &appsv1.Deployment{
 		Name: CertManagerWebhookName,
 		//		Namespace:   DeployNamespace,
 		Labels:      WebhookLabelMap,
-		Annotations: webhookAnnotation,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
