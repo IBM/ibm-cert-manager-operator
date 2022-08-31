@@ -74,15 +74,6 @@ var CainjectorLabelMap = map[string]string{
 	"release":                      certManagerComponentName,
 }
 
-// ConfigmapWatcherLabelMap is the labels for the configmap watcher in map format
-var ConfigmapWatcherLabelMap = map[string]string{
-	"app.kubernetes.io/name":       ConfigmapWatcherName,
-	"app.kubernetes.io/component":  certManagerComponentName,
-	"app.kubernetes.io/managed-by": "operator",
-	"app.kubernetes.io/instance":   ConfigmapWatcherName,
-	"release":                      certManagerComponentName,
-}
-
 // PodAnnotations are the annotations required for a pod
 var PodAnnotations = map[string]string{"openshift.io/scc": "restricted", "productName": "IBM Cloud Platform Common Services", "productID": "068a62892a1e4db39641342e592daa25", "productMetric": "FREE"}
 
@@ -100,9 +91,6 @@ const WebhookLabels = "app=ibm-cert-manager-webhook"
 
 // CainjectorLabels is a string of the cert-manager-cainjector's labels
 const CainjectorLabels = "app=ibm-cert-manager-cainjector"
-
-// ConfigmapWatcherLabels is a string of the configmap-watcher's labels
-const ConfigmapWatcherLabels = "app.kubernetes.io/name=configmap-watcher"
 
 // SecretWatchLabel is a string of secrets that watched by cert manager operator labels
 const SecretWatchLabel string = "operator.ibm.com/watched-by-cert-manager"
@@ -130,9 +118,6 @@ const CertManagerCainjectorName = "cert-manager-cainjector"
 // CertManagerWebhookName is the name of the container/pod/deployment for cert-manager-webhook
 const CertManagerWebhookName = "cert-manager-webhook"
 
-// ConfigmapWatcherName is the name of the container/pod/deployment for the configmap-watcher
-const ConfigmapWatcherName = "configmap-watcher"
-
 // ImageRegistry is the default image registry for the operand deployments
 const ImageRegistry = "icr.io/cpopen/cpfs"
 
@@ -141,9 +126,6 @@ const ControllerImageVersion = "0.12.0"
 
 // WebhookImageVersion is the default image version used for the cert-manager-webhook
 const WebhookImageVersion = "0.12.0"
-
-// ConfigmapWatcherVersion is the default image version used for the configmap-watcher
-const ConfigmapWatcherVersion = "3.4.0"
 
 // ControllerImageName is the image name of the cert-manager-controller
 const ControllerImageName = "icp-cert-manager-controller"
@@ -157,9 +139,6 @@ const CainjectorImageName = "icp-cert-manager-cainjector"
 // WebhookImageName is the image name of the cert-manager-webhook
 const WebhookImageName = "icp-cert-manager-webhook"
 
-// ConfigmapWatcherImageName is the name of the configmap watcher image
-const ConfigmapWatcherImageName = "icp-configmap-watcher"
-
 // ControllerImageEnvVar is the env variable name defined in operator container for Controller Image. Check operator.yaml
 const ControllerImageEnvVar = "ICP_CERT_MANAGER_CONTROLLER_IMAGE"
 
@@ -172,9 +151,6 @@ const CaInjectorImageEnvVar = "ICP_CERT_MANAGER_CAINJECTOR_IMAGE"
 // AcmeSolverImageEnvVar is the env variable name defined in operator container for acme-solver Image. Check operator.yaml
 const AcmeSolverImageEnvVar = "ICP_CERT_MANAGER_ACMESOLVER_IMAGE"
 
-// ConfigMapWatcherImageEnvVar is the env variable name defined in operator container for ConfigMap Watcher Image. Check operator.yaml
-const ConfigMapWatcherImageEnvVar = "ICP_CONFIGMAP_WATCHER_IMAGE"
-
 // DefaultImagePostfix is set to empty. It indicates any platform suffix that you can append to an image tag
 const DefaultImagePostfix = ""
 
@@ -182,8 +158,6 @@ var controllerImage = GetImageID(ImageRegistry, ControllerImageName, ControllerI
 var acmesolverImage = GetImageID(ImageRegistry, AcmesolverImageName, ControllerImageVersion, DefaultImagePostfix, AcmeSolverImageEnvVar)
 var cainjectorImage = GetImageID(ImageRegistry, CainjectorImageName, ControllerImageVersion, DefaultImagePostfix, CaInjectorImageEnvVar)
 var webhookImage = GetImageID(ImageRegistry, WebhookImageName, WebhookImageVersion, DefaultImagePostfix, WebhookImageEnvVar)
-var configmapWatcherImage = GetImageID(ImageRegistry, ConfigmapWatcherImageName, ConfigmapWatcherVersion, DefaultImagePostfix, ConfigMapWatcherImageEnvVar)
-
 // ServiceAccount is the name of the default service account to be used by cert-manager services
 const ServiceAccount = "cert-manager"
 
@@ -207,9 +181,6 @@ var livenessExecActionCainjector = v1.ExecAction{
 var livenessExecActionWebhook = v1.ExecAction{
 	Command: []string{"sh", "-c", "pgrep webhook -l"},
 }
-var livenessExecActionConfigmapWatcher = v1.ExecAction{
-	Command: []string{"sh", "-c", "pgrep watcher -l"},
-}
 
 var initialDelaySecondsReadiness int32 = 60
 var timeoutSecondsReadiness int32 = 10
@@ -223,9 +194,6 @@ var readinessExecActionCainjector = v1.ExecAction{
 }
 var readinessExecActionWebhook = v1.ExecAction{
 	Command: []string{"sh", "-c", "exec echo start cert-manager webhook"},
-}
-var readinessExecActionConfigmapWatcher = v1.ExecAction{
-	Command: []string{"sh", "-c", "exec echo start configmap-watcher"},
 }
 
 // Cert-manager args
