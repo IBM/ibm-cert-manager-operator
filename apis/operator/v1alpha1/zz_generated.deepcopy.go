@@ -126,7 +126,6 @@ func (in *CertManagerSpec) DeepCopyInto(out *CertManagerSpec) {
 	in.CertManagerController.DeepCopyInto(&out.CertManagerController)
 	in.CertManagerWebhook.DeepCopyInto(&out.CertManagerWebhook)
 	in.CertManagerCAInjector.DeepCopyInto(&out.CertManagerCAInjector)
-	in.ConfigMapWatcher.DeepCopyInto(&out.ConfigMapWatcher)
 	if in.EnableCertRefresh != nil {
 		in, out := &in.EnableCertRefresh, &out.EnableCertRefresh
 		*out = new(bool)
