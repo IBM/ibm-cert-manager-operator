@@ -164,6 +164,7 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		if instance.Spec.CertManagerWebhook.Resources.Requests != nil {
 			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.CertManagerWebhook.Resources.Requests
 		}
+	}
 
 	returningDeploy.Namespace = ns
 	logd.V(2).Info("Resulting image registry", "full name", returningDeploy.Spec.Template.Spec.Containers[0].Image)
