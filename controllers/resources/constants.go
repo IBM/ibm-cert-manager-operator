@@ -118,6 +118,9 @@ const CertManagerCainjectorName = "cert-manager-cainjector"
 // CertManagerWebhookName is the name of the container/pod/deployment for cert-manager-webhook
 const CertManagerWebhookName = "cert-manager-webhook"
 
+// ConfigmapWatcherName is the name of the container/pod/deployment for the configmap-watcher
+const ConfigmapWatcherName = "configmap-watcher"
+
 // ImageRegistry is the default image registry for the operand deployments
 const ImageRegistry = "icr.io/cpopen/cpfs"
 
