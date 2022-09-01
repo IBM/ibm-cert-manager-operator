@@ -35,6 +35,8 @@ type CertManagerSpec struct {
 	CertManagerWebhook CertManagerContainerSpec `json:"certManagerWebhook,omitempty"`
 	//CertManagerCAInjector includes spec for cert-manager-cainjector workload
 	CertManagerCAInjector CertManagerContainerSpec `json:"certManagerCAInjector,omitempty"`
+	//ConfigMapWatcher includes spec for icp-configmap-watcher workload
+	ConfigMapWatcher CertManagerContainerSpec `json:"configMapWatcher,omitempty"`
 
 	//EnableCertRefresh is a flag that can be set to enable the refresh of leaf certificates based on a root CA
 	EnableCertRefresh *bool `json:"enableCertRefresh,omitempty"`
