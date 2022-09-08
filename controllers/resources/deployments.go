@@ -50,7 +50,6 @@ var WebhookDeployment = &appsv1.Deployment{
 		Name: CertManagerWebhookName,
 		//		Namespace:   DeployNamespace,
 		Labels:      WebhookLabelMap,
-		Annotations: webhookAnnotation,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -87,28 +86,6 @@ var CainjectorDeployment = &appsv1.Deployment{
 				Annotations: PodAnnotations,
 			},
 			Spec: certManagerCainjectorPod,
-		},
-	},
-}
-
-// ConfigmapWatcherDeployment is the deployment spec for the configmap watcher
-var ConfigmapWatcherDeployment = &appsv1.Deployment{
-	ObjectMeta: metav1.ObjectMeta{
-		Name: ConfigmapWatcherName,
-		//		Namespace: DeployNamespace,
-		Labels: ConfigmapWatcherLabelMap,
-	},
-	Spec: appsv1.DeploymentSpec{
-		Replicas: &replicaCount,
-		Selector: &metav1.LabelSelector{
-			MatchLabels: ConfigmapWatcherLabelMap,
-		},
-		Template: corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels:      ConfigmapWatcherLabelMap,
-				Annotations: PodAnnotations,
-			},
-			Spec: configmapWatcherPod,
 		},
 	},
 }

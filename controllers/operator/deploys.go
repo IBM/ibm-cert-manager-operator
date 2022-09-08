@@ -49,10 +49,6 @@ func webhookDeploy(instance *operatorv1alpha1.CertManager, client client.Client,
 	return deployLogic(instance, client, kubeclient, scheme, res.WebhookDeployment, res.CertManagerWebhookName, res.WebhookImageName, res.WebhookLabels, ns)
 }
 
-func configmapWatcherDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
-	return deployLogic(instance, client, kubeclient, scheme, res.ConfigmapWatcherDeployment, res.ConfigmapWatcherName, res.ConfigmapWatcherImageName, res.ConfigmapWatcherLabels, ns)
-}
-
 func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, deployTemplate *appsv1.Deployment, name, imageName, labels, ns string) error {
 	similarDeploys := deployFinder(kubeclient, labels, imageName)
 	deployment := setupDeploy(instance, deployTemplate, ns)
@@ -167,16 +163,6 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		}
 		if instance.Spec.CertManagerWebhook.Resources.Requests != nil {
 			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.CertManagerWebhook.Resources.Requests
-		}
-
-	case res.ConfigmapWatcherName:
-		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.ConfigmapWatcherImageName, res.ConfigmapWatcherVersion, instance.Spec.ImagePostFix, res.ConfigMapWatcherImageEnvVar)
-		//add resource limits and requests for configmap-watcher only if present in CR else use default as defined in constants.go
-		if instance.Spec.ConfigMapWatcher.Resources.Limits != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Limits = instance.Spec.ConfigMapWatcher.Resources.Limits
-		}
-		if instance.Spec.ConfigMapWatcher.Resources.Requests != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.ConfigMapWatcher.Resources.Requests
 		}
 	}
 
