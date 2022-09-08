@@ -34,7 +34,6 @@ spec:
           metadata:
             type: object
           spec:
-            x-kubernetes-preserve-unknown-fields: true
             description: CertManagerSpec defines the desired state of CertManager
             properties:
               certManagerCAInjector:
