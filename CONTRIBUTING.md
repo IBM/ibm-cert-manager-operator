@@ -46,50 +46,64 @@ Repo maintainers can assign you an issue or pull request by leaving a
 1. Edit the image tags in [manager.yaml](config/manager/manager.yaml).
 1. Edit the image tags in [base csv](config/manifests/bases/ibm-cert-manager-operator.clusterserviceversion.yaml).
 1. Re-generate the bundle.
+
     ```
     make bundle
     ```
+
 1. Verify CSV has all the edits that were made in previous steps.
 
 ## Testing on Open Shift cluster
 
-### Pre-requisite
+### Pre-requisites
 
 1. [operator-sdk CLI](https://github.com/operator-framework/operator-sdk) v1.23.0 or above
 
 ### Testing bundle with OLM
 
-A bundle is a packaging format for the operator, which mainly consists of the CSV and CRDs. Bundles are understood by OLM. The operator-sdk CLI has the capability to create everything necessary to run this bundle on the cluster. 
+A bundle is a packaging format for the operator, which mainly consists of the CSV and CRDs. Bundles are understood by OLM. The operator-sdk CLI has the capability to create everything necessary to run this bundle on the cluster.
 
 Running the bundle involves ephemerally creating all the necessary OLM objects to ultimately have the operator's deployment running, such as temporary CatalogSource, OperatorGroup, Subscription, etc.
 
 This type of testing is as close as possible to how IBM Foundational services installs `ibm-cert-manager-operator` without creating a complete IBM Foundational services' CatalogSource and using ODLM.
 
 1. Verify you can build and push the operator's image to a registry. Check the `REGISTRY` variable in Makefile to see what is the default. Recommended to use your own personal registry that your Open Shift cluster has access to.
+    
     ```
     make push-image-amd64
+    
     ```
 1. Temporarily edit the `image` field in [manager.yaml](config/manager/manager.yaml) file to be the operator image you pushed in step 1.
 1. Verify you can generate the CSV in `bundle/`. The `image` field in the CSV should be the image you pushed in step 1.
+    
     ```
     make bundle
     ```
+
 1. Verify you can build the image for the operator bundle.
+    
     ```
     make bundle-build
     ```
+
 1. Push the bundle up to a registry. Check the `REGISTRY` variable in Makefile to see what is the default. Recommended to use your own personal registry that your Open Shift cluster has access to.
+   
     ```
     make bundle-push
     ```
+
 1. Use the built-in operator-sdk feature to [run the bundle](https://sdk.operatorframework.io/docs/olm-integration/tutorial-bundle/#deploying-an-operator-with-olm)
+    
     ```
     make bundle-run
     ```
+
 1. Verify operator is running, and you can create the operands by creating a new CertManager object
 1. Revert the `image` change in [manager.yaml](config/manager/manager.yaml) file, and re-generate the bundle before opening PR
+    
     ```
     make bundle
     ```
+
 
 ## Pre-check before submitting a PR
