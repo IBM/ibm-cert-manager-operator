@@ -34,6 +34,23 @@ order to be assigned an issue or pull request, you must be a member of the
 Repo maintainers can assign you an issue or pull request by leaving a
 `/assign <your Github ID>` comment on the issue or pull request.
 
+## Developing
+
+### Pre-requisite
+
+1. [operator-sdk CLI](https://github.com/operator-framework/operator-sdk) v1.23.0 or above
+
+### Version bump
+
+1. Edit the `PREV_VERSION` and `VERSION` values in the Makefile.
+1. Edit the image tags in [manager.yaml](config/manager/manager.yaml).
+1. Edit the image tags in [base csv](config/manifests/bases/ibm-cert-manager-operator.clusterserviceversion.yaml).
+1. Re-generate the bundle.
+    ```
+    make bundle
+    ```
+1. Verify CSV has all the edits that were made in previous steps.
+
 ## Testing on Open Shift cluster
 
 ### Pre-requisite
