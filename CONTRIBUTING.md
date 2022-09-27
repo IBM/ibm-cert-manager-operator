@@ -68,42 +68,42 @@ Running the bundle involves ephemerally creating all the necessary OLM objects t
 This type of testing is as close as possible to how IBM Foundational services installs `ibm-cert-manager-operator` without creating a complete IBM Foundational services' CatalogSource and using ODLM.
 
 1. Verify you can build and push the operator's image to a registry. Check the `REGISTRY` variable in Makefile to see what is the default. Recommended to use your own personal registry that your Open Shift cluster has access to.
-    
+
     ```
     make push-image-amd64
-    
+
     ```
+
 1. Temporarily edit the `image` field in [manager.yaml](config/manager/manager.yaml) file to be the operator image you pushed in step 1.
 1. Verify you can generate the CSV in `bundle/`. The `image` field in the CSV should be the image you pushed in step 1.
-    
+
     ```
     make bundle
     ```
 
 1. Verify you can build the image for the operator bundle.
-    
+
     ```
     make bundle-build
     ```
 
 1. Push the bundle up to a registry. Check the `REGISTRY` variable in Makefile to see what is the default. Recommended to use your own personal registry that your Open Shift cluster has access to.
-   
+
     ```
     make bundle-push
     ```
 
 1. Use the built-in operator-sdk feature to [run the bundle](https://sdk.operatorframework.io/docs/olm-integration/tutorial-bundle/#deploying-an-operator-with-olm)
-    
+ 
     ```
     make bundle-run
     ```
 
 1. Verify operator is running, and you can create the operands by creating a new CertManager object
 1. Revert the `image` change in [manager.yaml](config/manager/manager.yaml) file, and re-generate the bundle before opening PR
-    
+
     ```
     make bundle
     ```
-
 
 ## Pre-check before submitting a PR
