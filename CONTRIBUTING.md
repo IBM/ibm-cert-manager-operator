@@ -94,7 +94,7 @@ This type of testing is as close as possible to how IBM Foundational services in
     ```
 
 1. Use the built-in operator-sdk feature to [run the bundle](https://sdk.operatorframework.io/docs/olm-integration/tutorial-bundle/#deploying-an-operator-with-olm)
- 
+
     ```
     make bundle-run
     ```
