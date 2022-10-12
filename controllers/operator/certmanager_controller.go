@@ -414,7 +414,7 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 	}
 	var errMsg error
 	CRDs := []string{
-		certificaterequestsCRD, certificatesCRD, clusterissuersCRD, issuersCRD, ordersCRD, challengesCRD,
+		res.CertificaterequestsCRD, res.CertificatesCRD, res.ClusterissuersCRD, res.IssuersCRD, res.OrdersCRD, res.ChallengesCRD,
 	}
 	for _, CRD := range CRDs {
 
@@ -427,6 +427,8 @@ func (r *CertManagerReconciler) CreateOrUpdateV1CRDs() error {
 		for _, obj := range objects {
 			gvk := obj.GetObjectKind().GroupVersionKind()
 			crd, err := r.GetObject(obj)
+			version := obj.GetLabels()["app.kubernetes.io/version"]
+			labels["app.kubernetes.io/version"] = version
 			//this object not exist we need to create it
 			if errors.IsNotFound(err) {
 				klog.Infof("Creating resource with name: %s, namespace: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), obj.GetNamespace(), gvk.Kind, gvk.Group, gvk.Version)
