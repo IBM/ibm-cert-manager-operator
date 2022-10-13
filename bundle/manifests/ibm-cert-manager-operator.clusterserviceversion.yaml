@@ -34,7 +34,7 @@ metadata:
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <3.21.5
-    operators.operatorframework.io/builder: operator-sdk-v1.14.0+git
+    operators.operatorframework.io/builder: operator-sdk-v1.23.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
   labels:
@@ -692,7 +692,11 @@ spec:
           - create
         serviceAccountName: ibm-cert-manager-operator
       deployments:
-      - name: ibm-cert-manager-operator
+      - label:
+          app.kubernetes.io/instance: ibm-cert-manager-operator
+          app.kubernetes.io/managed-by: ibm-cert-manager-operator
+          app.kubernetes.io/name: cert-manager
+        name: ibm-cert-manager-operator
         spec:
           replicas: 1
           selector:

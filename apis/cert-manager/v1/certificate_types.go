@@ -22,12 +22,15 @@ import (
 	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 )
 
-// +kubebuilder:object:root=true
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:storageversion
 
 // A Certificate resource should be created to ensure an up to date and signed
 // x509 certificate is stored in the Kubernetes Secret resource named in `spec.secretName`. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
 //
 // The stored certificate will be renewed before it expires (as configured by `spec.renewBefore`).
+// +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=certificates,scope=Namespaced
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status",description=""
@@ -49,7 +52,7 @@ type Certificate struct {
 	Status CertificateStatus `json:"status"`
 }
 
-// +kubebuilder:object:root=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // CertificateList is a list of Certificates
 type CertificateList struct {
@@ -59,7 +62,7 @@ type CertificateList struct {
 	Items []Certificate `json:"items"`
 }
 
-// +kubebuilder:validation:Enum=RSA;ECDSA
+// +kubebuilder:validation:Enum=RSA;ECDSA;Ed25519
 type PrivateKeyAlgorithm string
 
 const (
@@ -96,6 +99,12 @@ type CertificateSpec struct {
 	// Full X509 name specification (https://golang.org/pkg/crypto/x509/pkix/#Name).
 	// +optional
 	Subject *X509Subject `json:"subject,omitempty"`
+
+	// LiteralSubject is an LDAP formatted string that represents the [X.509 Subject field](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6).
+	// Use this *instead* of the Subject field if you need to ensure the correct ordering of the RDN sequence, such as when issuing certs for LDAP authentication. See https://github.com/cert-manager/cert-manager/issues/3203, https://github.com/cert-manager/cert-manager/issues/4424.
+	// This field is alpha level and is only supported by cert-manager installations where LiteralCertificateSubject feature gate is enabled on both cert-manager controller and webhook.
+	// +optional
+	LiteralSubject string `json:"literalSubject,omitempty"`
 
 	// CommonName is a common name to be used on the Certificate.
 	// The CommonName should have a length of 64 characters or fewer to avoid
@@ -218,6 +227,7 @@ type CertificatePrivateKey struct {
 	// will be generated whenever a re-issuance occurs.
 	// Default is 'Never' for backward compatibility.
 	// +optional
+	// +kubebuilder:validation:Enum=Never;Always
 	RotationPolicy PrivateKeyRotationPolicy `json:"rotationPolicy,omitempty"`
 
 	// The private key cryptography standards (PKCS) encoding for this
@@ -245,7 +255,7 @@ type CertificatePrivateKey struct {
 	// If `algorithm` is set to `Ed25519`, Size is ignored.
 	// No other values are allowed.
 	// +optional
-	Size int `json:"size,omitempty"` // Validated by webhook. Be mindful of adding OpenAPI validation- see https://github.com/jetstack/cert-manager/issues/3644
+	Size int `json:"size,omitempty"` // Validated by webhook. Be mindful of adding OpenAPI validation- see https://github.com/cert-manager/cert-manager/issues/3644
 }
 
 // Denotes how private keys should be generated or sourced when a Certificate
@@ -279,12 +289,15 @@ const (
 	// CertificateOutputFormatDERKey is the name of the data entry in the Secret
 	// resource used to store the DER formatted private key.
 	CertificateOutputFormatDERKey string = "key.der"
+
 	// CertificateOutputFormatDER  writes the Certificate's private key in DER
 	// binary format to the `key.der` target Secret Data key.
 	CertificateOutputFormatDER CertificateOutputFormatType = "DER"
+
 	// CertificateOutputFormatCombinedPEMKey is the name of the data entry in the Secret
 	// resource used to store the combined PEM (key + signed certificate).
 	CertificateOutputFormatCombinedPEMKey string = "tls-combined.pem"
+
 	// CertificateOutputFormatCombinedPEM  writes the Certificate's signed
 	// certificate chain and private key, in PEM format, to the
 	// `tls-combined.pem` target Secret Data key. The value at this key will
@@ -385,6 +398,8 @@ type PKCS12Keystore struct {
 type CertificateStatus struct {
 	// List of status conditions to indicate the status of certificates.
 	// Known condition types are `Ready` and `Issuing`.
+	// +listType=map
+	// +listMapKey=type
 	// +optional
 	Conditions []CertificateCondition `json:"conditions,omitempty"`
 
@@ -437,6 +452,14 @@ type CertificateStatus struct {
 	// not set or False.
 	// +optional
 	NextPrivateKeySecretName *string `json:"nextPrivateKeySecretName,omitempty"`
+
+	// The number of continuous failed issuance attempts up till now. This
+	// field gets removed (if set) on a successful issuance and gets set to
+	// 1 if unset and an issuance has failed. If an issuance has failed, the
+	// delay till the next issuance will be calculated using formula
+	// time.Hour * 2 ^ (failedIssuanceAttempts - 1).
+	// +optional
+	FailedIssuanceAttempts *int `json:"failedIssuanceAttempts,omitempty"`
 }
 
 // CertificateCondition contains condition information for an Certificate.
@@ -508,6 +531,7 @@ type CertificateSecretTemplate struct {
 	// Annotations is a key value map to be copied to the target Kubernetes Secret.
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+
 	// Labels is a key value map to be copied to the target Kubernetes Secret.
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
