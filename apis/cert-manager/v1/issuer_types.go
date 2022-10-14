@@ -26,7 +26,7 @@ import (
 
 // +genclient
 // +k8s:openapi-gen=true
-// +kubebuilder:object:root=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:storageversion
 
 // An Issuer represents a certificate issuing authority which can be
@@ -50,7 +50,7 @@ type Issuer struct {
 	Status IssuerStatus `json:"status"`
 }
 
-// +kubebuilder:object:root=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // IssuerList is a list of Issuers
 type IssuerList struct {
@@ -264,6 +264,8 @@ type CAIssuer struct {
 type IssuerStatus struct {
 	// List of status conditions to indicate the status of a CertificateRequest.
 	// Known condition types are `Ready`.
+	// +listType=map
+	// +listMapKey=type
 	// +optional
 	Conditions []IssuerCondition `json:"conditions,omitempty"`
 
