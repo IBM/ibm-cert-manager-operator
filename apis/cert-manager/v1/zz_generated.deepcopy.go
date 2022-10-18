@@ -22,8 +22,8 @@ limitations under the License.
 package v1
 
 import (
-	acme_cert_managerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/acme.cert-manager/v1"
-	meta_cert_managerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/meta.cert-manager/v1"
+	acme_cert_managerv1 "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
+	meta_cert_managerv1 "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
