@@ -37,9 +37,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
@@ -76,9 +76,9 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	reqLogger.Info("Reconciling CertificateRefresh")
 
 	// Get the certificate that invoked reconciliation is a CA in the listOfCAs
-
-	cert := &certmanagerv1.Certificate{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, cert)
+	secret := &corev1.Secret{}
+	//cert := &certmanagerv1.Certificate{}
+	err := r.Client.Get(context.TODO(), req.NamespacedName, secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile req
@@ -108,6 +108,18 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// 		return ctrl.Result{}, err
 	// 	}
 	// }
+
+	// Get the certificate by this secret in the same namespace
+	cert, err := r.getCertificateBySecret(secret)
+	foundCert := true
+	if err != nil {
+		if errors.IsNotFound(err) {
+			logd.Info("Cert instance not found in the namespace")
+			foundCert = false
+		} else {
+			return ctrl.Result{}, err
+		}
+	}
 
 	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
 	// If fields exist, don't do anything
@@ -158,15 +170,26 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	logd.Info("Flag EnableCertRefresh is set to true!")
 
 	found := false
-	for _, caCert := range listOfCAs {
-		if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
-			found = true
-			break
+	// if we found this certificate in the same namespace
+	if foundCert {
+		// check this cert is ca or not
+		for _, caCert := range listOfCAs {
+			if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
+				found = true
+				break
+			}
 		}
-	}
+		// check this certificate has refresh label or not
+		if cert.Labels[res.RefreshCALabel] == "true" {
+			found = true
+		}
 
-	if cert.Labels[res.RefreshCALabel] == "true" {
-		found = true
+	} else {
+		// if we didn't found this certifcate in the same namespace
+		// check this secret has refresh label or not
+		if secret.GetLabels()[res.RefreshCALabel] == "true" {
+			found = true
+		}
 	}
 
 	if !found {
@@ -177,19 +200,11 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	logd.Info("Certificate is a CA, its leaf should be refreshed", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
 
-	// Get secret corresponding to the CA certificate
-	caSecret, err := r.getSecret(cert)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
-	}
 	//Get tls.crt of the CA
-	tlsValueOfCA := caSecret.Data["tls.crt"]
+	tlsValueOfCA := secret.Data["tls.crt"]
 
 	// Fetch issuers
-	issuers, err := r.findIssuersBasedOnCA(caSecret)
+	issuers, err := r.findIssuersBasedOnCA(secret)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -279,8 +294,18 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 		}
 	}
 
-	logd.Info("All leaf certificates refreshed for", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+	logd.Info("All leaf certificates refreshed for", "Secret.Name", secret.Name, "Secret.Namespace", secret.Namespace)
 	return ctrl.Result{}, nil
+}
+
+// Get the certificate by secret in the same namespace
+func (r *CertificateRefreshReconciler) getCertificateBySecret(secret *corev1.Secret) (*certmanagerv1.Certificate, error) {
+	certName := secret.GetAnnotations()["cert-manager.io/certificate-name"]
+	namespace := secret.GetNamespace()
+	cert := &certmanagerv1.Certificate{}
+	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: certName, Namespace: namespace}, cert)
+
+	return cert, err
 }
 
 //setCSCACertificateDuration sets duration of cs-ca-certificate to 2 years
@@ -521,45 +546,20 @@ func (r *CertificateRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		return err
 	}
 
+	isCertSecret, err := predicate.LabelSelectorPredicate(metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"operator.ibm.com/watched-by-cert-manager": "",
+		},
+	})
+	if err != nil {
+		return err
+	}
+
 	// Watch for changes to Certificates in the cluster
-	err = c.Watch(&source.Kind{Type: &certmanagerv1.Certificate{}}, &handler.EnqueueRequestForObject{}, isCACertificatePredicate{})
+	err = c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForObject{}, isCertSecret)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// isCACertificatePredicate implements a predicate verifying that
-// a certificate is a CA certificate. This only applies to Create and Update events. Deletes
-// and Generics should not make it to the work queue.
-type isCACertificatePredicate struct{}
-
-// Update implements default UpdateEvent filter for validating if object has the
-// `isCA: true` which helps identify that it is a CA certificate.
-// Intended to be used with certificates.
-func (isCACertificatePredicate) Update(e event.UpdateEvent) bool {
-	reqCert := (e.ObjectOld).(*certmanagerv1.Certificate)
-	if !reqCert.Spec.IsCA {
-		return false
-	}
-
-	return e.ObjectOld != e.ObjectNew
-}
-
-// Create implements default CreateEvent filter for validating if object is a CA
-// Intended to be used with certificates.
-
-func (isCACertificatePredicate) Create(e event.CreateEvent) bool {
-	reqCert := (e.Object).(*certmanagerv1.Certificate)
-
-	return reqCert.Spec.IsCA
-}
-
-func (isCACertificatePredicate) Delete(e event.DeleteEvent) bool {
-	return false
-}
-
-func (isCACertificatePredicate) Generic(e event.GenericEvent) bool {
-	return false
 }
