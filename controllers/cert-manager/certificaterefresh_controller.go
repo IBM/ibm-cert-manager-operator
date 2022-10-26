@@ -42,10 +42,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
 )
 
 var logd = log.Log.WithName("controller_certificaterefresh")

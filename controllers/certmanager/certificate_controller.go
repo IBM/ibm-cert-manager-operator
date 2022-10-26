@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	"golang.org/x/mod/semver"
 	admRegv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
