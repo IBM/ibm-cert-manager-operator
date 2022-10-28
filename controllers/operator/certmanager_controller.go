@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v1apis/cert-manager/v1"
 	"golang.org/x/mod/semver"
 	admRegv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
