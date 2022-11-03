@@ -167,31 +167,31 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	logd.Info("Flag EnableCertRefresh is set to true!")
-
-	found := false
+	// found ca cert or ca secret
+	foundCA := false
 	// if we found this certificate in the same namespace
 	if foundCert {
 		// check this cert is ca or not
 		for _, caCert := range listOfCAs {
 			if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
-				found = true
+				foundCA = true
 				break
 			}
 		}
 		// check this certificate has refresh label or not
 		if cert.Labels[res.RefreshCALabel] == "true" {
-			found = true
+			foundCA = true
 		}
 
 	} else {
 		// if we didn't found this certifcate in the same namespace
 		// check this secret has refresh label or not
 		if secret.GetLabels()[res.RefreshCALabel] == "true" {
-			found = true
+			foundCA = true
 		}
 	}
 
-	if !found {
+	if !foundCA {
 		//if certificate not in the list, disregard i.e. return and don't requeue
 		logd.Info("Certificate doesn't need its leaf certs refreshed. Disregarding.", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
 		return ctrl.Result{}, nil
