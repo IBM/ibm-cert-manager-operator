@@ -35,7 +35,6 @@ import (
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metaerrors "k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -168,51 +167,46 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	v1Issuer := &certmanagerv1.Issuer{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Issuer",
-			APIVersion: "cert-manager.io/v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "example-issuer",
-			Namespace: res.DeployNamespace,
-		},
-		Spec: certmanagerv1.IssuerSpec{
-			IssuerConfig: certmanagerv1.IssuerConfig{
-				SelfSigned: &certmanagerv1.SelfSignedIssuer{},
-			},
-		},
+	// delete Issuer in case it was not cleaned up properly before
+	if err = r.DeleteIssuer(res.Issuer); err != nil {
+		logd.Error(err, "Failed to delete smoke check Issuer")
+		return ctrl.Result{}, err
 	}
 
-	deleteError := r.DeleteIssuer(v1Issuer)
-	if deleteError != nil {
-		if !errors.IsNotFound(deleteError) {
-			logd.Error(err, "Failed to delete exampleIssuer, reconciling...")
+	foundCommunityCertManager, err := r.FoundCommunityCertManager(res.Issuer)
+	if err != nil {
+		if strings.Contains(fmt.Sprint(err), "failed to call webhook") {
+			isBedrockWebhook, err := r.checkValidatingWebhookConfiguration()
+			if err != nil {
+				if !errors.IsNotFound(err) {
+					logd.Error(err, "Failed to get ValidatingWebhookConfiguration")
+					return ctrl.Result{}, err
+				}
+				isBedrockWebhook, err = r.checkMutatingWebhookConfiguration()
+				if err != nil {
+					logd.Error(err, "Failed to get MutatingWebhookConfiguration")
+					return ctrl.Result{}, err
+				}
+			}
+
+			// If the webhook error is from the community, then user should resolve them since not managed by Bedrock
+			// If error is coming from Bedrock cert-manager-webhooks, we continue with normal operand installation
+			// since this was how the behaviour previously was, and maybe a reconciliation can fix things.
+			if !isBedrockWebhook {
+				logd.Info("Error with calling cert-manager-webhook, verify your open source cert-manager installation")
+				return ctrl.Result{}, nil
+			}
+
+		} else {
+			logd.Error(nil, "Error occurred while checking if another cert-manager installed")
 			return ctrl.Result{}, err
 		}
 	}
 
-	foundCommunityCertManager, err := r.FoundCommunityCertManager(v1Issuer)
-	if err != nil {
-		if !strings.Contains(fmt.Sprint(err), "failed to call webhook") {
-			getValidatingWebhookConfiguration, err := r.checkValidatingWebhookConfiguration()
-			if err != nil {
-				logd.Error(err, "Failed to check ValidatingWebhookConfiguration, reconciling...")
-				return ctrl.Result{}, err
-			}
-			if !getValidatingWebhookConfiguration {
-				logd.Info("fall to call webhook")
-				return ctrl.Result{}, nil
-			}
-		} else {
-			logd.Info("Kuberentes can't create issuer, Requeuing")
-			return ctrl.Result{RequeueAfter: time.Second * 30}, nil
-		}
-
-	}
-
 	if foundCommunityCertManager {
-		logd.Info("Found another cert-manager controller running on cluster, so skipping operand installation")
+		logd.Info("Found another cert-manager running on cluster, so skipping operand reconcile")
+		r.updateEvent(instance, "Deployed cert-manager successfully", corev1.EventTypeNormal, "Deployed")
+		r.updateStatus(instance, "Successfully deployed cert-manager")
 		return ctrl.Result{}, nil
 	}
 
@@ -380,14 +374,26 @@ func (r *CertManagerReconciler) checkValidatingWebhookConfiguration() (bool, err
 	// check the name of this ValidatingWebhookConfiguration
 	err := r.Client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, validating)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return false, nil
-		}
 		return false, err
 	}
 
-	ControllerName := validating.GetLabels()["app"]
-	if ControllerName != "ibm-cert-manager-controller" {
+	controllerName := validating.GetLabels()["app"]
+	if controllerName != "ibm-cert-manager-controller" {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (r *CertManagerReconciler) checkMutatingWebhookConfiguration() (bool, error) {
+	webhook := &admRegv1.MutatingWebhookConfiguration{}
+	err := r.Client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, webhook)
+	if err != nil {
+		return false, err
+	}
+
+	label := webhook.GetLabels()["app"]
+	if label != "ibm-cert-manager-controller" {
 		return false, nil
 	}
 
@@ -396,82 +402,88 @@ func (r *CertManagerReconciler) checkValidatingWebhookConfiguration() (bool, err
 
 // used to check communityCertManager is deployed or not
 // try to deploy issuer if it has status, and check cert-manager-controller deployment has ibm label or not
-func (r *CertManagerReconciler) FoundCommunityCertManager(v1Issuer *certmanagerv1.Issuer) (bool, error) {
+func (r *CertManagerReconciler) FoundCommunityCertManager(v1Issuer certmanagerv1.Issuer) (bool, error) {
 
-	if err := r.DeployIssuer(v1Issuer); err != nil {
-		logd.V(2).Info("Can't deploy example Issuer", "", err)
+	if err := r.CreateIssuer(v1Issuer); err != nil {
+		logd.Info("Failed to create smoke check issuer. Ignoring if webhook error")
 		return false, err
 	}
 
-	// check issuer has status
 	hasStatus, err := r.hasStatus()
 	if err != nil {
-		logd.Error(err, "Can't get status")
+		logd.Error(err, "Failed checking status")
 		return false, err
 	}
 
-	// delete issuer
 	if err := r.DeleteIssuer(v1Issuer); err != nil {
-		logd.Error(err, "Can't delete example Issuer")
+		logd.Error(err, "Failed to delete smoke check issuer")
 		return false, err
 	}
 
+	// in upgrade scenario, Bedrock cert-manager controller could be running
+	// and if it is, then continue with operand creation logic
 	if hasStatus {
-		// try to get cert-manager-controller deployment
 		if err := r.GetCertManagerControllerDeployment(); err != nil {
 			if errors.IsNotFound(err) {
-				logd.Info("Found community cert-manager")
+				logd.Info("Could not find Bedrock cert-manager-controller")
 				return true, nil
 			}
-			logd.Error(err, "Can't get cert-manager-controller deployment")
+			logd.Error(err, "Error encountered finding Bedrock cert-manager-controller")
 			return false, err
 		}
 
-		logd.Info("Found IBM cert-manager")
+		logd.Info("Found Bedrock cert-manager-controller")
 		return false, nil
 	}
 
-	logd.Info("There is no cert-manager in the cluster")
+	logd.Info("No cert-manager-controller found on cluster, continuing operand reconcile")
 	return false, nil
-
 }
 
 // get the status of example issuer
 func (r *CertManagerReconciler) hasStatus() (bool, error) {
-	time.Sleep(10 * time.Second)
+	waitTime := 5 * time.Second
 
-	exampleIssuer := &certmanagerv1.Issuer{}
-	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: res.DeployNamespace, Name: "example-issuer"}, exampleIssuer); err != nil {
-		logd.Error(err, "Can't get example-issuer")
+	// extend wait time if CRDs are found to handle slow clusters
+	crd := &apiextensionsAPIv1.CustomResourceDefinition{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{Name: "issuers.cert-manager.io"}, crd); err != nil {
+		if !errors.IsNotFound(err) {
+			return false, err
+		}
+		crd = nil
+	}
+
+	if crd != nil {
+		waitTime = waitTime * 6
+	}
+
+	logd.Info("Waiting for Issuer status.", "wait time:", waitTime)
+
+	time.Sleep(waitTime)
+
+	issuer := &certmanagerv1.Issuer{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: res.Issuer.Namespace, Name: res.Issuer.Name}, issuer); err != nil {
 		return false, err
 	}
 
-	hasCondition := exampleIssuer.Status.Conditions != nil
-	return hasCondition, nil
-
+	return issuer.Status.Conditions != nil, nil
 }
 
-// deploy a test issuer
-func (r *CertManagerReconciler) DeployIssuer(issuer *certmanagerv1.Issuer) error {
-	err := r.Client.Create(context.TODO(), issuer)
+// Creates an Issuer issuer
+func (r *CertManagerReconciler) CreateIssuer(i certmanagerv1.Issuer) error {
+	err := r.Client.Create(context.TODO(), &i)
 	if err != nil && !errors.IsAlreadyExists(err) {
-		return fmt.Errorf("could not Create resource: %v", err)
+		return err
 	}
 
 	return nil
 }
 
-// delete a test issuer
-func (r *CertManagerReconciler) DeleteIssuer(issuer *certmanagerv1.Issuer) error {
-	found := &certmanagerv1.Issuer{}
-
-	if err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: issuer.GetName(), Namespace: issuer.GetNamespace()}, found); err != nil {
-		return err
-	}
-
-	err := r.Client.Delete(context.TODO(), found)
+// Deletes an Issuer i
+func (r *CertManagerReconciler) DeleteIssuer(i certmanagerv1.Issuer) error {
+	err := r.Client.Delete(context.TODO(), &i)
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("could not Delete resource: %v", err)
+		return err
 	}
 	return nil
 }
