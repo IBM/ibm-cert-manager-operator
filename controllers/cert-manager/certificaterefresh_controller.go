@@ -39,7 +39,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
@@ -546,17 +545,8 @@ func (r *CertificateRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		return err
 	}
 
-	isCertSecret, err := predicate.LabelSelectorPredicate(metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			"operator.ibm.com/watched-by-cert-manager": "",
-		},
-	})
-	if err != nil {
-		return err
-	}
-
 	// Watch for changes to Certificates in the cluster
-	err = c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForObject{}, isCertSecret)
+	err = c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
