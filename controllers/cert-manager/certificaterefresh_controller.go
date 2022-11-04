@@ -86,23 +86,6 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	// Get the certificate by this secret in the same namespace
-	cert, err := r.getCertificateBySecret(secret)
-	foundCert := true
-	if err != nil {
-		if !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
-		logd.Info("Failed to find backing Certificate object for secret", "name:", secret.Name, "namespace:", secret.Namespace)
-		foundCert = false
-	}
-
-	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
-	// If fields exist, don't do anything
-	if err := r.setCSCACertificateDuration(cert); err != nil {
-		return ctrl.Result{}, err
-	}
-
 	// Fetch the CertManager instance to check the enableCertRefresh flag
 	instance := &operatorv1alpha1.CertManager{}
 	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: res.CertManagerInstanceName, Namespace: ""}, instance)
@@ -144,37 +127,53 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	logd.Info("Flag EnableCertRefresh is set to true!")
+
 	// found ca cert or ca secret
 	foundCA := false
-	// if we found this certificate in the same namespace
-	if foundCert {
-		// check if certificate is in list of CAs to refresh
-		for _, caCert := range listOfCAs {
-			if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
-				foundCA = true
-				break
+	// check this secret has refresh label or not
+	// if this secret has refresh label
+	if secret.GetLabels()[res.RefreshCALabel] == "true" {
+		foundCA = true
+	} else {
+		// Get the certificate by this secret in the same namespace
+		cert, err := r.getCertificateBySecret(secret)
+		foundCert := true
+		if err != nil {
+			if !errors.IsNotFound(err) {
+				return ctrl.Result{}, err
 			}
+			logd.Info("Failed to find backing Certificate object for secret", "name:", secret.Name, "namespace:", secret.Namespace)
+			foundCert = false
 		}
-		// check this certificate has refresh label or not
-		if cert.Labels[res.RefreshCALabel] == "true" {
-			foundCA = true
+		// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
+		// If fields exist, don't do anything
+		if err := r.setCSCACertificateDuration(cert); err != nil {
+			return ctrl.Result{}, err
 		}
 
-	} else {
-		// if we didn't found this certifcate in the same namespace
-		// check this secret has refresh label or not
-		if secret.GetLabels()[res.RefreshCALabel] == "true" {
-			foundCA = true
+		// if we found this certificate in the same namespace
+		if foundCert {
+			// check if certificate is in list of CAs to refresh
+			for _, caCert := range listOfCAs {
+				if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
+					foundCA = true
+					break
+				}
+			}
+			// check this certificate has refresh label or not
+			if cert.Labels[res.RefreshCALabel] == "true" {
+				foundCA = true
+			}
 		}
 	}
 
 	if !foundCA {
 		//if certificate not in the list, disregard i.e. return and don't requeue
-		logd.Info("Certificate doesn't need its leaf certs refreshed. Disregarding.", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+		logd.Info("Certificate Secret doesn't need its leaf certs refreshed. Disregarding.", "Secret.Name", secret.Name, "Secret.Namespace", secret.Namespace)
 		return ctrl.Result{}, nil
 	}
 
-	logd.Info("Certificate is a CA, its leaf should be refreshed", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+	logd.Info("Certificate Secret is a CA, its leaf should be refreshed", "Secret.Name", secret.Name, "Secret.Namespace", secret.Namespace)
 
 	//Get tls.crt of the CA
 	tlsValueOfCA := secret.Data["tls.crt"]
