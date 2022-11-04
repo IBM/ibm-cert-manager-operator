@@ -86,27 +86,6 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	// trigger conversion controller to handle mixing v1 CA Certificates and
-	// v1alpha1 leaf Certificates
-	// if cert.Labels[res.OperatorGeneratedAnno] == "" && cert.Labels[res.ProperV1Label] == "" {
-	// 	v1alpha1 := &certmanagerv1alpha1.Certificate{}
-	// 	if err := r.Client.Get(context.TODO(), req.NamespacedName, v1alpha1); err != nil {
-	// 		if errors.IsNotFound(err) {
-	// 			// Request object not found, could have been deleted after reconcile req
-	// 			// Return and don't requeue
-	// 			reqLogger.Info("Could not find v1alpha1 certificate")
-	// 			return ctrl.Result{}, nil
-	// 		}
-	// 		return ctrl.Result{}, err
-	// 	}
-	// 	reqLogger.Info("Emptying v1alpha1 Cert status")
-	// 	v1alpha1.Status = certmanagerv1alpha1.CertificateStatus{}
-	// 	if err := r.Client.Update(context.TODO(), v1alpha1); err != nil {
-	// 		reqLogger.Error(err, "failed to empty v1alpha1 status")
-	// 		return ctrl.Result{}, err
-	// 	}
-	// }
-
 	// Get the certificate by this secret in the same namespace
 	cert, err := r.getCertificateBySecret(secret)
 	foundCert := true
@@ -206,14 +185,6 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	//nolint
-	//TODO: Add clusterissuer to api
-	// // Fetch clusterissuers
-	// clusterissuers, err := r.findClusterIssuersBasedOnCA(caSecret)
-	// if err != nil {
-	// 	return ctrl.Result{}, err
-	// }
-
 	// // Fetch all the secrets of leaf certificates issued by these issuers/clusterissuers
 	var leafSecrets []*corev1.Secret
 
@@ -234,27 +205,6 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 	logd.V(2).Info("List of v1alpha1 leaves for refresh", "v1alpha1 certs", v1alpha1Leaves)
-
-	//nolint
-	//TODO: Add clusterissuer to api
-	// allNamespaces, err := r.getAllNamespaces()
-	// if err != nil {
-	// 	logd.Error(err, "Error listing all namespaces - requeue the request")
-	// 	return ctrl.Result{}, err
-	// }
-
-	//nolint
-	//TODO: Add clusterissuer to api
-	// for _, clusterissuer := range clusterissuers {
-	// 	for _, ns := range allNamespaces.Items {
-	// 		clusterLeafSecrets, err := r.findLeafSecrets(clusterissuer.Name, ns.Name)
-	// 		if err != nil {
-	// 			logd.Error(err, "Error reading the leaf certificates for clusterissuer - requeue the request")
-	// 			return ctrl.Result{}, err
-	// 		}
-	// 		leafSecrets = append(leafSecrets, clusterLeafSecrets...)
-	// 	}
-	// }
 
 	// Compare ca.crt in leaf with tls.crt of CA
 	// If the values don't match, delete the secret; if error, requeue else don't requeue
