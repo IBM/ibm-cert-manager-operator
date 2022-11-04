@@ -167,9 +167,11 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
+	logd.Info("Starting auto-detection process to search for another cert-manager running on cluster")
+
 	// delete Issuer in case it was not cleaned up properly before
 	if err = r.DeleteIssuer(res.Issuer); err != nil {
-		logd.Error(err, "Failed to delete smoke check Issuer")
+		logd.Info("Failed to clean up auto-detection resources from previous checks")
 		return ctrl.Result{}, err
 	}
 
@@ -179,12 +181,10 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			isBedrockWebhook, err := r.checkValidatingWebhookConfiguration()
 			if err != nil {
 				if !errors.IsNotFound(err) {
-					logd.Error(err, "Failed to get ValidatingWebhookConfiguration")
 					return ctrl.Result{}, err
 				}
 				isBedrockWebhook, err = r.checkMutatingWebhookConfiguration()
 				if err != nil {
-					logd.Error(err, "Failed to get MutatingWebhookConfiguration")
 					return ctrl.Result{}, err
 				}
 			}
@@ -193,20 +193,22 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			// If error is coming from Bedrock cert-manager-webhooks, we continue with normal operand installation
 			// since this was how the behaviour previously was, and maybe a reconciliation can fix things.
 			if !isBedrockWebhook {
-				logd.Info("Error with calling cert-manager-webhook, verify your open source cert-manager installation")
+				logd.Info("Auto-detection found error with calling cert-manager-webhook, verify your open source cert-manager installation, and then restart this pod")
 				return ctrl.Result{}, nil
 			}
 
 		} else {
-			logd.Error(nil, "Error occurred while checking if another cert-manager installed")
+			logd.Error(nil, "Auto-detection found error while checking if another cert-manager installed")
 			return ctrl.Result{}, err
 		}
 	}
 
+	logd.Info("Auto-detection process complete")
+
 	if foundCommunityCertManager {
-		logd.Info("Found another cert-manager running on cluster, so skipping operand reconcile")
-		r.updateEvent(instance, "Deployed cert-manager successfully", corev1.EventTypeNormal, "Deployed")
-		r.updateStatus(instance, "Successfully deployed cert-manager")
+		logd.Info("Auto-detection found another cert-manager running on cluster, so skipping operand reconcile")
+		r.updateEvent(instance, "Found another cert-manager running on cluster, skipping operand deployment", corev1.EventTypeNormal, "Skipped")
+		r.updateStatus(instance, "Successfully skipped operand deployment because another cert-manager running on cluster")
 		return ctrl.Result{}, nil
 	}
 
@@ -374,11 +376,12 @@ func (r *CertManagerReconciler) checkValidatingWebhookConfiguration() (bool, err
 	// check the name of this ValidatingWebhookConfiguration
 	err := r.Client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, validating)
 	if err != nil {
+		logd.Error(err, "Failed to get ValidatingWebhookConfiguration", "name:", res.CertManagerWebhookName)
 		return false, err
 	}
 
-	controllerName := validating.GetLabels()["app"]
-	if controllerName != "ibm-cert-manager-controller" {
+	label := validating.GetLabels()["app"]
+	if label != "ibm-cert-manager-webhook" {
 		return false, nil
 	}
 
@@ -389,6 +392,7 @@ func (r *CertManagerReconciler) checkMutatingWebhookConfiguration() (bool, error
 	webhook := &admRegv1.MutatingWebhookConfiguration{}
 	err := r.Client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, webhook)
 	if err != nil {
+		logd.Error(err, "Failed to get MutatingWebhookConfiguration", "name:", res.CertManagerWebhookName)
 		return false, err
 	}
 
@@ -404,19 +408,19 @@ func (r *CertManagerReconciler) checkMutatingWebhookConfiguration() (bool, error
 // try to deploy issuer if it has status, and check cert-manager-controller deployment has ibm label or not
 func (r *CertManagerReconciler) FoundCommunityCertManager(v1Issuer certmanagerv1.Issuer) (bool, error) {
 
+	logd.Info("Creating Issuer for auto-detection. If Issuer is reconciled and cannot find Bedrock cert-manager-controller, then another cert-manager is running on the cluster.")
 	if err := r.CreateIssuer(v1Issuer); err != nil {
-		logd.Info("Failed to create smoke check issuer. Ignoring if webhook error")
+		logd.Info("Checking if error is from webhook")
 		return false, err
 	}
 
 	hasStatus, err := r.hasStatus()
 	if err != nil {
-		logd.Error(err, "Failed checking status")
+		logd.Error(err, "Failed to check status of auto-detection Issuer", "name:", res.Issuer.Name, "namespace:", res.Issuer.Namespace)
 		return false, err
 	}
 
 	if err := r.DeleteIssuer(v1Issuer); err != nil {
-		logd.Error(err, "Failed to delete smoke check issuer")
 		return false, err
 	}
 
@@ -425,24 +429,25 @@ func (r *CertManagerReconciler) FoundCommunityCertManager(v1Issuer certmanagerv1
 	if hasStatus {
 		if err := r.GetCertManagerControllerDeployment(); err != nil {
 			if errors.IsNotFound(err) {
-				logd.Info("Could not find Bedrock cert-manager-controller")
+				logd.Info("Auto-detection could not find Bedrock cert-manager-controller")
 				return true, nil
 			}
-			logd.Error(err, "Error encountered finding Bedrock cert-manager-controller")
+			logd.Error(err, "Auto-detection encountered error finding Bedrock cert-manager-controller")
 			return false, err
 		}
 
-		logd.Info("Found Bedrock cert-manager-controller")
+		logd.Info("Auto-detection found Bedrock cert-manager-controller, continuing operand reconcile")
 		return false, nil
 	}
 
-	logd.Info("No cert-manager-controller found on cluster, continuing operand reconcile")
+	logd.Info("Auto-detection did not find any cert-manager-controller found on cluster, continuing operand reconcile")
 	return false, nil
 }
 
 // get the status of example issuer
 func (r *CertManagerReconciler) hasStatus() (bool, error) {
-	waitTime := 5 * time.Second
+	pollRate := 1 * time.Second
+	timeout := 5
 
 	// extend wait time if CRDs are found to handle slow clusters
 	crd := &apiextensionsAPIv1.CustomResourceDefinition{}
@@ -454,25 +459,32 @@ func (r *CertManagerReconciler) hasStatus() (bool, error) {
 	}
 
 	if crd != nil {
-		waitTime = waitTime * 6
+		timeout = timeout * 6
 	}
-
-	logd.Info("Waiting for Issuer status.", "wait time:", waitTime)
-
-	time.Sleep(waitTime)
 
 	issuer := &certmanagerv1.Issuer{}
-	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: res.Issuer.Namespace, Name: res.Issuer.Name}, issuer); err != nil {
-		return false, err
+	for i := 0; i < timeout; i++ {
+		logd.Info("Polling auto-detection Issuer status", "poll rate:", pollRate, "timeout:", pollRate*time.Duration(timeout))
+		if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: res.Issuer.Namespace, Name: res.Issuer.Name}, issuer); err != nil {
+			// ignore not found errors because k8s might be slow to create the smoke-check-issuer
+			if !errors.IsNotFound(err) {
+				return false, err
+			}
+		}
+		if issuer.Status.Conditions != nil {
+			return true, nil
+		}
+		time.Sleep(pollRate)
 	}
 
-	return issuer.Status.Conditions != nil, nil
+	return false, nil
 }
 
 // Creates an Issuer issuer
 func (r *CertManagerReconciler) CreateIssuer(i certmanagerv1.Issuer) error {
 	err := r.Client.Create(context.TODO(), &i)
 	if err != nil && !errors.IsAlreadyExists(err) {
+		logd.Info("Failed to create Issuer", "name:", res.Issuer.Name, "namespace:", res.Issuer.Namespace)
 		return err
 	}
 
@@ -483,6 +495,7 @@ func (r *CertManagerReconciler) CreateIssuer(i certmanagerv1.Issuer) error {
 func (r *CertManagerReconciler) DeleteIssuer(i certmanagerv1.Issuer) error {
 	err := r.Client.Delete(context.TODO(), &i)
 	if err != nil && !errors.IsNotFound(err) {
+		logd.Error(err, "Failed to delete Issuer", "name:", res.Issuer.Name, "namespace:", res.Issuer.Namespace)
 		return err
 	}
 	return nil
