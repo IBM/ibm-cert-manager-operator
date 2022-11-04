@@ -170,7 +170,7 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	foundCA := false
 	// if we found this certificate in the same namespace
 	if foundCert {
-		// check this cert is ca or not
+		// check if certificate is in list of CAs to refresh
 		for _, caCert := range listOfCAs {
 			if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
 				foundCA = true
