@@ -112,12 +112,11 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	cert, err := r.getCertificateBySecret(secret)
 	foundCert := true
 	if err != nil {
-		if errors.IsNotFound(err) {
-			logd.Info("Cert instance not found in the namespace")
-			foundCert = false
-		} else {
+		if !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
+		logd.Info("Failed to find backing Certificate object for secret", "name:", secret.Name, "namespace:", secret.Namespace)
+		foundCert = false
 	}
 
 	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
