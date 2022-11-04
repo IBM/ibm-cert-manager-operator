@@ -76,7 +76,6 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	// Get the certificate that invoked reconciliation is a CA in the listOfCAs
 	secret := &corev1.Secret{}
-	//cert := &certmanagerv1.Certificate{}
 	err := r.Client.Get(context.TODO(), req.NamespacedName, secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
