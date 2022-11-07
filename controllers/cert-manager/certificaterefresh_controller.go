@@ -37,7 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -76,42 +75,14 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 	reqLogger.Info("Reconciling CertificateRefresh")
 
 	// Get the certificate that invoked reconciliation is a CA in the listOfCAs
-
-	cert := &certmanagerv1.Certificate{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, cert)
+	secret := &corev1.Secret{}
+	err := r.Client.Get(context.TODO(), req.NamespacedName, secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile req
 			// Return and don't requeue
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, err
-	}
-
-	// trigger conversion controller to handle mixing v1 CA Certificates and
-	// v1alpha1 leaf Certificates
-	// if cert.Labels[res.OperatorGeneratedAnno] == "" && cert.Labels[res.ProperV1Label] == "" {
-	// 	v1alpha1 := &certmanagerv1alpha1.Certificate{}
-	// 	if err := r.Client.Get(context.TODO(), req.NamespacedName, v1alpha1); err != nil {
-	// 		if errors.IsNotFound(err) {
-	// 			// Request object not found, could have been deleted after reconcile req
-	// 			// Return and don't requeue
-	// 			reqLogger.Info("Could not find v1alpha1 certificate")
-	// 			return ctrl.Result{}, nil
-	// 		}
-	// 		return ctrl.Result{}, err
-	// 	}
-	// 	reqLogger.Info("Emptying v1alpha1 Cert status")
-	// 	v1alpha1.Status = certmanagerv1alpha1.CertificateStatus{}
-	// 	if err := r.Client.Update(context.TODO(), v1alpha1); err != nil {
-	// 		reqLogger.Error(err, "failed to empty v1alpha1 status")
-	// 		return ctrl.Result{}, err
-	// 	}
-	// }
-
-	// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
-	// If fields exist, don't do anything
-	if err := r.setCSCACertificateDuration(cert); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -157,50 +128,61 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	logd.Info("Flag EnableCertRefresh is set to true!")
 
-	found := false
-	for _, caCert := range listOfCAs {
-		if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
-			found = true
-			break
+	// found ca cert or ca secret
+	foundCA := false
+	// check this secret has refresh label or not
+	// if this secret has refresh label
+	if secret.GetLabels()[res.RefreshCALabel] == "true" {
+		foundCA = true
+	} else {
+		// Get the certificate by this secret in the same namespace
+		cert, err := r.getCertificateBySecret(secret)
+		foundCert := true
+		if err != nil {
+			if !errors.IsNotFound(err) {
+				return ctrl.Result{}, err
+			}
+			logd.Info("Failed to find backing Certificate object for secret", "name:", secret.Name, "namespace:", secret.Namespace)
+			foundCert = false
+		}
+		// Adding extra logic to check the duration of cs-ca-certificate. If no fields, then add the fields with default values
+		// If fields exist, don't do anything
+		if err := r.setCSCACertificateDuration(cert); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// if we found this certificate in the same namespace
+		if foundCert {
+			// check if certificate is in list of CAs to refresh
+			for _, caCert := range listOfCAs {
+				if caCert.CertName == cert.Name && caCert.Namespace == cert.Namespace {
+					foundCA = true
+					break
+				}
+			}
+			// check this certificate has refresh label or not
+			if cert.Labels[res.RefreshCALabel] == "true" {
+				foundCA = true
+			}
 		}
 	}
 
-	if cert.Labels[res.RefreshCALabel] == "true" {
-		found = true
-	}
-
-	if !found {
+	if !foundCA {
 		//if certificate not in the list, disregard i.e. return and don't requeue
-		logd.Info("Certificate doesn't need its leaf certs refreshed. Disregarding.", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+		logd.Info("Certificate Secret doesn't need its leaf certs refreshed. Disregarding.", "Secret.Name", secret.Name, "Secret.Namespace", secret.Namespace)
 		return ctrl.Result{}, nil
 	}
 
-	logd.Info("Certificate is a CA, its leaf should be refreshed", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+	logd.Info("Certificate Secret is a CA, its leaf should be refreshed", "Secret.Name", secret.Name, "Secret.Namespace", secret.Namespace)
 
-	// Get secret corresponding to the CA certificate
-	caSecret, err := r.getSecret(cert)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
-	}
 	//Get tls.crt of the CA
-	tlsValueOfCA := caSecret.Data["tls.crt"]
+	tlsValueOfCA := secret.Data["tls.crt"]
 
 	// Fetch issuers
-	issuers, err := r.findIssuersBasedOnCA(caSecret)
+	issuers, err := r.findIssuersBasedOnCA(secret)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-
-	//nolint
-	//TODO: Add clusterissuer to api
-	// // Fetch clusterissuers
-	// clusterissuers, err := r.findClusterIssuersBasedOnCA(caSecret)
-	// if err != nil {
-	// 	return ctrl.Result{}, err
-	// }
 
 	// // Fetch all the secrets of leaf certificates issued by these issuers/clusterissuers
 	var leafSecrets []*corev1.Secret
@@ -222,27 +204,6 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 	logd.V(2).Info("List of v1alpha1 leaves for refresh", "v1alpha1 certs", v1alpha1Leaves)
-
-	//nolint
-	//TODO: Add clusterissuer to api
-	// allNamespaces, err := r.getAllNamespaces()
-	// if err != nil {
-	// 	logd.Error(err, "Error listing all namespaces - requeue the request")
-	// 	return ctrl.Result{}, err
-	// }
-
-	//nolint
-	//TODO: Add clusterissuer to api
-	// for _, clusterissuer := range clusterissuers {
-	// 	for _, ns := range allNamespaces.Items {
-	// 		clusterLeafSecrets, err := r.findLeafSecrets(clusterissuer.Name, ns.Name)
-	// 		if err != nil {
-	// 			logd.Error(err, "Error reading the leaf certificates for clusterissuer - requeue the request")
-	// 			return ctrl.Result{}, err
-	// 		}
-	// 		leafSecrets = append(leafSecrets, clusterLeafSecrets...)
-	// 	}
-	// }
 
 	// Compare ca.crt in leaf with tls.crt of CA
 	// If the values don't match, delete the secret; if error, requeue else don't requeue
@@ -279,8 +240,18 @@ func (r *CertificateRefreshReconciler) Reconcile(ctx context.Context, req ctrl.R
 		}
 	}
 
-	logd.Info("All leaf certificates refreshed for", "Certificate.Name", cert.Name, "Certificate.Namespace", cert.Namespace)
+	logd.Info("All leaf certificates refreshed for", "Secret.Name", secret.Name, "Secret.Namespace", secret.Namespace)
 	return ctrl.Result{}, nil
+}
+
+// Get the certificate by secret in the same namespace
+func (r *CertificateRefreshReconciler) getCertificateBySecret(secret *corev1.Secret) (*certmanagerv1.Certificate, error) {
+	certName := secret.GetAnnotations()["cert-manager.io/certificate-name"]
+	namespace := secret.GetNamespace()
+	cert := &certmanagerv1.Certificate{}
+	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: certName, Namespace: namespace}, cert)
+
+	return cert, err
 }
 
 //setCSCACertificateDuration sets duration of cs-ca-certificate to 2 years
@@ -522,44 +493,10 @@ func (r *CertificateRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error 
 	}
 
 	// Watch for changes to Certificates in the cluster
-	err = c.Watch(&source.Kind{Type: &certmanagerv1.Certificate{}}, &handler.EnqueueRequestForObject{}, isCACertificatePredicate{})
+	err = c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// isCACertificatePredicate implements a predicate verifying that
-// a certificate is a CA certificate. This only applies to Create and Update events. Deletes
-// and Generics should not make it to the work queue.
-type isCACertificatePredicate struct{}
-
-// Update implements default UpdateEvent filter for validating if object has the
-// `isCA: true` which helps identify that it is a CA certificate.
-// Intended to be used with certificates.
-func (isCACertificatePredicate) Update(e event.UpdateEvent) bool {
-	reqCert := (e.ObjectOld).(*certmanagerv1.Certificate)
-	if !reqCert.Spec.IsCA {
-		return false
-	}
-
-	return e.ObjectOld != e.ObjectNew
-}
-
-// Create implements default CreateEvent filter for validating if object is a CA
-// Intended to be used with certificates.
-
-func (isCACertificatePredicate) Create(e event.CreateEvent) bool {
-	reqCert := (e.Object).(*certmanagerv1.Certificate)
-
-	return reqCert.Spec.IsCA
-}
-
-func (isCACertificatePredicate) Delete(e event.DeleteEvent) bool {
-	return false
-}
-
-func (isCACertificatePredicate) Generic(e event.GenericEvent) bool {
-	return false
 }
