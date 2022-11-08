@@ -251,7 +251,7 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if rhacmErr != nil {
 		// missing RHACM CR or CRD means RHACM does not exist
 		if errors.IsNotFound(rhacmErr) || metaerrors.IsNoMatchError(rhacmErr) {
-			logd.Error(rhacmErr, "Could not find RHACM")
+			logd.Info("Could not find RHACM")
 		} else {
 			return ctrl.Result{}, rhacmErr
 		}
