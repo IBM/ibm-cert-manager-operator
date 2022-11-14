@@ -57,6 +57,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/IBM/controller-filtered-cache v0.2.0/go.mod h1:x6kTgtNFa6YL5mqVUh14RMoW89ycqP9/6ZjgzkBP808=
 github.com/IBM/controller-filtered-cache v0.3.4 h1:msdH0oQqEab+R8bppCUcOJVDQw6yxYFAvrLqUtSDp0E=
 github.com/IBM/controller-filtered-cache v0.3.4/go.mod h1:NDLuOZt+Qk5hZQlVz74ZszrvO2741sO5X7kE9PV/4VI=
+github.com/IBM/controller-filtered-cache v0.3.5 h1:XoT+7B12jGeWHZBe3qOnXNCJukGtXP+MUVnu0Lq4BvM=
+github.com/IBM/controller-filtered-cache v0.3.5/go.mod h1:Lu4gJQZ9TqO9FiQXq+JA5gXs8/4AoFmo4ee+PD5Lp/A=
 github.com/IBM/ibm-secretshare-operator v1.11.0 h1:o6DvaOnHfCgTf7U5FdV6RnM153dZ9Wu5n96y638SGXg=
 github.com/IBM/ibm-secretshare-operator v1.11.0/go.mod h1:GDQgj3wxXSGB9AZ3vn4mbNU9I5sfXPkL29qMZJzyJhU=
 github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd/go.mod h1:64YHyfSL2R96J44Nlwm39UHepQbyR5q10x7iYa1ks2E=
