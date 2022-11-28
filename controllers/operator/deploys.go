@@ -28,6 +28,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -46,10 +47,6 @@ func cainjectorDeploy(instance *operatorv1alpha1.CertManager, client client.Clie
 
 func webhookDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
 	return deployLogic(instance, client, kubeclient, scheme, res.WebhookDeployment, res.CertManagerWebhookName, res.WebhookImageName, res.WebhookLabels, ns)
-}
-
-func configmapWatcherDeploy(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
-	return deployLogic(instance, client, kubeclient, scheme, res.ConfigmapWatcherDeployment, res.ConfigmapWatcherName, res.ConfigmapWatcherImageName, res.ConfigmapWatcherLabels, ns)
 }
 
 func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, deployTemplate *appsv1.Deployment, name, imageName, labels, ns string) error {
@@ -167,16 +164,6 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 		if instance.Spec.CertManagerWebhook.Resources.Requests != nil {
 			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.CertManagerWebhook.Resources.Requests
 		}
-
-	case res.ConfigmapWatcherName:
-		returningDeploy.Spec.Template.Spec.Containers[0].Image = res.GetImageID(imageRegistry, res.ConfigmapWatcherImageName, res.ConfigmapWatcherVersion, instance.Spec.ImagePostFix, res.ConfigMapWatcherImageEnvVar)
-		//add resource limits and requests for configmap-watcher only if present in CR else use default as defined in constants.go
-		if instance.Spec.ConfigMapWatcher.Resources.Limits != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Limits = instance.Spec.ConfigMapWatcher.Resources.Limits
-		}
-		if instance.Spec.ConfigMapWatcher.Resources.Requests != nil {
-			returningDeploy.Spec.Template.Spec.Containers[0].Resources.Requests = instance.Spec.ConfigMapWatcher.Resources.Requests
-		}
 	}
 
 	returningDeploy.Namespace = ns
@@ -188,7 +175,9 @@ func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployme
 func removeDeploy(client kubernetes.Interface, name, namespace string) error {
 	if err := client.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{}); err != nil {
 		logd.V(1).Info("Error removing deployment", "name", name, "namespace", namespace, "error message", err)
-		return err
+		if !k8serrors.IsNotFound(err) {
+			return err
+		}
 	}
 	logd.V(2).Info("Deployment removed", "deploy name", name, "deploy namespace", namespace)
 	return nil

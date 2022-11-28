@@ -21,6 +21,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+//+kubebuilder:validation:XPreserveUnknownFields
+
 // CertManagerSpec defines the desired state of CertManager
 type CertManagerSpec struct {
 	ImageRegistry      string `json:"imageRegistry,omitempty"`

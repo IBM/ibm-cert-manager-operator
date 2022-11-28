@@ -73,12 +73,3 @@ var certManagerCainjectorPod = corev1.PodSpec{
 		cainjectorContainer,
 	},
 }
-
-var configmapWatcherPod = corev1.PodSpec{
-	Affinity:           podAffinity,
-	ServiceAccountName: ServiceAccount,
-	SecurityContext:    podSecurity,
-	Containers: []corev1.Container{
-		configmapWatcherContainer,
-	},
-}

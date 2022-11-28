@@ -17,11 +17,21 @@
 package operator
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"reflect"
 
+	utilyaml "github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/serializer/json"
+	"k8s.io/apimachinery/pkg/runtime/serializer/streaming"
+	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
@@ -77,4 +87,58 @@ func copySecret(client client.Client, secretToCopy string, srcNamespace string, 
 
 	return nil
 
+}
+
+// YamlToObjects convert YAML content to unstructured objects
+func YamlToObjects(yamlContent []byte) ([]*unstructured.Unstructured, error) {
+	var objects []*unstructured.Unstructured
+
+	// This step is for converting large yaml file, we can remove it after using "apimachinery" v0.19.0
+	if len(yamlContent) > 1024*64 {
+		object, err := YamlToObject(yamlContent)
+		if err != nil {
+			return nil, err
+		}
+		objects = append(objects, object)
+		return objects, nil
+	}
+
+	yamlDecoder := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+
+	reader := json.YAMLFramer.NewFrameReader(ioutil.NopCloser(bytes.NewReader(yamlContent)))
+	decoder := streaming.NewDecoder(reader, yamlDecoder)
+	for {
+		obj, _, err := decoder.Decode(nil, nil)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			klog.Infof("error convert object: %v", err)
+			continue
+		}
+
+		switch t := obj.(type) {
+		case *unstructured.Unstructured:
+			objects = append(objects, t)
+		default:
+			return nil, fmt.Errorf("failed to convert object %s", reflect.TypeOf(obj))
+		}
+	}
+
+	return objects, nil
+}
+
+// YamlToObject converting large yaml file, we can remove it after using "apimachinery" v0.19.0
+func YamlToObject(yamlContent []byte) (*unstructured.Unstructured, error) {
+	obj := &unstructured.Unstructured{}
+	jsonSpec, err := utilyaml.YAMLToJSON(yamlContent)
+	if err != nil {
+		return nil, fmt.Errorf("could not convert yaml to json: %v", err)
+	}
+
+	if err := obj.UnmarshalJSON(jsonSpec); err != nil {
+		return nil, fmt.Errorf("could not unmarshal resource: %v", err)
+	}
+
+	return obj, nil
 }

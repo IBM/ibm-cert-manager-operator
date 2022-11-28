@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
-# Copyright 2022 IBM Corporation
+# Copyright 2020 IBM Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
 # limitations under the License.
 #
 
-set -o errexit
-set -o errtrace
-set -o nounset
-set -o pipefail
 
-mkdir -p hack/tmp
+if [ -f ./config/crd/bases/cert-manager.io_certificates.yaml ] ;then
+   rm -rf ./config/crd/bases/cert-manager.io_certificates.yaml
+   echo " cert-manager.io_certificates.yaml is removed"
+fi
 
-for f in bundle/manifests/cert*.yaml; do
-    filename="$(basename "$f")"
-    hack/fixup-cert-manager-manifests.py  < "$f" > hack/tmp/"$filename"
-    cp hack/tmp/"$filename" "$f"
-done
+if [ -f ./config/crd/bases/cert-manager.io_issuers.yaml ] ;then
+   rm -rf ./config/crd/bases/cert-manager.io_issuers.yaml
+   echo " cert-manager.io_issuers.yaml is removed"
+fi

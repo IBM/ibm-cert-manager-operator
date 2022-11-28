@@ -95,47 +95,7 @@ volumes:
 
 ### Developer guide
 
-If, as a developer, you are looking to build and test this operator to try out and learn more about the operator and its capabilities, you can use the following developer guide. This guide provides commands for a quick install and initial validation for running the operator.
-
-> **Important:** The following developer guide is provided as-is and only for trial and education purposes. IBM and IBM Support does not provide any support for the usage of the operator with this developer guide. For the official supported install and usage guide for the operator, see the the IBM Knowledge Center documentation for your IBM Cloud Pak or for IBM Cloud Platform Common Services.
-
-### Quick start guide
-
-- Follow the [IBM Common Services Operator guide](https://github.com/IBM/ibm-common-service-operator/blob/master/docs/install.md).
-
-- Use the following quick start commands for building and testing the operator:
-
-```bash
-oc login -u <CLUSTER_USER> -p <CLUSTER_PASS> <CLUSTER_IP>:6443
-
-export NAMESPACE=ibm-common-services
-export BASE_DIR=deploy/olm-catalog/ibm-cert-manager-operator
-export CSV_VERSION=<CSV_VERSION_TO_TEST>
-
-make install
-```
-
-- To uninstall the operator installed using `make install`, run `make uninstall`.
-
-### Debugging guide
-
-Use the following commands to debug the operator:
-
-- Check the certificate manager CR.
-
-```bash
-kubectl get certmanager
-kubectl describe certmanager <certmanager CR name>
-```
-
-- Look at the logs of the cert-manager-operator pod for errors
-
-```bash
-kubectl get po -n <namespace>
-kubectl logs -n <namespace> <cert-manager-operator pod name>
-```
-
-**NOTE:** The certificate manager service (operand) is a singleton. Do not run more than one instance of `cert-manager-controller` within the same cluster.
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### End-to-End testing
 

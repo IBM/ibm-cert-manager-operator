@@ -24,8 +24,12 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilwait "k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/discovery"
+	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -78,7 +82,7 @@ func (r *PodRefreshReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	if cert.Status.NotBefore != nil && cert.Status.NotAfter != nil {
-		if err := r.restart(cert.Spec.SecretName, cert.Name, cert.Status.NotBefore.Format("2006-1-2.1504")); err != nil {
+		if err := r.restart(cert.Spec.SecretName, cert.Name, cert.Namespace, cert.Status.NotBefore.Format("2006-1-2.1504")); err != nil {
 			reqLogger.Error(err, "Failed to fresh pod")
 			return ctrl.Result{}, err
 		}
@@ -91,13 +95,13 @@ func (r *PodRefreshReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 // pod refresh is enabled. It will edit the deployments, statefulsets, and daemonsets
 // that use the secret being updated, which will trigger the pod to be restarted.
-func (r *PodRefreshReconciler) restart(secret, cert string, lastUpdated string) error {
+func (r *PodRefreshReconciler) restart(secret, cert, namespace string, lastUpdated string) error {
 	timeNow := time.Now().Format("2006-1-2.1504")
 	deployments := &appsv1.DeploymentList{}
 	if err := r.Client.List(context.TODO(), deployments); err != nil {
 		return fmt.Errorf("error getting deployments: %v", err)
 	}
-	deploymentsToUpdate, err := r.getDeploymentsNeedUpdate(secret, lastUpdated)
+	deploymentsToUpdate, err := r.getDeploymentsNeedUpdate(secret, namespace, lastUpdated)
 	if err != nil {
 		return err
 	}
@@ -106,7 +110,7 @@ func (r *PodRefreshReconciler) restart(secret, cert string, lastUpdated string) 
 		return err
 	}
 
-	statefulsetsToUpdate, err := r.getStsNeedUpdate(secret, lastUpdated)
+	statefulsetsToUpdate, err := r.getStsNeedUpdate(secret, namespace, lastUpdated)
 	if err != nil {
 		return err
 	}
@@ -114,7 +118,7 @@ func (r *PodRefreshReconciler) restart(secret, cert string, lastUpdated string) 
 		return err
 	}
 
-	daemonsetsToUpdate, err := r.getDaemonSetNeedUpdate(secret, lastUpdated)
+	daemonsetsToUpdate, err := r.getDaemonSetNeedUpdate(secret, namespace, lastUpdated)
 	if err != nil {
 		return err
 	}
@@ -125,10 +129,13 @@ func (r *PodRefreshReconciler) restart(secret, cert string, lastUpdated string) 
 	return nil
 }
 
-func (r *PodRefreshReconciler) getDeploymentsNeedUpdate(secret, lastUpdated string) ([]appsv1.Deployment, error) {
+func (r *PodRefreshReconciler) getDeploymentsNeedUpdate(secret, namespace, lastUpdated string) ([]appsv1.Deployment, error) {
 	deploymentsToUpdate := make([]appsv1.Deployment, 0)
 	deployments := &appsv1.DeploymentList{}
-	if err := r.Client.List(context.TODO(), deployments); err != nil {
+	listOpts := &client.ListOptions{
+		Namespace: namespace,
+	}
+	if err := r.Client.List(context.TODO(), deployments, listOpts); err != nil {
 		return deploymentsToUpdate, fmt.Errorf("error getting deployments: %v", err)
 	}
 NEXT_DEPLOYMENT:
@@ -172,10 +179,13 @@ NEXT_DEPLOYMENT:
 	return deploymentsToUpdate, nil
 }
 
-func (r *PodRefreshReconciler) getStsNeedUpdate(secret, lastUpdated string) ([]appsv1.StatefulSet, error) {
+func (r *PodRefreshReconciler) getStsNeedUpdate(secret, namespace, lastUpdated string) ([]appsv1.StatefulSet, error) {
 	statefulsetsToUpdate := make([]appsv1.StatefulSet, 0)
 	statefulsets := &appsv1.StatefulSetList{}
-	err := r.Client.List(context.TODO(), statefulsets)
+	listOpts := &client.ListOptions{
+		Namespace: namespace,
+	}
+	err := r.Client.List(context.TODO(), statefulsets, listOpts)
 	if err != nil {
 		return statefulsetsToUpdate, fmt.Errorf("error getting statefulsets: %v", err)
 	}
@@ -220,10 +230,13 @@ NEXT_STATEFULSET:
 	return statefulsetsToUpdate, nil
 }
 
-func (r *PodRefreshReconciler) getDaemonSetNeedUpdate(secret, lastUpdated string) ([]appsv1.DaemonSet, error) {
+func (r *PodRefreshReconciler) getDaemonSetNeedUpdate(secret, namespace, lastUpdated string) ([]appsv1.DaemonSet, error) {
 	daemonsetsToUpdate := make([]appsv1.DaemonSet, 0)
 	daemonsets := &appsv1.DaemonSetList{}
-	if err := r.Client.List(context.TODO(), daemonsets); err != nil {
+	listOpts := &client.ListOptions{
+		Namespace: namespace,
+	}
+	if err := r.Client.List(context.TODO(), daemonsets, listOpts); err != nil {
 		return daemonsetsToUpdate, fmt.Errorf("error getting daemonsets: %v", err)
 	}
 NEXT_DAEMONSET:
@@ -323,8 +336,55 @@ func (r *PodRefreshReconciler) updateDaemonSetAnnotations(daemonsetsToUpdate []a
 	return nil
 }
 
+func (r *PodRefreshReconciler) waitResourceReady(apiGroupVersion, kind string) error {
+	klog.Infof("wait for resource ready")
+	cfg, err := config.GetConfig()
+	if err != nil {
+		klog.Errorf("Failed to get config: %v", err)
+		return err
+	}
+	dc := discovery.NewDiscoveryClientForConfigOrDie(cfg)
+	if err := utilwait.PollImmediate(time.Second*10, time.Minute*5, func() (done bool, err error) {
+		exist, err := r.ResourceExists(dc, apiGroupVersion, kind)
+		if err != nil {
+			return exist, err
+		}
+		if !exist {
+			klog.Infof("waiting for resource ready with kind: %s, apiGroupVersion: %s", kind, apiGroupVersion)
+		}
+		return exist, nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ResourceExists returns true if the given resource kind exists
+// in the given api groupversion
+func (r *PodRefreshReconciler) ResourceExists(dc discovery.DiscoveryInterface, apiGroupVersion, kind string) (bool, error) {
+	_, apiLists, err := dc.ServerGroupsAndResources()
+	if err != nil {
+		return false, err
+	}
+	for _, apiList := range apiLists {
+		if apiList.GroupVersion == apiGroupVersion {
+			for _, r := range apiList.APIResources {
+				if r.Kind == kind {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *PodRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// wait for crd ready
+	if err := r.waitResourceReady("cert-manager.io/v1", "Certificate"); err != nil {
+		return err
+	}
+
 	// Create a new controller
 	c, err := controller.New("podrefresh-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {

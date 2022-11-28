@@ -47,7 +47,7 @@ spec:
       hostPID: false
       containers:
         - name: manager
-          image: quay.io/opencloudio/ibm-cert-manager-operator:latest
+          image: icr.io/cpopen/ibm-cert-manager-operator:latest
           command:
           - ibm-cert-manager-operator
           imagePullPolicy: Always
@@ -75,15 +75,13 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-cert-manager-operator"
             - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-controller:1.5.0-jetstack.1.7.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.10.0-jetstack.1.7.1
             - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-webhook:1.5.0-jetstack.1.7.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.10.0-jetstack.1.7.1
             - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-cainjector:1.5.0-jetstack.1.7.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.10.0-jetstack.1.7.1
             - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-              value: quay.io/opencloudio/icp-cert-manager-acmesolver:1.5.0-jetstack.1.7.1
-            - name: ICP_CONFIGMAP_WATCHER_IMAGE
-              value: quay.io/opencloudio/icp-configmap-watcher:3.14.0
+              value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.10.0-jetstack.1.7.1
           resources:
             limits:
               cpu: 100m
