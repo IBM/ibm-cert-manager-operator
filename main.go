@@ -50,8 +50,6 @@ import (
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
-	certmanagerv1controllers "github.com/ibm/ibm-cert-manager-operator/controllers/cert-manager"
-	certmanagercontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/certmanager"
 	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/operator"
 	constants "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 	//+kubebuilder:scaffold:imports
@@ -160,69 +158,6 @@ func main() {
 		NS:           ns,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CertManager")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.IssuerReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Issuer")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.CertificateReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Certificate")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.ChallengeReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Challenge")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.OrderReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Order")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.CertificateRequestReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "CertificateRequest")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.CertificateRefreshReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "CertificateRefresh")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.PodRefreshReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodRefresh")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.V1AddLabelReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "V1AddLabel")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.V1Alpha1AddLabelReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "V1Alpha1AddLabel")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
