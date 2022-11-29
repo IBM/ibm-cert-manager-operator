@@ -150,9 +150,9 @@ func main() {
 	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
 	apiextclient, _ := apiextensionclientset.NewForConfig(mgr.GetConfig())
 	ns, _ := os.LookupEnv("WATCH_NAMESPACE")
-
 	if err = (&operatorcontrollers.CertManagerReconciler{
 		Client:       mgr.GetClient(),
+		Reader:       mgr.GetAPIReader(),
 		Kubeclient:   kubeclient,
 		APIextclient: apiextclient,
 		Scheme:       mgr.GetScheme(),

@@ -30,8 +30,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	utilwait "k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/discovery"
+	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -91,7 +95,7 @@ func (r *CertificateReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if rhacmErr != nil {
 		// missing RHACM CR or CRD means RHACM does not exist
 		if errors.IsNotFound(rhacmErr) || metaerrors.IsNoMatchError(rhacmErr) {
-			logd.Error(rhacmErr, "Could not find RHACM")
+			logd.Info("Could not find RHACM")
 		} else {
 			return ctrl.Result{}, rhacmErr
 		}
@@ -174,7 +178,18 @@ func (r *CertificateReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if isExpired(instance, secret) {
+	certv1 := &certmanagerv1.Certificate{}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{Namespace: certificate.Namespace, Name: certificate.Name}, certv1); err != nil {
+		if errors.IsNotFound(err) {
+			reqLogger.Info("No v1 Certificate for this v1alpha1", "certificate name:", instance.Name, "certificate namespace", instance.Namespace)
+			certv1 = nil
+		} else {
+			reqLogger.Error(err, "failed to get v1 Certificate")
+			return ctrl.Result{}, err
+		}
+	}
+
+	if isExpired(instance, certificate, certv1, secret) {
 		reqLogger.Info("v1alpha1 Certificate is expired, creating v1 version")
 		if err := r.Client.Create(context.TODO(), certificate); err != nil {
 			if errors.IsAlreadyExists(err) {
@@ -284,18 +299,24 @@ func (r *CertificateReconciler) purgeOldV1() error {
 	return nil
 }
 
-// isExpired Determines if v1alpha1 Certificate is expired or not based on three
+// isExpired Determines if v1alpha1 Certificate is expired or not based on four
 // conditions:
 // 1. existence of NotAfter status
 // 2. existence of certificate secret
-// 3. is current date after expiration date
+// 3. existence converted v1 certificate and is converted v1 certificate different from we expect
+// 4. is current date after expiration date
 // TODO: could optionally inspect the secret to check if NotAfter date matches with Certificate status
-func isExpired(c *certmanagerv1alpha1.Certificate, s *corev1.Secret) bool {
+func isExpired(c *certmanagerv1alpha1.Certificate, certficateV1Expect *certmanagerv1.Certificate, certficateV1 *certmanagerv1.Certificate, s *corev1.Secret) bool {
 	if c.Status.NotAfter == nil {
 		return true
 	}
 	if s == nil {
 		return true
+	}
+	if certficateV1 != nil {
+		if !equality.Semantic.DeepEqual(certficateV1.Spec, certficateV1Expect.Spec) {
+			return true
+		}
 	}
 	return time.Now().After(getExpiration(*c.Status.NotAfter))
 }
@@ -418,8 +439,55 @@ func (r *CertificateReconciler) updateLeafCerts(issuers []certmanagerv1alpha1.Is
 	return nil
 }
 
+func (r *CertificateReconciler) waitResourceReady(apiGroupVersion, kind string) error {
+	klog.Infof("wait for resource ready")
+	cfg, err := config.GetConfig()
+	if err != nil {
+		klog.Errorf("Failed to get config: %v", err)
+		return err
+	}
+	dc := discovery.NewDiscoveryClientForConfigOrDie(cfg)
+	if err := utilwait.PollImmediate(time.Second*10, time.Minute*5, func() (done bool, err error) {
+		exist, err := r.ResourceExists(dc, apiGroupVersion, kind)
+		if err != nil {
+			return exist, err
+		}
+		if !exist {
+			klog.Infof("waiting for resource ready with kind: %s, apiGroupVersion: %s", kind, apiGroupVersion)
+		}
+		return exist, nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ResourceExists returns true if the given resource kind exists
+// in the given api groupversion
+func (r *CertificateReconciler) ResourceExists(dc discovery.DiscoveryInterface, apiGroupVersion, kind string) (bool, error) {
+	_, apiLists, err := dc.ServerGroupsAndResources()
+	if err != nil {
+		return false, err
+	}
+	for _, apiList := range apiLists {
+		if apiList.GroupVersion == apiGroupVersion {
+			for _, r := range apiList.APIResources {
+				if r.Kind == kind {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertificateReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// wait for crd ready
+	if err := r.waitResourceReady("cert-manager.io/v1", "Certificate"); err != nil {
+		return err
+	}
+
 	// Create a new controller
 	c, err := controller.New("certificate-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
