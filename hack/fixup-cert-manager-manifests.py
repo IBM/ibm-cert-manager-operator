@@ -70,10 +70,11 @@ def main():
     Strip duplicate description fields from all supplied CRD files.
     """
     for doc in yaml.safe_load_all(sys.stdin):
-        if doc.get("kind", "") == "CustomResourceDefinition":
-            remove_descriptions_from_non_storage_versions_in_crd(doc)
-        yaml.safe_dump(doc, sys.stdout)
-        sys.stdout.write("---\n")
+        if doc is not None:
+            if doc.get("kind", "") == "CustomResourceDefinition":
+                remove_descriptions_from_non_storage_versions_in_crd(doc)
+            yaml.safe_dump(doc, sys.stdout)
+            sys.stdout.write("---\n")
 
 
 if __name__ == "__main__":

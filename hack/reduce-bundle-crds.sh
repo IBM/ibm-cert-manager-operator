@@ -22,7 +22,7 @@ set -o pipefail
 
 mkdir -p hack/tmp
 
-for f in bundle/manifests/cert*.yaml; do
+for f in bundle/manifests/{acme.cert*.yaml,cert*.yaml}; do
     filename="$(basename "$f")"
     hack/fixup-cert-manager-manifests.py  < "$f" > hack/tmp/"$filename"
     cp hack/tmp/"$filename" "$f"

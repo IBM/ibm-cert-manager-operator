@@ -33,7 +33,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
-    olm.skipRange: <3.24.0
+    olm.skipRange: <4.0.0
     operators.operatorframework.io/builder: operator-sdk-v1.24.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
@@ -42,17 +42,25 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-cert-manager-operator.v3.24.0
+  name: ibm-cert-manager-operator.v4.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+      - kind: CertificateRequest
+        name: certificaterequests.cert-manager.io
+        version: v1
       - description: 'CertificateRequest is the Schema for the certificaterequests API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Certificate Request
         kind: CertificateRequest
         name: certificaterequests.certmanager.k8s.io
         version: v1alpha1
+      - description: "A Certificate resource should be created to ensure an up to date and signed x509 certificate is stored in the Kubernetes Secret resource named in `spec.secretName`. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license. \n The stored certificate will be renewed before it expires (as configured by `spec.renewBefore`)."
+        displayName: Certificate
+        kind: Certificate
+        name: certificates.cert-manager.io
+        version: v1
       - description: 'Certificate is the Schema for the certificates API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Certificate
         kind: Certificate
@@ -63,19 +71,33 @@ spec:
         kind: CertManager
         name: certmanagers.operator.ibm.com
         version: v1alpha1
+      - kind: Challenge
+        name: challenges.acme.cert-manager.io
+        version: v1
       - description: 'Challenge is the Schema for the challenges API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Challenge
         kind: Challenge
         name: challenges.certmanager.k8s.io
         version: v1alpha1
       - kind: ClusterIssuer
+        name: clusterissuers.cert-manager.io
+        version: v1
+      - kind: ClusterIssuer
         name: clusterissuers.certmanager.k8s.io
         version: v1alpha1
+      - description: 'An Issuer represents a certificate issuing authority which can be referenced as part of `issuerRef` fields. It is scoped to a single namespace and can therefore only be referenced by resources within the same namespace. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
+        displayName: Issuer
+        kind: Issuer
+        name: issuers.cert-manager.io
+        version: v1
       - description: 'Issuer is the Schema for the issuers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Issuer
         kind: Issuer
         name: issuers.certmanager.k8s.io
         version: v1alpha1
+      - kind: Order
+        name: orders.acme.cert-manager.io
+        version: v1
       - description: 'Order is the Schema for the orders API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Order
         kind: Order
@@ -562,15 +584,15 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  version: 3.24.0
+  version: 4.0.0
   relatedImages:
     - image: icr.io/cpopen/ibm-cert-manager-operator:latest
       name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.10.0-jetstack.1.7.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.10.0-jetstack.1.9.1
       name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.10.0-jetstack.1.7.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.10.0-jetstack.1.9.1
       name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.10.0-jetstack.1.7.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.10.0-jetstack.1.9.1
       name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.10.0-jetstack.1.7.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.10.0-jetstack.1.9.1
       name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
