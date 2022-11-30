@@ -105,7 +105,6 @@ help: ## Display this help.
 manifests: yq controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=operator crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	common/scripts/patch-metadata.sh $(YQ)
-	common/scripts/delete_v1.sh
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
