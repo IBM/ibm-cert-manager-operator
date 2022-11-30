@@ -90,6 +90,18 @@ type CertManagerReconciler struct {
 //+kubebuilder:rbac:groups="cert-manager.io",resources=clusterissuers,verbs=get;list;watch;update
 //+kubebuilder:rbac:groups="cert-manager.io",resources=clusterissuers/status,verbs=update
 
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;deletecollection
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates/finalizers,verbs=update
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates/status,verbs=get;update;patch
+
+//+kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;deletecollection
+//+kubebuilder:rbac:groups=cert-manager.io,resources=issuers/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=cert-manager.io,resources=issuers/finalizers,verbs=update
+
 //+kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests,verbs=get;list;watch;update
 //+kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests/status,verbs=update
 //+kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign
