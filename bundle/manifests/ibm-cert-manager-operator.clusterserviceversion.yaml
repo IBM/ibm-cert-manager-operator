@@ -299,6 +299,33 @@ spec:
             - apiGroups:
                 - cert-manager.io
               resources:
+                - certificates
+              verbs:
+                - create
+                - delete
+                - deletecollection
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - cert-manager.io
+              resources:
+                - certificates/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - cert-manager.io
+              resources:
+                - certificates/status
+              verbs:
+                - get
+                - patch
+                - update
+            - apiGroups:
+                - cert-manager.io
+              resources:
                 - clusterissuers
               verbs:
                 - get
@@ -310,6 +337,33 @@ spec:
               resources:
                 - clusterissuers/status
               verbs:
+                - update
+            - apiGroups:
+                - cert-manager.io
+              resources:
+                - issuers
+              verbs:
+                - create
+                - delete
+                - deletecollection
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - cert-manager.io
+              resources:
+                - issuers/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - cert-manager.io
+              resources:
+                - issuers/status
+              verbs:
+                - get
+                - patch
                 - update
             - apiGroups:
                 - cert-manager.io

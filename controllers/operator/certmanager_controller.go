@@ -78,7 +78,6 @@ type CertManagerReconciler struct {
 //+kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=validatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=mutatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="apiregistration.k8s.io",resources=apiservices,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="apiextensions.k8s.io",resources=customresourcedefinitions,verbs=get;list;watch;create;update;patch;delete
 
 //+kubebuilder:rbac:groups="acme.cert-manager.io",resources=challenges;orders,verbs=get;list;watch;create;update;patch;delete;deletecollection
 //+kubebuilder:rbac:groups="acme.cert-manager.io",resources=orders/finalizers;orders/status;challenges/finalizers;challenges/status,verbs=update
@@ -102,16 +101,10 @@ type CertManagerReconciler struct {
 //+kubebuilder:rbac:groups=cert-manager.io,resources=issuers/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=cert-manager.io,resources=issuers/finalizers,verbs=update
 
-//+kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests,verbs=get;list;watch;update
-//+kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests/status,verbs=update
-//+kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign
-
-//+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;delete
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;delete
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=events,verbs=get;create;update;patch
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list
 
 //+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses;httproutes,verbs=get;list;watch;create;delete;update
 //+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses/finalizers,verbs=update
