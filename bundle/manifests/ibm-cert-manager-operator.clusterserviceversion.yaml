@@ -34,7 +34,7 @@ metadata:
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <4.0.0
-    operators.operatorframework.io/builder: operator-sdk-v1.24.0
+    operators.operatorframework.io/builder: operator-sdk-v1.23.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
   labels:
