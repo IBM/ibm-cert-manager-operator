@@ -34,7 +34,7 @@ metadata:
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <4.0.0
-    operators.operatorframework.io/builder: operator-sdk-v1.23.0
+    operators.operatorframework.io/builder: operator-sdk-v1.24.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
   labels:
@@ -115,29 +115,12 @@ spec:
             - apiGroups:
                 - ""
               resources:
-                - configmaps
-              verbs:
-                - get
-                - list
-            - apiGroups:
-                - ""
-              resources:
                 - events
               verbs:
                 - create
                 - get
                 - patch
                 - update
-            - apiGroups:
-                - ""
-              resources:
-                - pods
-              verbs:
-                - create
-                - delete
-                - get
-                - list
-                - watch
             - apiGroups:
                 - ""
               resources:
@@ -212,18 +195,6 @@ spec:
                 - admissionregistration.k8s.io
               resources:
                 - validatingwebhookconfigurations
-              verbs:
-                - create
-                - delete
-                - get
-                - list
-                - patch
-                - update
-                - watch
-            - apiGroups:
-                - apiextensions.k8s.io
-              resources:
-                - customresourcedefinitions
               verbs:
                 - create
                 - delete
@@ -371,36 +342,6 @@ spec:
                 - signers
               verbs:
                 - approve
-            - apiGroups:
-                - certificates.k8s.io
-              resources:
-                - certificatesigningrequests
-              verbs:
-                - get
-                - list
-                - update
-                - watch
-            - apiGroups:
-                - certificates.k8s.io
-              resources:
-                - certificatesigningrequests/status
-              verbs:
-                - update
-            - apiGroups:
-                - certificates.k8s.io
-              resources:
-                - signers
-              verbs:
-                - sign
-            - apiGroups:
-                - ibmcpcs.ibm.com
-              resources:
-                - secretshares
-              verbs:
-                - create
-                - get
-                - list
-                - watch
             - apiGroups:
                 - networking.k8s.io
               resources:
