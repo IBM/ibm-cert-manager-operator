@@ -22,14 +22,10 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
-	"k8s.io/apimachinery/pkg/runtime"
 	//+kubebuilder:scaffold:imports
 )
 
-var (
-	scheme = runtime.NewScheme()
-)
+var ()
 
 func init() {
 }
