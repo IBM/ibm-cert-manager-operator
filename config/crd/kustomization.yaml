@@ -3,12 +3,6 @@
 # It should be run by config/default
 resources:
 - bases/operator.ibm.com_certmanagers.yaml
-- bases/certmanager.k8s.io_issuers.yaml
-- bases/certmanager.k8s.io_certificates.yaml
-- bases/certmanager.k8s.io_challenges.yaml
-- bases/certmanager.k8s.io_orders.yaml
-- bases/certmanager.k8s.io_certificaterequests.yaml
-- bases/certmanager.k8s.io_clusterissuers.yaml
 - bases/cert-manager.io_issuers.yaml
 - bases/cert-manager.io_certificates.yaml
 - bases/cert-manager.io_clusterissuers.yaml
