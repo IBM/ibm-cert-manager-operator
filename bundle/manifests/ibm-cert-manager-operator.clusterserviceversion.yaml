@@ -1,0 +1,74 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+    operators.operatorframework.io/builder: operator-sdk-v1.24.0
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+  name: ibm-cert-manager-operator.v4.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+      - kind: CertificateRequest
+        name: certificaterequests.cert-manager.io
+        version: v1
+      - kind: Certificate
+        name: certificates.cert-manager.io
+        version: v1
+      - kind: Challenge
+        name: challenges.acme.cert-manager.io
+        version: v1
+      - kind: ClusterIssuer
+        name: clusterissuers.cert-manager.io
+        version: v1
+      - kind: Issuer
+        name: issuers.cert-manager.io
+        version: v1
+      - kind: Order
+        name: orders.acme.cert-manager.io
+        version: v1
+  description: Ibm Cert Manager Operator description. TODO.
+  displayName: Ibm Cert Manager Operator
+  icon:
+    - base64data: ""
+      mediatype: ""
+  install:
+    spec:
+      deployments: []
+    strategy: deployment
+  installModes:
+    - supported: false
+      type: OwnNamespace
+    - supported: false
+      type: SingleNamespace
+    - supported: false
+      type: MultiNamespace
+    - supported: true
+      type: AllNamespaces
+  keywords:
+    - ibm-cert-manager-operator
+  links:
+    - name: Ibm Cert Manager Operator
+      url: https://ibm-cert-manager-operator.domain
+  maintainers:
+    - email: your@email.com
+      name: Maintainer Name
+  maturity: alpha
+  provider:
+    name: Provider Name
+    url: https://your.domain
+  version: 4.0.0
+  relatedImages:
+    - image: icr.io/cpopen/ibm-cert-manager-operator:latest
+      name: IBM_CERT_MANAGER_OPERATOR_IMAGE
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.0-jetstack.1.9.1
+      name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.0-jetstack.1.9.1
+      name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.0-jetstack.1.9.1
+      name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.0-jetstack.1.9.1
+      name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE

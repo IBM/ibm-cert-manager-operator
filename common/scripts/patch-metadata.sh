@@ -24,9 +24,9 @@ yq=${1}
 crdDir=${2:-config/crd/bases}
 
 # add unapproved api annotation to v1alpha1 APIs which have domian k8s.io
-for f in "$crdDir"/certmanager.k8s.io_*; do
-    "${yq}" eval '.metadata.annotations."api-approved.kubernetes.io" = "unapproved"' "${f}" -i
-done
+# for f in "$crdDir"/certmanager.k8s.io_*; do
+#     "${yq}" eval '.metadata.annotations."api-approved.kubernetes.io" = "unapproved"' "${f}" -i
+# done
 
 # add labels to resources
 "${yq}" eval '.metadata.labels."app.kubernetes.io/instance" = "ibm-cert-manager-operator"' config/rbac/role.yaml -i
