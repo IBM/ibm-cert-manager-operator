@@ -31,7 +31,7 @@ spec:
         name: orders.acme.cert-manager.io
         version: v1
   description: Ibm Cert Manager Operator description. TODO.
-  displayName: Ibm Cert Manager Operator
+  displayName: Ibm Cert Manager API Operator
   icon:
     - base64data: ""
       mediatype: ""
@@ -40,7 +40,7 @@ spec:
       deployments: []
     strategy: deployment
   installModes:
-    - supported: false
+    - supported: true
       type: OwnNamespace
     - supported: false
       type: SingleNamespace
