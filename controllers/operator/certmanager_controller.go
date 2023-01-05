@@ -169,25 +169,9 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if req.Name != "default" {
-		msg := "Only one CR named default is allowed"
-		logd.Info(msg, "request name", req.Name)
-		r.updateEvent(instance, msg, corev1.EventTypeWarning, "Not Allowed")
-		return ctrl.Result{}, nil
-	}
-
 	finalizerName := "certmanager.operators.ibm.com"
 	// Determine if the certmanager crd is going to be deleted
-	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
-		// Object not being deleted, but add our finalizer so we know to remove this object later when it is going to be deleted
-		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName)
-			if err := r.Client.Update(context.Background(), instance); err != nil {
-				logd.Error(err, "Error adding the finalizer to the CR")
-				return ctrl.Result{}, err
-			}
-		}
-	} else {
+	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Object scheduled to be deleted
 		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
@@ -195,9 +179,15 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				logd.Error(err, "Error updating the CR to remove the finalizer")
 				return ctrl.Result{}, err
 			}
-
 		}
 		return ctrl.Result{}, err
+	}
+
+	if req.Name != "default" {
+		msg := "Only one CR named default is allowed"
+		logd.Info(msg, "request name", req.Name)
+		r.updateEvent(instance, msg, corev1.EventTypeWarning, "Not Allowed")
+		return ctrl.Result{}, nil
 	}
 
 	logd.Info("The namespace", "ns", r.NS)
