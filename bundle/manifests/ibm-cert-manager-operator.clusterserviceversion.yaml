@@ -6,7 +6,7 @@ metadata:
     capabilities: Basic Install
     operators.operatorframework.io/builder: operator-sdk-v1.24.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
-  name: ibm-cert-manager-operator.v4.0.0
+  name: ibm-cert-manager-api.v1.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -49,7 +49,7 @@ spec:
     - supported: false
       type: AllNamespaces
   keywords:
-    - ibm-cert-manager-operator
+    - ibm-cert-manager-api
   links:
     - name: Ibm Cert Manager Operator
       url: https://ibm-cert-manager-operator.domain
@@ -60,7 +60,7 @@ spec:
   provider:
     name: Provider Name
     url: https://your.domain
-  version: 4.0.0
+  version: 1.0.0
   relatedImages:
     - image: icr.io/cpopen/ibm-cert-manager-operator:latest
       name: IBM_CERT_MANAGER_OPERATOR_IMAGE
