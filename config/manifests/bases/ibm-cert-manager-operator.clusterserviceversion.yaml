@@ -119,13 +119,13 @@ spec:
   relatedImages:
   - image: icr.io/cpopen/ibm-cert-manager-operator:latest
     name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.7.7-jetstack.1.9.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.7.7-jetstack.1.10.1
     name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.7.7-jetstack.1.9.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.7.7-jetstack.1.10.1
     name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.7.7-jetstack.1.9.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.7.7-jetstack.1.10.1
     name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.7.7-jetstack.1.9.1
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.7.7-jetstack.1.10.1
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
   replaces: ibm-cert-manager-operator.v3.21.6
   version: 0.0.0
