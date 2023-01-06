@@ -75,13 +75,13 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-cert-manager-operator"
             - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-              value: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.0-jetstack.1.9.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.0-jetstack.1.10.1
             - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-              value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.0-jetstack.1.9.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.0-jetstack.1.10.1
             - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-              value: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.0-jetstack.1.9.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.0-jetstack.1.10.1
             - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-              value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.0-jetstack.1.9.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.0-jetstack.1.10.1
           resources:
             limits:
               cpu: 100m
