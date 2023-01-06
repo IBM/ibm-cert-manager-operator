@@ -11,7 +11,7 @@ dependencies:
     version: v1
 - type: olm.gvk
   value:
-    group: cert-manager.io
+    group: acme.cert-manager.io
     kind: Challenge
     version: v1
 - type: olm.gvk
@@ -21,7 +21,7 @@ dependencies:
     version: v1
 - type: olm.gvk
   value:
-    group: cert-manager.io
+    group: acme.cert-manager.io
     kind: Order
     version: v1
 - type: olm.gvk
