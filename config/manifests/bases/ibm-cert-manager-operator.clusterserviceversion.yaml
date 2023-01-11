@@ -42,7 +42,7 @@ spec:
       name: issuers.cert-manager.io
       version: v1
   description: '"**Important:** Do not install this operator directly. Only install
-    this operator using the IBM Common Services Operator. For more information about
+    this operator using the IBM Cert Manager Operator. For more information about
     installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall).
     Additionally, you can exit this panel and navigate to the IBM Common Services
     tile in OperatorHub to learn more about the operator. \n\n If you are using this
@@ -80,7 +80,7 @@ spec:
   installModes:
   - supported: true
     type: OwnNamespace
-  - supported: true
+  - supported: false
     type: SingleNamespace
   - supported: false
     type: MultiNamespace
@@ -94,14 +94,6 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: icr.io/cpopen/ibm-cert-manager-operator:latest
-    name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.0-jetstack.1.9.1
-    name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.0-jetstack.1.9.1
-    name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.0-jetstack.1.9.1
-    name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.0-jetstack.1.9.1
-    name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
+  - image: icr.io/cpopen/ibm-cert-manager-api:latest
+    name: IBM_CERT_MANAGER_API_IMAGE
   version: 0.0.0

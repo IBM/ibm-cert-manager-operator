@@ -12,26 +12,13 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-      - kind: CertificateRequest
-        name: certificaterequests.cert-manager.io
-        version: v1
-      - kind: Certificate
-        name: certificates.cert-manager.io
-        version: v1
       - kind: Challenge
         name: challenges.acme.cert-manager.io
         version: v1
-      - kind: ClusterIssuer
-        name: clusterissuers.cert-manager.io
-        version: v1
-      - kind: Issuer
-        name: issuers.cert-manager.io
-        version: v1
-      - kind: Order
-        name: orders.acme.cert-manager.io
-        version: v1
-  description: Ibm Cert Manager Operator description. TODO.
-  displayName: Ibm Cert Manager API Operator
+  description:  |-
+    # Ibm Cert Manager API description. 
+    The IBM Cert Manager API cannot be installed standalone, it only can be installed by ibm-cert-manager-oeprator by dependency.
+  displayName: Ibm Cert Manager API
   icon:
     - base64data: ""
       mediatype: ""
@@ -51,24 +38,15 @@ spec:
   keywords:
     - ibm-cert-manager-api
   links:
-    - name: Ibm Cert Manager Operator
+    - name: Ibm Cert Manager API
       url: https://ibm-cert-manager-operator.domain
   maintainers:
-    - email: your@email.com
-      name: Maintainer Name
+    - email: support@ibm.com
+      name: IBM Support
   maturity: alpha
   provider:
-    name: Provider Name
-    url: https://your.domain
+    name: IBM
   version: 1.0.0
   relatedImages:
     - image: icr.io/cpopen/ibm-cert-manager-operator:latest
       name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.0-jetstack.1.9.1
-      name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.0-jetstack.1.9.1
-      name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.0-jetstack.1.9.1
-      name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.0-jetstack.1.9.1
-      name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE

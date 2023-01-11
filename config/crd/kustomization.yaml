@@ -2,12 +2,7 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/cert-manager.io_issuers.yaml
-- bases/cert-manager.io_certificates.yaml
-- bases/cert-manager.io_clusterissuers.yaml
-- bases/cert-manager.io_certificaterequests.yaml
 - bases/acme.cert-manager.io_challenges.yaml
-- bases/acme.cert-manager.io_orders.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
