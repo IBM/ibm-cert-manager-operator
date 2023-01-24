@@ -57,6 +57,7 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 func GetDeployNamespace() string {
 	// If running locally or installMode is All-Namespaces use "ibm-common-services"
 	ns, _ := os.LookupEnv("OPERATOR_NAMESPACE")
+	// Issue
 	if ns == "" || ns == "openshift-operators" {
 		return DefaultNamespace
 	}
