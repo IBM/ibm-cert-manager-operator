@@ -31,9 +31,33 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
-    createdAt: 2022-02-010T21:31:00Z
+    createdAt: "2023-01-25T20:48:01Z"
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <4.0.0
+    operatorframework.io/initialization-resource: |-
+      {
+        "apiVersion": "operator.ibm.com/v1alpha1",
+        "kind": "CertManager",
+        "metadata":{
+          "name": "default",
+          "labels":{
+            "app.kubernetes.io/instance": "ibm-cert-manager-operator",
+            "app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
+            "app.kubernetes.io/name": "cert-manager"
+          }
+        },
+        "spec":{
+          "disableHostNetwork": "true",
+          "enableWebhook": "true",
+          "imageRegistry": "icr.io/cpopen/cpfs",
+          "version": "'4.0.0'",
+          "enableCertRefresh": "true"
+        },
+        "status":{
+          "certManagerStatus": {}
+        }
+      }
+    operatorframework.io/suggested-namespace: ibm-cert-manager
     operators.operatorframework.io/builder: operator-sdk-v1.23.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
