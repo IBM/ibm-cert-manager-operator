@@ -71,6 +71,9 @@ type CertManagerReconciler struct {
 //+kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=mutatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="apiregistration.k8s.io",resources=apiservices,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="apiextensions.k8s.io",resources=customresourcedefinitions,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests,verbs=get;list;watch;update
+//+kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests/status,verbs=update
+//+kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign
 
 //+kubebuilder:rbac:groups="acme.cert-manager.io",resources=challenges;orders,verbs=get;list;watch;create;update;patch;delete;deletecollection
 //+kubebuilder:rbac:groups="acme.cert-manager.io",resources=orders/finalizers;orders/status;challenges/finalizers;challenges/status,verbs=update

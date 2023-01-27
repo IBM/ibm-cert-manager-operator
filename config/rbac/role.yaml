@@ -281,6 +281,27 @@ rules:
     verbs:
       - approve
   - apiGroups:
+      - certificates.k8s.io
+    resources:
+      - certificatesigningrequests
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - certificates.k8s.io
+    resources:
+      - certificatesigningrequests/status
+    verbs:
+      - update
+  - apiGroups:
+      - certificates.k8s.io
+    resources:
+      - signers
+    verbs:
+      - sign
+  - apiGroups:
       - ibmcpcs.ibm.com
     resources:
       - secretshares
