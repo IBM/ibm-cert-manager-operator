@@ -114,7 +114,6 @@ type CertManagerReconciler struct {
 
 //+kubebuilder:rbac:groups="authorization.k8s.io",resources=subjectaccessreviews,verbs=create
 
-//+kubebuilder:rbac:groups="operator.open-cluster-management.io",resources=multiclusterhubs,verbs=get;list;watch
 //+kubebuilder:rbac:groups="ibmcpcs.ibm.com",resources=secretshares,verbs=create;get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
