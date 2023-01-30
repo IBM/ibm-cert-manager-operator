@@ -44,14 +44,12 @@ import (
 
 	cache "github.com/IBM/controller-filtered-cache/filteredcache"
 	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
+	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 
 	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
 	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
-	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
-	certmanagerv1controllers "github.com/ibm/ibm-cert-manager-operator/controllers/cert-manager"
-	certmanagercontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/certmanager"
 	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/operator"
 	constants "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 	//+kubebuilder:scaffold:imports
@@ -68,7 +66,6 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(operatorv1alpha1.AddToScheme(scheme))
-	utilruntime.Must(certmanagerv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(metacertmanagerv1.AddToScheme(scheme))
 	utilruntime.Must(acmecertmanagerv1.AddToScheme(scheme))
 	utilruntime.Must(certmanagerv1.AddToScheme(scheme))
@@ -149,7 +146,6 @@ func main() {
 
 	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
 	apiextclient, _ := apiextensionclientset.NewForConfig(mgr.GetConfig())
-	ns, _ := os.LookupEnv("OPERATOR_NAMESPACE")
 	if err = (&operatorcontrollers.CertManagerReconciler{
 		Client:       mgr.GetClient(),
 		Reader:       mgr.GetAPIReader(),
@@ -157,72 +153,9 @@ func main() {
 		APIextclient: apiextclient,
 		Scheme:       mgr.GetScheme(),
 		Recorder:     mgr.GetEventRecorderFor("ibm-cert-manager-operator"),
-		NS:           ns,
+		NS:           res.DeployNamespace,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CertManager")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.IssuerReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Issuer")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.CertificateReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Certificate")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.ChallengeReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Challenge")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.OrderReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Order")
-		os.Exit(1)
-	}
-	if err = (&certmanagercontrollers.CertificateRequestReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "CertificateRequest")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.CertificateRefreshReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "CertificateRefresh")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.PodRefreshReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodRefresh")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.V1AddLabelReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "V1AddLabel")
-		os.Exit(1)
-	}
-	if err = (&certmanagerv1controllers.V1Alpha1AddLabelReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "V1Alpha1AddLabel")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

@@ -96,7 +96,7 @@ const CainjectorLabels = "app=ibm-cert-manager-cainjector"
 const SecretWatchLabel string = "operator.ibm.com/watched-by-cert-manager"
 
 // DefaultNamespace is the namespace the cert-manager services will be deployed in if the operator is deployed in all namespaces or locally
-const DefaultNamespace = "ibm-common-services"
+const DefaultNamespace = "openshift-operators"
 
 // PodNamespace is the namespace the the operator is getting deployed (set in an env var)
 var PodNamespace = os.Getenv("POD_NAMESPACE")
@@ -161,6 +161,7 @@ var controllerImage = GetImageID(ImageRegistry, ControllerImageName, ControllerI
 var acmesolverImage = GetImageID(ImageRegistry, AcmesolverImageName, ControllerImageVersion, DefaultImagePostfix, AcmeSolverImageEnvVar)
 var cainjectorImage = GetImageID(ImageRegistry, CainjectorImageName, ControllerImageVersion, DefaultImagePostfix, CaInjectorImageEnvVar)
 var webhookImage = GetImageID(ImageRegistry, WebhookImageName, WebhookImageVersion, DefaultImagePostfix, WebhookImageEnvVar)
+
 // ServiceAccount is the name of the default service account to be used by cert-manager services
 const ServiceAccount = "cert-manager"
 
