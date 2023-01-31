@@ -96,7 +96,7 @@ const CainjectorLabels = "app=ibm-cert-manager-cainjector"
 const SecretWatchLabel string = "operator.ibm.com/watched-by-cert-manager"
 
 // DefaultNamespace is the namespace the cert-manager services will be deployed in if the operator is deployed in all namespaces or locally
-const DefaultNamespace = "openshift-operators"
+const DefaultNamespace = "ibm-cert-manager"
 
 // PodNamespace is the namespace the the operator is getting deployed (set in an env var)
 var PodNamespace = os.Getenv("POD_NAMESPACE")

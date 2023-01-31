@@ -33,6 +33,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: "2023-01-24T19:21:18Z"
     description: Operator for managing deployment of cert-manager service.
+    operatorframework.io/suggested-namespace: ibm-cert-manager
     olm.skipRange: <4.0.0
     operators.operatorframework.io/builder: operator-sdk-v1.26.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
@@ -520,6 +521,10 @@ spec:
                         valueFrom:
                           fieldRef:
                             fieldPath: metadata.annotations['olm.targetNamespaces']
+                      - name: DEPLOYED_NAMESPACE
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.namespace
                       - name: POD_NAME
                         valueFrom:
                           fieldRef:
