@@ -49,7 +49,7 @@ import (
 	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
 	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
-	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
+	operatorv1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1"
 	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/operator"
 	constants "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 	//+kubebuilder:scaffold:imports
@@ -65,7 +65,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(operatorv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(operatorv1.AddToScheme(scheme))
 	utilruntime.Must(metacertmanagerv1.AddToScheme(scheme))
 	utilruntime.Must(acmecertmanagerv1.AddToScheme(scheme))
 	utilruntime.Must(certmanagerv1.AddToScheme(scheme))

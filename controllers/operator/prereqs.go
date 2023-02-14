@@ -34,19 +34,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	operatorv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1"
+	operatorv1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1"
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 )
 
 // Check all RBAC is ready for cert-manager
-func checkRbac(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
+func checkRbac(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
 	if rolesError := roles(instance, scheme, client, ns); rolesError != nil {
 		return rolesError
 	}
 	return nil
 }
 
-func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
+func roles(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
 
 	if clusterRoleErr := createClusterRole(instance, scheme, client); clusterRoleErr != nil {
 		return clusterRoleErr
@@ -66,7 +66,7 @@ func roles(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, clien
 	return nil
 }
 
-func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
+func createRole(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
 	logd.V(0).Info("Creating roles")
 	for _, r := range res.RolesToCreate.Items {
 		logd.V(0).Info("Creating role " + r.Name)
@@ -98,7 +98,7 @@ func createRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, 
 	return nil
 }
 
-func createClusterRole(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func createClusterRole(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client) error {
 	logd.V(0).Info("Creating cluster roles")
 	for _, r := range res.ClusterRolesToCreate.Items {
 		logd.V(0).Info("Creating cluster role " + r.Name)
@@ -130,7 +130,7 @@ func createClusterRole(instance *operatorv1alpha1.CertManager, scheme *runtime.S
 	return nil
 }
 
-func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
+func createClusterRoleBinding(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
 	logd.V(0).Info("Creating cluster role binding")
 	for _, b := range res.ClusterRoleBindingsToCreate.Items {
 		logd.V(0).Info("Creating cluster role binding " + b.Name)
@@ -170,7 +170,7 @@ func createClusterRoleBinding(instance *operatorv1alpha1.CertManager, scheme *ru
 	return nil
 }
 
-func createRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
+func createRoleBinding(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
 	logd.V(0).Info("Creating role binding")
 	for _, b := range res.RoleBindingsToCreate.Items {
 		logd.V(0).Info("Creating role binding " + b.Name)
@@ -215,7 +215,7 @@ func createRoleBinding(instance *operatorv1alpha1.CertManager, scheme *runtime.S
 	return nil
 }
 
-func createServiceAccount(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
+func createServiceAccount(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, namespace string) error {
 	logd.V(0).Info("Creating service account")
 	for _, a := range res.ServiceAccountsToCreate.Items {
 		logd.V(0).Info("Creating service account" + a.Name)
@@ -236,7 +236,7 @@ func createServiceAccount(instance *operatorv1alpha1.CertManager, scheme *runtim
 }
 
 // Checks to ensure the namespace we're deploying the service in exists
-func checkNamespace(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client typedCorev1.NamespaceInterface) error {
+func checkNamespace(instance *operatorv1.CertManager, scheme *runtime.Scheme, client typedCorev1.NamespaceInterface) error {
 	getOpt := metav1.GetOptions{}
 
 	if _, err := client.Get(context.TODO(), res.DeployNamespace, getOpt); err != nil && apiErrors.IsNotFound(err) {
@@ -256,7 +256,7 @@ func checkNamespace(instance *operatorv1alpha1.CertManager, scheme *runtime.Sche
 
 // Checks for the existence of all certmanager CRDs
 // Takes action to create them if they do not exist
-func checkCrds(instance *operatorv1alpha1.CertManager, scheme *runtime.Scheme, client apiextensionclientsetv1beta1.CustomResourceDefinitionInterface, name, namespace string) error {
+func checkCrds(instance *operatorv1.CertManager, scheme *runtime.Scheme, client apiextensionclientsetv1beta1.CustomResourceDefinitionInterface, name, namespace string) error {
 	var allErrors []string
 	listOptions := metav1.ListOptions{}
 	customResourcesList, err := client.List(context.TODO(), listOptions)

@@ -21,9 +21,9 @@ run:
   skip-files:
     - ".*\\.pb\\.go"
     - ".*\\.gen\\.go"
-    - apis/certmanager/v1alpha1/challenge_types.go
-    - apis/certmanager/v1alpha1/issuer_types.go
-    - apis/certmanager/v1alpha1/order_types.go
+    - apis/certmanager/v1/challenge_types.go
+    - apis/certmanager/v1/issuer_types.go
+    - apis/certmanager/v1/order_types.go
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
