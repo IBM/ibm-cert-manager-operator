@@ -37,19 +37,19 @@ import (
 )
 
 // Returns true if no errors in deploy logic
-func certManagerDeploy(instance *operatorv1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
+func certManagerDeploy(instance *operatorv1.CertManagerConfig, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
 	return deployLogic(instance, client, kubeclient, scheme, res.ControllerDeployment, res.CertManagerControllerName, res.ControllerImageName, res.ControllerLabels, ns)
 }
 
-func cainjectorDeploy(instance *operatorv1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
+func cainjectorDeploy(instance *operatorv1.CertManagerConfig, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
 	return deployLogic(instance, client, kubeclient, scheme, res.CainjectorDeployment, res.CertManagerCainjectorName, res.CainjectorImageName, res.CainjectorLabels, ns)
 }
 
-func webhookDeploy(instance *operatorv1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
+func webhookDeploy(instance *operatorv1.CertManagerConfig, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, ns string) error {
 	return deployLogic(instance, client, kubeclient, scheme, res.WebhookDeployment, res.CertManagerWebhookName, res.WebhookImageName, res.WebhookLabels, ns)
 }
 
-func deployLogic(instance *operatorv1.CertManager, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, deployTemplate *appsv1.Deployment, name, imageName, labels, ns string) error {
+func deployLogic(instance *operatorv1.CertManagerConfig, client client.Client, kubeclient kubernetes.Interface, scheme *runtime.Scheme, deployTemplate *appsv1.Deployment, name, imageName, labels, ns string) error {
 	similarDeploys := deployFinder(kubeclient, labels, imageName)
 	deployment := setupDeploy(instance, deployTemplate, ns)
 	var existingDeploy appsv1.Deployment
@@ -101,7 +101,7 @@ func deployLogic(instance *operatorv1.CertManager, client client.Client, kubecli
 // Args:deploy
 //     instance - The CR instance of CertManager
 //     deploy - The base deployment object - template contains most of the defaults/constants for the deployment
-func setupDeploy(instance *operatorv1.CertManager, deploy *appsv1.Deployment, ns string) appsv1.Deployment {
+func setupDeploy(instance *operatorv1.CertManagerConfig, deploy *appsv1.Deployment, ns string) appsv1.Deployment {
 	// First copy the deploy template into a deployment object
 
 	returningDeploy := *deploy

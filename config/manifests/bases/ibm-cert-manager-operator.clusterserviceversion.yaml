@@ -9,8 +9,8 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
-    operatorframework.io/suggested-namespace: ibm-cert-manager
     olm.skipRange: <4.0.0
+    operatorframework.io/suggested-namespace: ibm-cert-manager
     support: IBM
   labels:
     operatorframework.io/arch.amd64: supported
@@ -58,6 +58,13 @@ spec:
       kind: Order
       name: orders.certmanager.k8s.io
       version: v1alpha1
+    - description: 'CertManager is the Schema for the certmanagers API. Documentation
+        For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
+        License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
+      displayName: Cert Manager
+      kind: CertManager
+      name: certmanagers.operator.ibm.com
+      version: v1
     - description: "A Certificate resource should be created to ensure an up to date
         and signed x509 certificate is stored in the Kubernetes Secret resource named
         in `spec.secretName`. Documentation For additional details regarding install
@@ -71,8 +78,8 @@ spec:
     - description: 'CertManager is the Schema for the certmanagers API. Documentation
         For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
         License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
-      displayName: Cert Manager
-      kind: CertManager
+      displayName: Cert Manager Config
+      kind: CertManagerConfig
       name: certmanagers.operator.ibm.com
       version: v1
     - description: 'An Issuer represents a certificate issuing authority which can

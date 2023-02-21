@@ -99,7 +99,7 @@ This type of testing is as close as possible to how IBM Foundational services in
     make bundle-run
     ```
 
-1. Verify operator is running, and you can create the operands by creating a new CertManager object
+1. Verify operator is running, and you can create the operands by creating a new CertManagerConfig object
 1. Revert the `image` change in [manager.yaml](config/manager/manager.yaml) file, and re-generate the bundle before opening PR
 
     ```

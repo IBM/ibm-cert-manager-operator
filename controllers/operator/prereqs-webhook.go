@@ -34,7 +34,7 @@ import (
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 )
 
-func webhookPrereqs(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
+func webhookPrereqs(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client, ns string) error {
 	if err := removeAPIService(client); err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func removeOldSecret(client client.Client, ns string) error {
 	return nil
 }
 
-func webhooks(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func webhooks(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client) error {
 	mutating := &admRegv1.MutatingWebhookConfiguration{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ""}, mutating)
 	if err != nil {
@@ -230,7 +230,7 @@ func removeWebhooks(client client.Client) error {
 	return nil
 }
 
-func service(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
+func service(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client, ns string) error {
 	svc := &corev1.Service{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: ns}, svc)
 	if err != nil {
@@ -284,7 +284,7 @@ func removeSvc(client client.Client, ns string) error {
 	return nil
 }
 
-func createWebhookRoleBinding(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client) error {
+func createWebhookRoleBinding(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client) error {
 	logd.V(2).Info("Creating role binding")
 	roleBinding := &rbacv1.RoleBinding{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: res.CertManagerWebhookName, Namespace: "kube-system"}, roleBinding)
