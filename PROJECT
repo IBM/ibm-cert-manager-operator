@@ -14,9 +14,9 @@ resources:
   controller: true
   domain: ibm.com
   group: operator
-  kind: CertManager
-  path: github.com/ibm/ibm-cert-manager-operator/apis/operator/v1alpha1
-  version: v1alpha1
+  kind: CertManagerConfig
+  path: github.com/ibm/ibm-cert-manager-operator/apis/operator/v1
+  version: v1
 - api:
     crdVersion: v1
     namespaced: true

@@ -357,7 +357,7 @@ rules:
   - apiGroups:
       - operator.ibm.com
     resources:
-      - certmanagers
+      - certmanagerconfigs
     verbs:
       - create
       - delete
@@ -369,13 +369,13 @@ rules:
   - apiGroups:
       - operator.ibm.com
     resources:
-      - certmanagers/finalizers
+      - certmanagerconfigs/finalizers
     verbs:
       - update
   - apiGroups:
       - operator.ibm.com
     resources:
-      - certmanagers/status
+      - certmanagerconfigs/status
     verbs:
       - get
       - patch

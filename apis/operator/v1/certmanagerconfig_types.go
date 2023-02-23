@@ -23,8 +23,8 @@ import (
 
 //+kubebuilder:validation:XPreserveUnknownFields
 
-// CertManagerSpec defines the desired state of CertManager
-type CertManagerSpec struct {
+// CertManagerConfigSpec defines the desired state of CertManager
+type CertManagerConfigSpec struct {
 	ImageRegistry      string `json:"imageRegistry,omitempty"`
 	ImagePostFix       string `json:"imagePostFix,omitempty"`
 	Webhook            bool   `json:"enableWebhook,omitempty"`
@@ -58,36 +58,36 @@ type CACertificate struct {
 }
 
 // CertManagerStatus defines the observed state of CertManager
-type CertManagerStatus struct {
+type CertManagerConfigStatus struct {
 	// It will be as "OK when all objects are created successfully
 	// TODO: convert these markers for spec descriptor
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
-	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors.displayName="CertManager Status"
-	OverallStatus string `json:"certManagerStatus"`
+	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors.displayName="CertManagerConfig Status"
+	OverallStatus string `json:"certManagerConfigStatus"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:resource:path=certmanagers,scope=Cluster
+//+kubebuilder:resource:path=certmanagerconfigs,scope=Cluster
 
 // CertManager is the Schema for the certmanagers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
-type CertManager struct {
+type CertManagerConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   CertManagerSpec   `json:"spec,omitempty"`
-	Status CertManagerStatus `json:"status,omitempty"`
+	Spec   CertManagerConfigSpec   `json:"spec,omitempty"`
+	Status CertManagerConfigStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
 // CertManagerList contains a list of CertManager
-type CertManagerList struct {
+type CertManagerConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []CertManager `json:"items"`
+	Items           []CertManagerConfig `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&CertManager{}, &CertManagerList{})
+	SchemeBuilder.Register(&CertManagerConfig{}, &CertManagerConfigList{})
 }

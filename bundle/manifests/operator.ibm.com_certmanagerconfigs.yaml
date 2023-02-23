@@ -4,22 +4,23 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.7.0
   creationTimestamp: null
-  name: certmanagers.operator.ibm.com
+  name: certmanagerconfigs.operator.ibm.com
 spec:
   group: operator.ibm.com
   names:
-    kind: CertManager
-    listKind: CertManagerList
-    plural: certmanagers
-    singular: certmanager
+    kind: CertManagerConfig
+    listKind: CertManagerConfigList
+    plural: certmanagerconfigs
+    singular: certmanagerconfig
   scope: Cluster
   versions:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: 'CertManager is the Schema for the certmanagers API. Documentation
-          For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
-          License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
+        description: 'CertManagerConfig is the Schema for the certmanagerconfigs API.
+          Documentation For additional details regarding install parameters check:
+          https://ibm.biz/icpfs39install. License By installing this product you accept
+          the license terms https://ibm.biz/icpfs39license.'
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,7 +35,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: CertManagerSpec defines the desired state of CertManager
+            description: CertManagerConfigSpec defines the desired state of CertManagerConfig
             properties:
               certManagerCAInjector:
                 description: CertManagerCAInjector includes spec for cert-manager-cainjector
@@ -198,14 +199,14 @@ spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
           status:
-            description: CertManagerStatus defines the observed state of CertManager
+            description: CertManagerConfigStatus defines the observed state of CertManagerConfig
             properties:
-              certManagerStatus:
+              certManagerConfigStatus:
                 description: 'It will be as "OK when all objects are created successfully
                   TODO: convert these markers for spec descriptor'
                 type: string
             required:
-            - certManagerStatus
+            - certManagerConfigStatus
             type: object
         type: object
     served: true

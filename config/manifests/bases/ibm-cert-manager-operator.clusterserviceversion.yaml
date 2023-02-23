@@ -9,8 +9,8 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
-    operatorframework.io/suggested-namespace: ibm-cert-manager
     olm.skipRange: <4.0.0
+    operatorframework.io/suggested-namespace: ibm-cert-manager
     support: IBM
   labels:
     operatorframework.io/arch.amd64: supported
@@ -71,9 +71,9 @@ spec:
     - description: 'CertManager is the Schema for the certmanagers API. Documentation
         For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
         License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
-      displayName: Cert Manager
-      kind: CertManager
-      name: certmanagers.operator.ibm.com
+      displayName: Cert Manager Config
+      kind: CertManagerConfig
+      name: certmanagerconfigs.operator.ibm.com
       version: v1
     - description: 'An Issuer represents a certificate issuing authority which can
         be referenced as part of `issuerRef` fields. It is scoped to a single namespace
