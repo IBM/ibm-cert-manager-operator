@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog"
@@ -281,8 +282,53 @@ func (r *CertManagerReconciler) UpdateResourse(obj *unstructured.Unstructured, c
 	return nil
 }
 
+// GetObject get k8s resource with the unstructured object
+func (r *CertManagerReconciler) GetObject(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+	found := &unstructured.Unstructured{}
+	found.SetGroupVersionKind(obj.GetObjectKind().GroupVersionKind())
+
+	err := r.Reader.Get(context.TODO(), types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, found)
+
+	return found, err
+}
+
+// create CertManagerConfig CR if not exist or update it if the version is old
+func (r *CertManagerReconciler) CreateCertManagerConfigCR() error {
+	klog.Infof("Creating CertManagerConfig CR")
+	var errMsg error
+
+	objects, err := YamlToObjects([]byte(res.CertManagerConfigCR))
+	if err != nil {
+		return err
+	}
+
+	for _, obj := range objects {
+		gvk := obj.GetObjectKind().GroupVersionKind()
+		_, err := r.GetObject(obj)
+		//this object not exist we need to create it
+		if errors.IsNotFound(err) {
+			klog.Infof("Creating certmanagerconfig CR with name: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), gvk.Kind, gvk.Group, gvk.Version)
+			if e := r.CreateObject(obj); e != nil {
+				errMsg = e
+			}
+		} else if err == nil {
+			klog.Infof("Found certmanagerconfig CR, skip creating")
+		} else if err != nil {
+			klog.Infof("can't get object:%s: %v", obj.GetName(), err)
+			errMsg = err
+		}
+	}
+
+	return errMsg
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// Create certManager CRDs
+	if err := r.CreateCertManagerConfigCR(); err != nil {
+		klog.Errorf("Fail to create CertManager Instance: %v", err)
+		return err
+	}
 
 	// Create a new controller
 	c, err := controller.New("certmanager-controller", mgr, controller.Options{Reconciler: r})
