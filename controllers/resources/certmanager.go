@@ -16,9 +16,9 @@
 
 package resources
 
-const CertManagerCR = `
+const CertManagerConfigCR = `
 apiVersion: operator.ibm.com/v1
-kind: CertManager
+kind: CertManagerConfig
 metadata:
   labels:
     app.kubernetes.io/instance: ibm-cert-manager-operator
@@ -32,5 +32,5 @@ spec:
   imageRegistry: icr.io/cpopen/cpfs
   version: 4.0.0
 status:
-  certManagerStatus: ''
+  certManagerConfigStatus: ''
 `

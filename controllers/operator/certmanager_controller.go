@@ -292,12 +292,12 @@ func (r *CertManagerReconciler) GetObject(obj *unstructured.Unstructured) (*unst
 	return found, err
 }
 
-// create CertManager CR if not exist or update it if the version is old
-func (r *CertManagerReconciler) CreateCertManagerCR() error {
-	klog.Infof("Creating CertManager CR")
+// create CertManagerConfig CR if not exist or update it if the version is old
+func (r *CertManagerReconciler) CreateCertManagerConfigCR() error {
+	klog.Infof("Creating CertManagerConfig CR")
 	var errMsg error
 
-	objects, err := YamlToObjects([]byte(res.CertManagerCR))
+	objects, err := YamlToObjects([]byte(res.CertManagerConfigCR))
 	if err != nil {
 		return err
 	}
@@ -307,12 +307,12 @@ func (r *CertManagerReconciler) CreateCertManagerCR() error {
 		_, err := r.GetObject(obj)
 		//this object not exist we need to create it
 		if errors.IsNotFound(err) {
-			klog.Infof("Creating certmanager CR with name: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), gvk.Kind, gvk.Group, gvk.Version)
+			klog.Infof("Creating certmanagerconfig CR with name: %s, kind: %s, apiversion: %s/%s\n", obj.GetName(), gvk.Kind, gvk.Group, gvk.Version)
 			if e := r.CreateObject(obj); e != nil {
 				errMsg = e
 			}
 		} else if err == nil {
-			klog.Infof("Found certmanager CR, skip creating")
+			klog.Infof("Found certmanagerconfig CR, skip creating")
 		} else if err != nil {
 			klog.Infof("can't get object:%s: %v", obj.GetName(), err)
 			errMsg = err
@@ -325,7 +325,7 @@ func (r *CertManagerReconciler) CreateCertManagerCR() error {
 // SetupWithManager sets up the controller with the Manager.
 func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Create certManager CRDs
-	if err := r.CreateCertManagerCR(); err != nil {
+	if err := r.CreateCertManagerConfigCR(); err != nil {
 		klog.Errorf("Fail to create CertManager Instance: %v", err)
 		return err
 	}
