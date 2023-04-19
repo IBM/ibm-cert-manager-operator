@@ -16,6 +16,7 @@
 
 package resources
 
+// base on doc https://www.ibm.com/docs/en/cpfs?topic=services-configuring-foundational-by-using-custom-resource#cert_resources
 const CertManagerConfigCR = `
 apiVersion: operator.ibm.com/v1
 kind: CertManagerConfig
@@ -26,6 +27,30 @@ metadata:
     app.kubernetes.io/name: cert-manager
   name: default
 spec:
+  certManagerCAInjector:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 520Mi
+      requests:
+        cpu: 20m
+        memory: 410Mi
+  certManagerController:
+    resources:
+      limits:
+        cpu: 80m
+        memory: 530Mi
+      requests:
+        cpu: 20m
+        memory: 230Mi
+  certManagerWebhook:
+    resources:
+      limits:
+        cpu: 60m
+        memory: 100Mi
+      requests:
+        cpu: 30m
+        memory: 40Mi
   disableHostNetwork: true
   enableCertRefresh: true
   enableWebhook: true
