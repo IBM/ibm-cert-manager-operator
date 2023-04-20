@@ -27,7 +27,6 @@ import (
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -99,8 +98,9 @@ func deployLogic(instance *operatorv1alpha1.CertManager, client client.Client, k
 
 // Configure deployment options
 // Args:deploy
-//     instance - The CR instance of CertManager
-//     deploy - The base deployment object - template contains most of the defaults/constants for the deployment
+//
+//	instance - The CR instance of CertManager
+//	deploy - The base deployment object - template contains most of the defaults/constants for the deployment
 func setupDeploy(instance *operatorv1alpha1.CertManager, deploy *appsv1.Deployment, ns string) appsv1.Deployment {
 	// First copy the deploy template into a deployment object
 
@@ -486,27 +486,27 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	fRes := fContainer.Resources
 	sRes := sContainer.Resources
 
-	if !reflect.DeepEqual(fRes.Limits[corev1.ResourceCPU], sRes.Limits[corev1.ResourceCPU]) {
+	if fmt.Sprint(fRes.Limits.Cpu().AsDec()) != fmt.Sprint(sRes.Limits.Cpu().AsDec()) {
 		statusLog.Info("Resource limit cpu not equal",
-			"first", fRes.Limits[corev1.ResourceCPU], "second", sRes.Limits[corev1.ResourceCPU])
+			"first", fmt.Sprint(fRes.Limits.Cpu().AsDec()), "second", fmt.Sprint(sRes.Limits.Cpu().AsDec()))
 		return false
 	}
 
-	if !reflect.DeepEqual(fRes.Limits[corev1.ResourceMemory], sRes.Limits[corev1.ResourceMemory]) {
+	if fmt.Sprint(fRes.Limits.Memory().AsDec()) != fmt.Sprint(sRes.Limits.Memory().AsDec()) {
 		statusLog.Info("Resource limit memory not equal",
-			"first", fRes.Limits[corev1.ResourceMemory], "second", sRes.Limits[corev1.ResourceMemory])
+			"first", fmt.Sprint(fRes.Limits.Memory().AsDec()), "second", fmt.Sprint(sRes.Limits.Memory().AsDec()))
 		return false
 	}
 
-	if !reflect.DeepEqual(fRes.Requests[corev1.ResourceCPU], sRes.Requests[corev1.ResourceCPU]) {
+	if fmt.Sprint(fRes.Requests.Cpu().AsDec()) != fmt.Sprint(sRes.Requests.Cpu().AsDec()) {
 		statusLog.Info("Resource requests cpu not equal",
-			"first", fRes.Requests[corev1.ResourceCPU], "second", sRes.Requests[corev1.ResourceCPU])
+			"first", fmt.Sprint(fRes.Requests.Cpu().AsDec()), "second", fmt.Sprint(sRes.Requests.Cpu().AsDec()))
 		return false
 	}
 
-	if !reflect.DeepEqual(fRes.Requests[corev1.ResourceMemory], sRes.Requests[corev1.ResourceMemory]) {
+	if fmt.Sprint(fRes.Requests.Memory().AsDec()) != fmt.Sprint(sRes.Requests.Memory().AsDec()) {
 		statusLog.Info("Resource requests memory not equal",
-			"first", fRes.Requests[corev1.ResourceMemory], "second", sRes.Requests[corev1.ResourceMemory])
+			"first", fmt.Sprint(fRes.Requests.Memory().AsDec()), "second", fmt.Sprint(sRes.Requests.Memory().AsDec()))
 		return false
 	}
 
