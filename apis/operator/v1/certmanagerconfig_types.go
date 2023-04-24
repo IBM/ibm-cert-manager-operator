@@ -57,7 +57,7 @@ type CACertificate struct {
 	Namespace string `json:"namespace"`
 }
 
-// CertManagerStatus defines the observed state of CertManager
+// CertManagerConfigStatus defines the observed state of CertManagerConfig
 type CertManagerConfigStatus struct {
 	// It will be as "OK when all objects are created successfully
 	// TODO: convert these markers for spec descriptor
@@ -70,7 +70,7 @@ type CertManagerConfigStatus struct {
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:path=certmanagerconfigs,scope=Cluster
 
-// CertManager is the Schema for the certmanagers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
+// CertManagerConfig is the Schema for the certmanagerconfigs API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
 type CertManagerConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

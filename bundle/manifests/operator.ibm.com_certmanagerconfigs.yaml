@@ -35,7 +35,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: CertManagerConfigSpec defines the desired state of CertManagerConfig
+            description: CertManagerConfigSpec defines the desired state of CertManager
             properties:
               certManagerCAInjector:
                 description: CertManagerCAInjector includes spec for cert-manager-cainjector
