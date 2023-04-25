@@ -156,6 +156,11 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	logd.Info("The namespace", "ns", r.NS)
 	r.updateEvent(instance, "Instance found", corev1.EventTypeNormal, "Initializing")
 
+	if instance.Spec.License.Accept != true {
+		logd.Info("Accept license by changing .spec.license.accept to true in the CertManagerConfig CR. Operator will not proceed until then")
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {
 		logd.Error(err, "One or more prerequisites not met, requeueing")
