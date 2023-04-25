@@ -45,6 +45,26 @@ type CertManagerConfigSpec struct {
 
 	//RefreshCertsBasedOnCA is a list of CA certificate names. Leaf certificates created from the CA will be refreshed when the CA is refreshed.
 	RefreshCertsBasedOnCA []CACertificate `json:"refreshCertsBasedOnCA,omitempty"`
+
+	// +optional
+	License LicenseAcceptance `json:"license,omitempty"`
+}
+
+// LicenseAcceptance defines the license specification in CSV
+type LicenseAcceptance struct {
+	// Accepting the license - URL: https://ibm.biz/integration-licenses
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:hidden"
+	// +optional
+	Accept bool `json:"accept"`
+	// The type of license being accepted.
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:hidden"
+	Use string `json:"use,omitempty"`
+	// The license being accepted where the component has multiple.
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:hidden"
+	License string `json:"license,omitempty"`
+	// The license key for this deployment.
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:hidden"
+	Key string `json:"key,omitempty"`
 }
 
 //CertManagerContainerSpec defines the spec related to individual operand containers
