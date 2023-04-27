@@ -35,7 +35,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: CertManagerConfigSpec defines the desired state of CertManagerConfig
+            description: CertManagerConfigSpec defines the desired state of CertManager
             properties:
               certManagerCAInjector:
                 description: CertManagerCAInjector includes spec for cert-manager-cainjector
@@ -177,6 +177,24 @@ spec:
                 type: string
               imageRegistry:
                 type: string
+              license:
+                description: LicenseAcceptance defines the license specification in
+                  CSV
+                properties:
+                  accept:
+                    description: 'Accepting the license - URL: https://ibm.biz/integration-licenses'
+                    type: boolean
+                  key:
+                    description: The license key for this deployment.
+                    type: string
+                  license:
+                    description: The license being accepted where the component has
+                      multiple.
+                    type: string
+                  use:
+                    description: The type of license being accepted.
+                    type: string
+                type: object
               refreshCertsBasedOnCA:
                 description: RefreshCertsBasedOnCA is a list of CA certificate names.
                   Leaf certificates created from the CA will be refreshed when the

@@ -55,6 +55,8 @@ spec:
   enableCertRefresh: true
   enableWebhook: true
   imageRegistry: icr.io/cpopen/cpfs
+  license:
+    accept: false
   version: 4.0.0
 status:
   certManagerConfigStatus: ''

@@ -31,11 +31,11 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
-    createdAt: "2023-02-23T16:03:11Z"
+    createdAt: "2023-04-25T19:31:21Z"
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <4.0.0
     operatorframework.io/suggested-namespace: ibm-cert-manager
-    operators.operatorframework.io/builder: operator-sdk-v1.26.0
+    operators.operatorframework.io/builder: operator-sdk-v1.28.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
   labels:
@@ -57,7 +57,7 @@ spec:
         kind: Certificate
         name: certificates.cert-manager.io
         version: v1
-      - description: 'CertManager is the Schema for the certmanagers API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
+      - description: 'CertManagerConfig is the Schema for the certmanagerconfigs API. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Cert Manager Config
         kind: CertManagerConfig
         name: certmanagerconfigs.operator.ibm.com

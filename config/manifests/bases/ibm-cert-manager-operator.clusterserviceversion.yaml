@@ -68,8 +68,8 @@ spec:
       kind: Certificate
       name: certificates.cert-manager.io
       version: v1
-    - description: 'CertManager is the Schema for the certmanagers API. Documentation
-        For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
+    - description: 'CertManagerConfig is the Schema for the certmanagerconfigs API.
+        Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
         License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
       displayName: Cert Manager Config
       kind: CertManagerConfig
