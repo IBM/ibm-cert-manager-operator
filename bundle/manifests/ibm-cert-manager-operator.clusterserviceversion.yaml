@@ -37,6 +37,7 @@ metadata:
     operatorframework.io/suggested-namespace: ibm-cert-manager
     operators.operatorframework.io/builder: operator-sdk-v1.28.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+    operators.openshift.io/infrastructure-features: '["disconnected"]'
     support: IBM
   labels:
     operatorframework.io/arch.amd64: supported
