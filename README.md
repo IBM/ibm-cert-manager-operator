@@ -1,10 +1,6 @@
 # ibm-cert-manager-operator
 
-> **Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
-
-You can use the ibm-cert-manager-operator to install the IBM certificate manager service for the IBM Cloud Platform Common Services. You can use IBM certificate manager service to issue and manage x509 certificates from various sources, such as Let’s Encrypt and Hashicorp Vault, a simple signing key pair, or self-signed. It ensures certificates are valid and up to date and will renew certificates before they expire.
-
-For more information about the available IBM Cloud Platform Common Services, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
+You can use IBM Cert Manager Operator to install the IBM certificate manager service. IBM certificate manager service issues and manages x509 certificates from various sources, such as Let's Encrypt and Hashicorp Vault, a simple signing key pair, or self-signed. It ensures certificates are valid and up to date and will renew certificates before they expire. If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
 
 ## Supported platforms
 
