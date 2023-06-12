@@ -9,6 +9,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
+    operators.openshift.io/infrastructure-features: '["disconnected"]'
     olm.skipRange: <3.25.4
     support: IBM
   labels:
