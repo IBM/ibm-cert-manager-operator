@@ -679,7 +679,7 @@ spec:
                       - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
                         value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.5-jetstack.1.11.0
                     image: icr.io/cpopen/ibm-cert-manager-operator:latest
-                    imagePullPolicy: Always
+                    imagePullPolicy: IfNotPresent
                     livenessProbe:
                       httpGet:
                         path: /healthz
