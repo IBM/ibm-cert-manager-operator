@@ -50,7 +50,7 @@ spec:
           image: icr.io/cpopen/ibm-cert-manager-operator:latest
           command:
           - ibm-cert-manager-operator
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /healthz
