@@ -76,7 +76,7 @@ var controllerContainer = corev1.Container{
 		},
 	},
 	LivenessProbe: &corev1.Probe{
-		Handler: corev1.Handler{
+		Handler: corev1.ProbeHandler{
 			Exec: &livenessExecActionController,
 		},
 		InitialDelaySeconds: initialDelaySecondsLiveness,
@@ -85,7 +85,7 @@ var controllerContainer = corev1.Container{
 		FailureThreshold:    failureThresholdLiveness,
 	},
 	ReadinessProbe: &corev1.Probe{
-		Handler: corev1.Handler{
+		Handler: corev1.ProbeHandler{
 			Exec: &readinessExecActionController,
 		},
 		InitialDelaySeconds: initialDelaySecondsReadiness,
@@ -120,7 +120,7 @@ var webhookContainer = corev1.Container{
 		},
 	},
 	LivenessProbe: &corev1.Probe{
-		Handler: corev1.Handler{
+		Handler: corev1.ProbeHandler{
 			Exec: &livenessExecActionWebhook,
 		},
 		InitialDelaySeconds: initialDelaySecondsLiveness,
@@ -129,7 +129,7 @@ var webhookContainer = corev1.Container{
 		FailureThreshold:    failureThresholdLiveness,
 	},
 	ReadinessProbe: &corev1.Probe{
-		Handler: corev1.Handler{
+		Handler: corev1.ProbeHandler{
 			Exec: &readinessExecActionWebhook,
 		},
 		InitialDelaySeconds: initialDelaySecondsReadiness,
@@ -156,7 +156,7 @@ var cainjectorContainer = corev1.Container{
 		},
 	},
 	LivenessProbe: &corev1.Probe{
-		Handler: corev1.Handler{
+		Handler: corev1.ProbeHandler{
 			Exec: &livenessExecActionCainjector,
 		},
 		InitialDelaySeconds: initialDelaySecondsLiveness,
@@ -165,7 +165,7 @@ var cainjectorContainer = corev1.Container{
 		FailureThreshold:    failureThresholdLiveness,
 	},
 	ReadinessProbe: &corev1.Probe{
-		Handler: corev1.Handler{
+		Handler: corev1.ProbeHandler{
 			Exec: &readinessExecActionCainjector,
 		},
 		InitialDelaySeconds: initialDelaySecondsReadiness,
