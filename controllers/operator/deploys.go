@@ -360,9 +360,9 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	sLive := sContainer.LivenessProbe
 
 	if fLive != nil && sLive != nil {
-		if !reflect.DeepEqual(fLive.Handler.Exec.Command, sLive.Handler.Exec.Command) {
+		if !reflect.DeepEqual(fLive.ProbeHandler.Exec.Command, sLive.ProbeHandler.Exec.Command) {
 			statusLog.Info("Exec command in liveness probes not equal",
-				"first", fLive.Handler.Exec.Command, "second", sLive.Handler.Exec.Command)
+				"first", fLive.ProbeHandler.Exec.Command, "second", sLive.ProbeHandler.Exec.Command)
 			return false
 		}
 
@@ -386,9 +386,9 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 	fReady := fContainer.ReadinessProbe
 	sReady := sContainer.ReadinessProbe
 	if fReady != nil && sReady != nil {
-		if !reflect.DeepEqual(fReady.Handler.Exec.Command, sReady.Handler.Exec.Command) {
+		if !reflect.DeepEqual(fReady.ProbeHandler.Exec.Command, sReady.ProbeHandler.Exec.Command) {
 			statusLog.Info("Exec command in readiness probes not equal",
-				"first", fReady.Handler.Exec.Command, "second", sReady.Handler.Exec.Command)
+				"first", fReady.ProbeHandler.Exec.Command, "second", sReady.ProbeHandler.Exec.Command)
 			return false
 		}
 
