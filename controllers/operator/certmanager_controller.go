@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 
 	operatorv1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1"
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
@@ -177,9 +178,15 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{Requeue: true}, nil
 	}
 
+	if err := r.updateVersion(instance); err != nil {
+		logd.Error(err, "Error updating certmanagerconfig cr")
+		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "Failed")
+		r.updateStatus(instance, "Error updating version")
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	r.updateEvent(instance, "Deployed cert-manager successfully", corev1.EventTypeNormal, "Deployed")
 	r.updateStatus(instance, "Successfully deployed cert-manager")
-
 	return ctrl.Result{}, nil
 }
 
@@ -324,6 +331,33 @@ func (r *CertManagerReconciler) CreateCertManagerConfigCR() error {
 	}
 
 	return errMsg
+}
+
+// update version of CertManagerConfig CR
+func (r *CertManagerReconciler) updateVersion(instance *operatorv1.CertManagerConfig) error {
+	name := "ibm-cert-manager-operator"
+	namespace := r.NS
+	deployKey := types.NamespacedName{Name: name, Namespace: namespace}
+	deploy := &appsv1.Deployment{}
+	if err := r.Reader.Get(context.TODO(), deployKey, deploy); err != nil {
+		klog.Errorf("Failed to get deployment %s/%s, %s", namespace, name, err)
+		return err
+	}
+
+	if csv, ok := deploy.GetLabels()["olm.owner"]; ok {
+		csvVersion := strings.SplitN(csv, ".", 2)
+		version := strings.Replace(csvVersion[1], "v", "", 1)
+
+		if instance.Spec.Version != version {
+			instance.Spec.Version = version
+			if err := r.Client.Update(context.TODO(), instance); err != nil {
+				logd.Error(err, "Error updating instance version")
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
