@@ -158,7 +158,7 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	r.updateEvent(instance, "Instance found", corev1.EventTypeNormal, "Initializing")
 
 	if !instance.Spec.License.Accept {
-		logd.Error(nil, "Accept license by changing .spec.license.accept to true in the CertManagerConfig CR. Operator will not proceed until then")
+		logd.Error(nil, "Accept license by changing .spec.license.accept to true in the CertManagerConfig CR. This message will keep showing until then")
 	}
 
 	// Check Prerequisites
