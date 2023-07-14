@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: daily
+    target-branch: "master"
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: daily
+    target-branch: "release-ltsr"
