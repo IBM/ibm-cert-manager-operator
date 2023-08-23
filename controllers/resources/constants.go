@@ -36,6 +36,7 @@ var cpu100 = resource.NewMilliQuantity(100, resource.DecimalSI) // 100m
 var cpu500 = resource.NewMilliQuantity(500, resource.DecimalSI) // 500m
 
 // Memory quantities
+var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI) // 300Mi
 var memory300 = resource.NewQuantity(300*1024*1024, resource.BinarySI) // 300Mi
 var memory500 = resource.NewQuantity(500*1024*1024, resource.BinarySI) // 500Mi
 
@@ -222,7 +223,7 @@ var CRDs = [5]string{"certificates", "issuers", "clusterissuers", "orders", "cha
 // GroupVersion is the cert-manager's crd group version
 const GroupVersion = "certmanager.k8s.io"
 
-//CRDVersion is the cert-manager's crd version
+// CRDVersion is the cert-manager's crd version
 const CRDVersion = "v1alpha1"
 
 // NamespaceDef is the namespace spec for the cert-manager services and will be where the service is deployed
@@ -245,25 +246,25 @@ var CSCAIssuerLabelMap = map[string]string{
 	"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
 }
 
-//CSCAIssuerName is the name of the CS CA Issuer
+// CSCAIssuerName is the name of the CS CA Issuer
 const CSCAIssuerName = "cs-ca-issuer"
 
-//CSCACertName is the name of the CS CA certificate
+// CSCACertName is the name of the CS CA certificate
 const CSCACertName = "cs-ca-certificate"
 
-//CSCASecretName is the name of the CA certificate secret
+// CSCASecretName is the name of the CA certificate secret
 const CSCASecretName = "cs-ca-certificate-secret"
 
-//RhacmNamespace is the namespace where RHACM is installed
+// RhacmNamespace is the namespace where RHACM is installed
 const RhacmNamespace = "open-cluster-management"
 
-//RhacmCRName is the RHACM CR name
+// RhacmCRName is the RHACM CR name
 const RhacmCRName = "multiclusterhub"
 
-//RhacmSecretShareCRName is the Secret Share CR Name that copies the cs-ca-certificate-secret
+// RhacmSecretShareCRName is the Secret Share CR Name that copies the cs-ca-certificate-secret
 var RhacmSecretShareCRName = "rhacm-cs-ca-certificate-secret-share"
 
-//RhacmGVK identifies the RHACM CRD
+// RhacmGVK identifies the RHACM CRD
 var RhacmGVK = schema.GroupVersionKind{
 	Group:   "operator.open-cluster-management.io",
 	Kind:    "MultiClusterHub",

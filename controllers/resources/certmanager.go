@@ -35,6 +35,7 @@ spec:
       requests:
         cpu: 20m
         memory: 410Mi
+        ephemeral-storage: 256Mi
   certManagerController:
     resources:
       limits:
@@ -43,6 +44,7 @@ spec:
       requests:
         cpu: 20m
         memory: 230Mi
+        ephemeral-storage: 256Mi
   certManagerWebhook:
     resources:
       limits:
@@ -51,6 +53,7 @@ spec:
       requests:
         cpu: 30m
         memory: 40Mi
+        ephemeral-storage: 256Mi
   disableHostNetwork: true
   enableCertRefresh: true
   enableWebhook: true
