@@ -18,23 +18,17 @@ package operator
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"reflect"
 
 	utilyaml "github.com/ghodss/yaml"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/apimachinery/pkg/runtime/serializer/streaming"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/klog"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 )
 
 func containsString(source []string, str string) bool {
@@ -54,39 +48,6 @@ func removeString(source []string, str string) (result []string) {
 		result = append(result, sourceString)
 	}
 	return result
-}
-
-//copySecret copies the secret from one namespace to another
-func copySecret(client client.Client, secretToCopy string, srcNamespace string, destNamespace string, secretShareCRName string) error {
-	// create a secretshare CR instance
-
-	var secretShareCR = &secretshare.SecretShare{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretShareCRName,
-			Namespace: srcNamespace,
-		},
-		Spec: secretshare.SecretShareSpec{
-			Secretshares: []secretshare.Secretshare{
-				{
-					Secretname: secretToCopy,
-					Sharewith: []secretshare.TargetNamespace{
-						{
-							Namespace: destNamespace,
-						},
-					},
-				},
-			},
-		},
-	}
-
-	// Create the secretshare CR to copy the secret
-	err := client.Create(context.TODO(), secretShareCR)
-	if err != nil && !errors.IsAlreadyExists(err) {
-		return fmt.Errorf("could not create resource: %v", err)
-	}
-
-	return nil
-
 }
 
 // YamlToObjects convert YAML content to unstructured objects
