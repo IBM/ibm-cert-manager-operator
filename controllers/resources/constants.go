@@ -21,8 +21,6 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // TrueVar the variable representing the boolean value true
@@ -215,79 +213,3 @@ var AcmeSolverArg = "--acme-http01-solver-image=" + acmesolverImage
 
 // DefaultArgs are the default arguments use for cert-manager-controller
 var DefaultArgs = []string{}
-
-// CRDs is the list of crds created/used by cert-manager in this version
-var CRDs = [5]string{"certificates", "issuers", "clusterissuers", "orders", "challenges"}
-
-// GroupVersion is the cert-manager's crd group version
-const GroupVersion = "certmanager.k8s.io"
-
-//CRDVersion is the cert-manager's crd version
-const CRDVersion = "v1alpha1"
-
-// NamespaceDef is the namespace spec for the cert-manager services and will be where the service is deployed
-var NamespaceDef = &v1.Namespace{
-	ObjectMeta: metav1.ObjectMeta{
-		Name: DeployNamespace,
-		Labels: map[string]string{
-			"certmanager.k8s.io/disable-validation": "true",
-		},
-	},
-	Spec: v1.NamespaceSpec{
-		Finalizers: []v1.FinalizerName{"kubernetes"},
-	},
-}
-
-// CSCAIssuerLabelMap is the labels for the CS CA Issuer in map format
-var CSCAIssuerLabelMap = map[string]string{
-	"app.kubernetes.io/name":       "cert-manager",
-	"app.kubernetes.io/managed-by": "ibm-cert-manager-operator",
-	"app.kubernetes.io/instance":   "ibm-cert-manager-operator",
-}
-
-//CSCAIssuerName is the name of the CS CA Issuer
-const CSCAIssuerName = "cs-ca-issuer"
-
-//CSCACertName is the name of the CS CA certificate
-const CSCACertName = "cs-ca-certificate"
-
-//CSCASecretName is the name of the CA certificate secret
-const CSCASecretName = "cs-ca-certificate-secret"
-
-//RhacmNamespace is the namespace where RHACM is installed
-const RhacmNamespace = "open-cluster-management"
-
-//RhacmCRName is the RHACM CR name
-const RhacmCRName = "multiclusterhub"
-
-//RhacmSecretShareCRName is the Secret Share CR Name that copies the cs-ca-certificate-secret
-var RhacmSecretShareCRName = "rhacm-cs-ca-certificate-secret-share"
-
-//RhacmGVK identifies the RHACM CRD
-var RhacmGVK = schema.GroupVersionKind{
-	Group:   "operator.open-cluster-management.io",
-	Kind:    "MultiClusterHub",
-	Version: "v1",
-}
-
-// DefaultEnableCertRefresh is set to true
-const DefaultEnableCertRefresh = true
-
-// DefaultCANames is the default CA names for which the leaf certs need to be refreshed
-var DefaultCANames = []string{"cs-ca-certificate", "mongodb-root-ca-cert"}
-
-// CertManager instance name
-const CertManagerInstanceName = "default"
-
-// OdlmDeploymentName is the deployment name of ODLM
-const OdlmDeploymentName = "operand-deployment-lifecycle-manager"
-
-// ProductName is the name of Common Services
-const ProductName = "IBM Cloud Pak Foundational Services"
-
-// Labels and Annotations added by this operator
-const (
-	OperatorGeneratedAnno = "ibm-cert-manager-operator-generated"
-	ProperV1Label         = "ibm-cert-manager-operator/conditionally-generated-v1"
-	RefreshCALabel        = "ibm-cert-manager-operator/refresh-ca-chain"
-)
