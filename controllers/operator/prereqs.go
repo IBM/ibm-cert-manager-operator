@@ -18,19 +18,12 @@ package operator
 
 import (
 	"context"
-	"strings"
 
-	"github.com/pkg/errors"
 	rbacv1 "k8s.io/api/rbac/v1"
-	apiextensionclientsetv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metaerrors "k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -233,135 +226,4 @@ func createServiceAccount(instance *operatorv1.CertManagerConfig, scheme *runtim
 		}
 	}
 	return nil
-}
-
-// Checks to ensure the namespace we're deploying the service in exists
-func checkNamespace(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client typedCorev1.NamespaceInterface) error {
-	getOpt := metav1.GetOptions{}
-
-	if _, err := client.Get(context.TODO(), res.DeployNamespace, getOpt); err != nil && apiErrors.IsNotFound(err) {
-		if err = controllerutil.SetControllerReference(instance, res.NamespaceDef, scheme); err != nil {
-			logd.Error(err, "Error setting controller reference on namespace")
-		}
-		logd.V(1).Info("cert-manager namespace does not exist, creating it", "error", err)
-		if _, err = client.Create(context.TODO(), res.NamespaceDef, metav1.CreateOptions{}); err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
-	}
-	logd.V(2).Info("cert-manager namespace exists")
-	return nil
-}
-
-// Checks for the existence of all certmanager CRDs
-// Takes action to create them if they do not exist
-func checkCrds(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client apiextensionclientsetv1beta1.CustomResourceDefinitionInterface, name, namespace string) error {
-	var allErrors []string
-	listOptions := metav1.ListOptions{}
-	customResourcesList, err := client.List(context.TODO(), listOptions)
-	if err != nil {
-		return err
-	}
-
-	existingResources := make(map[string]bool)
-	for _, item := range customResourcesList.Items {
-		if strings.Contains(item.Name, res.GroupVersion) {
-			existingResources[item.Name] = false
-		}
-	}
-
-	// Check that the CRDs we need match the ones we got from the cluster
-	for _, item := range res.CRDs {
-		crName := item + "." + res.GroupVersion
-		if _, ok := existingResources[crName]; !ok { // CRD wasn't found, create it
-			logd.V(1).Info("Did not find custom resource, creating it now", "resource", item)
-			crd := res.CRDMap[item]
-
-			if err := controllerutil.SetControllerReference(instance, crd, scheme); err != nil {
-				logd.Error(err, "Error setting controller reference on crd")
-			}
-			if _, err = client.Create(context.TODO(), crd, metav1.CreateOptions{}); err != nil {
-				allErrors = append(allErrors, err.Error())
-			}
-		}
-	}
-	if allErrors != nil {
-		return errors.New(strings.Join(allErrors, "\n"))
-	}
-	logd.V(2).Info("Finished checking CRDs, no errors found")
-	return nil
-}
-
-// Removes the clusterrole and clusterrolebinding created by this operator
-func removeRoles(client client.Client) error {
-	// Delete the clusterrolebinding
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{}
-
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRoleBinding)
-	if err != nil && apiErrors.IsNotFound(err) {
-		logd.V(1).Info("Error getting cluster role binding", "msg", err)
-		return nil
-	} else if err == nil {
-		if err = client.Delete(context.Background(), clusterRoleBinding); err != nil {
-			logd.V(1).Info("Error deleting cluster role binding", "name", clusterRoleBinding.Name, "error message", err)
-			return err
-		}
-	} else {
-		return err
-	}
-	// Delete the clusterrole
-	clusterRole := &rbacv1.ClusterRole{}
-	err = client.Get(context.Background(), types.NamespacedName{Name: res.ClusterRoleName, Namespace: ""}, clusterRole)
-	if err != nil && apiErrors.IsNotFound(err) {
-		logd.V(1).Info("Error getting cluster role", "msg", err)
-		return nil
-	} else if err == nil {
-		if err = client.Delete(context.Background(), clusterRole); err != nil {
-			logd.V(1).Info("Error deleting cluster role", "name", clusterRole.Name, "error message", err)
-			return err
-		}
-	} else {
-		return err
-	}
-	return nil
-}
-
-//CheckRhacm checks if RHACM exists and returns RHACM version and namespace
-func CheckRhacm(client client.Client) (string, string, error) {
-
-	multiClusterHubList := &unstructured.UnstructuredList{}
-	multiClusterHubList.SetGroupVersionKind(res.RhacmGVK)
-
-	err := client.List(context.Background(), multiClusterHubList)
-	if err != nil {
-		return "", "", err
-	}
-
-	if len(multiClusterHubList.Items) < 1 {
-		return "", "", &metaerrors.NoKindMatchError{GroupKind: multiClusterHubList.GroupVersionKind().GroupKind()}
-	}
-
-	// there should only be one MultiClusterHub CR in a cluster
-	multiClusterHub := multiClusterHubList.Items[0]
-	mchNamespace := multiClusterHub.GetNamespace()
-	if mchNamespace == "" {
-		mchNamespace = res.RhacmNamespace
-	}
-
-	// get the currentVersion value from the CR's status
-	mchStatus, isFound, err := unstructured.NestedMap(multiClusterHub.Object, "status")
-	if err != nil {
-		return "", mchNamespace, err
-	}
-	if !isFound {
-		return "", mchNamespace, errors.New("could not find status of MultiClusterHub")
-	}
-	val, ok := mchStatus["currentVersion"]
-	if !ok {
-		return "", mchNamespace, errors.New("could not find currentVersion in MultiClusterHub CR")
-	}
-	version := val.(string)
-
-	return version, mchNamespace, nil
 }
