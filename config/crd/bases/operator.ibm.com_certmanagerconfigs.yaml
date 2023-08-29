@@ -40,7 +40,7 @@ spec:
             description: CertManagerConfigSpec defines the desired state of CertManager
             properties:
               certManagerCAInjector:
-                description: CertManagerCAInjector includes spec for cert-manager-cainjector
+                description: CertManagerCAInjector describes spec for cert-manager-cainjector
                   workload
                 properties:
                   resources:
@@ -72,7 +72,7 @@ spec:
                     type: object
                 type: object
               certManagerController:
-                description: CertManagerController includes spec for cert-manager-controller
+                description: CertManagerController describes spec for cert-manager-controller
                   workload
                 properties:
                   resources:
@@ -104,7 +104,7 @@ spec:
                     type: object
                 type: object
               certManagerWebhook:
-                description: CertManagerWebhook includes spec for cert-manager-webhook
+                description: CertManagerWebhook describes spec for cert-manager-webhook
                   workload
                 properties:
                   resources:
@@ -136,8 +136,7 @@ spec:
                     type: object
                 type: object
               configMapWatcher:
-                description: ConfigMapWatcher includes spec for icp-configmap-watcher
-                  workload
+                description: ConfigMapWatcher is not used
                 properties:
                   resources:
                     description: ResourceRequirements describes the compute resource
@@ -168,16 +167,22 @@ spec:
                     type: object
                 type: object
               disableHostNetwork:
+                description: DisableHostNetwork disables
                 type: boolean
               enableCertRefresh:
-                description: EnableCertRefresh is a flag that can be set to enable
-                  the refresh of leaf certificates based on a root CA
+                description: EnableCertRefresh enables the refresh of leaf certificates
+                  based on a CA certificate
                 type: boolean
               enableWebhook:
+                description: Webhook enables the cert-manager-webhook operand
                 type: boolean
               imagePostFix:
+                description: ImagePostFix describes a string that will be appended
+                  to the end of the fully qualified image, e.g. imageRegistry/imageName:imageTagAndPostFix
                 type: string
               imageRegistry:
+                description: ImageRegistry describes the image registry for the operands,
+                  e.g. cert-manager-controller
                 type: string
               license:
                 description: LicenseAcceptance defines the license specification in
@@ -199,9 +204,11 @@ spec:
                 type: object
               refreshCertsBasedOnCA:
                 description: RefreshCertsBasedOnCA is a list of CA certificate names.
-                  Leaf certificates created from the CA will be refreshed when the
-                  CA is refreshed.
+                  Leaf certificates created from any of the listed CA will be refreshed
+                  when the CA is refreshed
                 items:
+                  description: CACertificate describes a CA Certfiicate's name and
+                    namespace
                   properties:
                     certName:
                       type: string
@@ -213,8 +220,13 @@ spec:
                   type: object
                 type: array
               resourceNamespace:
+                description: ResourceNS describes the cluster-resource-namespace flag
+                  for cert-manager-controller operand, which is used to configure
+                  the namespace the operand will use for ClusterIssuer secretReferences
                 type: string
               version:
+                description: Version descibes the version of cert-manager-operator.
+                  Changing the value does not change the cert-manager-operator version
                 type: string
             type: object
             x-kubernetes-preserve-unknown-fields: true
@@ -222,8 +234,8 @@ spec:
             description: CertManagerConfigStatus defines the observed state of CertManagerConfig
             properties:
               certManagerConfigStatus:
-                description: 'It will be as "OK when all objects are created successfully
-                  TODO: convert these markers for spec descriptor'
+                description: OverallStatus describes whether cert-manager operands
+                  have been successfully deployed or not.
                 type: string
             required:
             - certManagerConfigStatus

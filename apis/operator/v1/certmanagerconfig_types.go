@@ -25,25 +25,39 @@ import (
 
 // CertManagerConfigSpec defines the desired state of CertManager
 type CertManagerConfigSpec struct {
-	ImageRegistry      string `json:"imageRegistry,omitempty"`
-	ImagePostFix       string `json:"imagePostFix,omitempty"`
-	Webhook            bool   `json:"enableWebhook,omitempty"`
-	ResourceNS         string `json:"resourceNamespace,omitempty"`
-	DisableHostNetwork *bool  `json:"disableHostNetwork,omitempty"`
-	Version            string `json:"version,omitempty"`
-	//CertManagerController includes spec for cert-manager-controller workload
+	// ImageRegistry describes the image registry for the operands, e.g.
+	// cert-manager-controller
+	ImageRegistry string `json:"imageRegistry,omitempty"`
+	// ImagePostFix describes a string that will be appended to the end of the
+	// fully qualified image, e.g. imageRegistry/imageName:imageTagAndPostFix
+	ImagePostFix string `json:"imagePostFix,omitempty"`
+	// Webhook enables the cert-manager-webhook operand
+	Webhook bool `json:"enableWebhook,omitempty"`
+	// ResourceNS describes the cluster-resource-namespace flag for
+	// cert-manager-controller operand, which is used to configure the namespace
+	// the operand will use for ClusterIssuer secretReferences
+	ResourceNS string `json:"resourceNamespace,omitempty"`
+	// DisableHostNetwork disables
+	DisableHostNetwork *bool `json:"disableHostNetwork,omitempty"`
+	// Version descibes the version of cert-manager-operator. Changing the value
+	// does not change the cert-manager-operator version
+	Version string `json:"version,omitempty"`
+	//CertManagerController describes spec for cert-manager-controller workload
 	CertManagerController CertManagerContainerSpec `json:"certManagerController,omitempty"`
-	//CertManagerWebhook includes spec for cert-manager-webhook workload
+	//CertManagerWebhook describes spec for cert-manager-webhook workload
 	CertManagerWebhook CertManagerContainerSpec `json:"certManagerWebhook,omitempty"`
-	//CertManagerCAInjector includes spec for cert-manager-cainjector workload
+	//CertManagerCAInjector describes spec for cert-manager-cainjector workload
 	CertManagerCAInjector CertManagerContainerSpec `json:"certManagerCAInjector,omitempty"`
-	//ConfigMapWatcher includes spec for icp-configmap-watcher workload
+	//ConfigMapWatcher is not used
 	ConfigMapWatcher CertManagerContainerSpec `json:"configMapWatcher,omitempty"`
 
-	//EnableCertRefresh is a flag that can be set to enable the refresh of leaf certificates based on a root CA
+	// EnableCertRefresh enables the refresh of leaf certificates based on a CA
+	// certificate
 	EnableCertRefresh *bool `json:"enableCertRefresh,omitempty"`
 
-	//RefreshCertsBasedOnCA is a list of CA certificate names. Leaf certificates created from the CA will be refreshed when the CA is refreshed.
+	// RefreshCertsBasedOnCA is a list of CA certificate names. Leaf
+	// certificates created from any of the listed CA will be refreshed when
+	// the CA is refreshed
 	RefreshCertsBasedOnCA []CACertificate `json:"refreshCertsBasedOnCA,omitempty"`
 
 	// +optional
@@ -67,11 +81,11 @@ type LicenseAcceptance struct {
 	Key string `json:"key,omitempty"`
 }
 
-//CertManagerContainerSpec defines the spec related to individual operand containers
 type CertManagerContainerSpec struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
+// CACertificate describes a CA Certfiicate's name and namespace
 type CACertificate struct {
 	CertName  string `json:"certName"`
 	Namespace string `json:"namespace"`
@@ -79,8 +93,8 @@ type CACertificate struct {
 
 // CertManagerConfigStatus defines the observed state of CertManagerConfig
 type CertManagerConfigStatus struct {
-	// It will be as "OK when all objects are created successfully
-	// TODO: convert these markers for spec descriptor
+	// OverallStatus describes whether cert-manager operands have been
+	// successfully deployed or not.
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors=true
 	// +operator-sdk:gen-csv:customresourcedefinitions.statusDescriptors.displayName="CertManagerConfig Status"
 	OverallStatus string `json:"certManagerConfigStatus"`
