@@ -1,0 +1,66 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/instance: test-leaf-issuer
+    app.kubernetes.io/managed-by: cert-manager-controller
+    app.kubernetes.io/name: Issuer
+  name: test-leaf-issuer
+spec:
+  ca:
+    secretName: test-ca-certificate-secret
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/instance: test-ss-issuer
+    app.kubernetes.io/managed-by: cert-manager-controller
+    app.kubernetes.io/name: Issuer
+  name: test-ss-issuer
+spec:
+  selfSigned: {}
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/instance: test-ca-certificate
+    app.kubernetes.io/managed-by: cert-manager-controller
+    app.kubernetes.io/name: Certificate
+    ibm-cert-manager-operator/refresh-ca-chain: 'true'
+  name: test-ca-certificate
+spec:
+  secretName: test-ca-certificate-secret
+  issuerRef:
+    name: test-ss-issuer
+    kind: Issuer
+  commonName: test-ca-certificate
+  isCA: true
+  duration: 720h0m0s
+  renewBefore: 719h59m30s
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/instance: test-leaf-certificate
+    app.kubernetes.io/managed-by: cert-manager-controller
+    app.kubernetes.io/name: Certificate
+    ibm-cert-manager-operator/refresh-ca-chain: 'true'
+  name: test-leaf-certificate
+spec:
+  secretName: test-leaf-certificate-secret
+  issuerRef:
+    name: test-leaf-issuer
+    kind: Issuer
+  commonName: test-leaf-certificate
+  isCA: true
+  duration: 17520h0m0s
+  renewBefore: 720h0m0s
