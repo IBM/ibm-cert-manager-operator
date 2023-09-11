@@ -52,8 +52,9 @@ var cpuMemory = corev1.ResourceRequirements{
 		corev1.ResourceCPU:    *cpu500,
 		corev1.ResourceMemory: *memory500},
 	Requests: map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    *cpu100,
-		corev1.ResourceMemory: *memory300},
+		corev1.ResourceCPU:              *cpu100,
+		corev1.ResourceMemory:           *memory300,
+		corev1.ResourceEphemeralStorage: *memory256},
 }
 
 var controllerContainer = corev1.Container{

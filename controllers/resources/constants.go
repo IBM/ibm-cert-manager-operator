@@ -34,6 +34,7 @@ var cpu100 = resource.NewMilliQuantity(100, resource.DecimalSI) // 100m
 var cpu500 = resource.NewMilliQuantity(500, resource.DecimalSI) // 500m
 
 // Memory quantities
+var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI) // 300Mi
 var memory300 = resource.NewQuantity(300*1024*1024, resource.BinarySI) // 300Mi
 var memory500 = resource.NewQuantity(500*1024*1024, resource.BinarySI) // 500Mi
 
