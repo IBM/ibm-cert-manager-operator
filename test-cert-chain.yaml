@@ -42,7 +42,7 @@ spec:
   commonName: test-ca-certificate
   isCA: true
   duration: 720h0m0s
-  renewBefore: 719h59m00s
+  renewBefore: 719h57m00s
 
 ---
 
