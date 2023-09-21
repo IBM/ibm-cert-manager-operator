@@ -31,12 +31,12 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
-    createdAt: 2022-02-010T21:31:00Z
+    createdAt: "2023-09-21T20:28:48Z"
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <3.25.8
-    operators.operatorframework.io/builder: operator-sdk-v1.23.0
-    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     operators.openshift.io/infrastructure-features: '["disconnected"]'
+    operators.operatorframework.io/builder: operator-sdk-v1.31.0
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
   labels:
     operatorframework.io/arch.amd64: supported
@@ -672,13 +672,13 @@ spec:
                       - name: OPERATOR_NAME
                         value: ibm-cert-manager-operator
                       - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.8-jetstack.1.12.2
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.9-jetstack.1.13.0
                       - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.8-jetstack.1.12.2
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.9-jetstack.1.13.0
                       - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.8-jetstack.1.12.2
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.9-jetstack.1.13.0
                       - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.8-jetstack.1.12.2
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.9-jetstack.1.13.0
                     image: icr.io/cpopen/ibm-cert-manager-operator:latest
                     imagePullPolicy: IfNotPresent
                     livenessProbe:
