@@ -34,13 +34,11 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	"github.com/ibm/ibm-cert-manager-operator/controllers/operator"
@@ -488,26 +486,9 @@ func (r *CertificateReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
-	// Create a new controller
-	c, err := controller.New("certificate-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to primary resource Certificate
-	err = c.Watch(&source.Kind{Type: &certmanagerv1alpha1.Certificate{}}, &handler.EnqueueRequestForObject{}, ignoreStatusPredicate{})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource Pods and requeue the owner Certificate
-	err = c.Watch(&source.Kind{Type: &certmanagerv1.Certificate{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &certmanagerv1alpha1.Certificate{},
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ctrl.NewControllerManagedBy(mgr).
+		Named("certificate_controller").
+		For(&certmanagerv1alpha1.Certificate{}, builder.WithPredicates(ignoreStatusPredicate{})).
+		Owns(&certmanagerv1.Certificate{}).
+		Complete(r)
 }

@@ -44,10 +44,7 @@ import (
 	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 var logd = log.Log.WithName("controller_certmanager")
@@ -145,6 +142,18 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		// Error reading the object - requeue the request.
 		return ctrl.Result{}, err
 	}
+
+	// mysecret := &corev1.SecretList{}
+	// if err := r.Client.List(context.TODO(), mysecret, &client.ListOptions{Namespace: "henry-test"}); err != nil {
+	// 	return ctrl.Result{}, err
+	// }
+	// var names string
+	// for _, i := range mysecret.Items {
+	// 	names = names + i.GetObjectMeta().GetName() + " "
+	// }
+	// logd.Info("My secret is: ", "list", names)
+
+	// return ctrl.Result{}, nil
 
 	configMapName := "ibm-cpp-config"
 	conditionalDeployCM := &corev1.ConfigMap{}
@@ -655,94 +664,17 @@ func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
-	// Create a new controller
-	c, err := controller.New("certmanager-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to primary resource CertManager
-	err = c.Watch(&source.Kind{Type: &operatorv1alpha1.CertManager{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource Deployments and requeue the owner CertManager
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource ClusterRoles and requeue the owner CertManager
-	err = c.Watch(&source.Kind{Type: &rbacv1.ClusterRole{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource ClusterRoleBindings and requeue the owner CertManager
-	err = c.Watch(&source.Kind{Type: &rbacv1.ClusterRoleBinding{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource ServiceAccounts and requeue the owner CertManager
-	err = c.Watch(&source.Kind{Type: &corev1.ServiceAccount{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-
-	// Watch changes to custom resource defintions that are owned by this operator - in case of deletion or changes
-	err = c.Watch(&source.Kind{Type: &apiextensionsAPIv1.CustomResourceDefinition{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-
-	// Watch changes to mutating webhook configuration that are owned by this operator - in case of deletion or changes
-	err = c.Watch(&source.Kind{Type: &admRegv1.MutatingWebhookConfiguration{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-	// Watch changes to validating webhook configuration that are owned by this operator - in case of deletion or changes
-	err = c.Watch(&source.Kind{Type: &admRegv1.ValidatingWebhookConfiguration{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-	// Watch changes to apiservice that are owned by this operator - in case of deletion or changes
-	err = c.Watch(&source.Kind{Type: &apiRegv1.APIService{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-	// Watch changes to service that are owned by this operator - in case of deletion or changes
-	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.CertManager{},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
+	return ctrl.NewControllerManagedBy(mgr).
+		Named("certmanager_controller").
+		For(&operatorv1alpha1.CertManager{}).
+		Owns(&appsv1.Deployment{}).
+		Owns(&rbacv1.ClusterRole{}).
+		Owns(&rbacv1.ClusterRoleBinding{}).
+		Owns(&corev1.ServiceAccount{}).
+		Owns(&apiextensionsAPIv1.CustomResourceDefinition{}).
+		Owns(&admRegv1.MutatingWebhookConfiguration{}).
+		Owns(&admRegv1.ValidatingWebhookConfiguration{}).
+		Owns(&apiRegv1.APIService{}).
+		Owns(&corev1.Service{}).
+		Complete(r)
 }

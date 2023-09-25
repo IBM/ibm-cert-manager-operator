@@ -25,10 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
@@ -57,7 +54,7 @@ func (r *V1Alpha1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	logd = log.FromContext(ctx)
 
 	reqLogger := logd.WithValues("req.Namespace", req.Namespace, "req.Name", req.Name)
-	reqLogger.Info("Reconciling CertificateRefresh")
+	reqLogger.Info("Reconciling v1alpha1 Certificate for label")
 
 	v1cert := &certmanagerv1.Certificate{}
 	err := r.Client.Get(context.TODO(), req.NamespacedName, v1cert)
@@ -122,17 +119,9 @@ func (r *V1Alpha1AddLabelReconciler) updateSecret(secret *corev1.Secret) error {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *V1Alpha1AddLabelReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	// Create a new controller
-	c, err := controller.New("addlabel-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
 
-	// Watch for changes to certmanagerv1alpha1 Certificates in the cluster
-	err = c.Watch(&source.Kind{Type: &certmanagerv1alpha1.Certificate{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ctrl.NewControllerManagedBy(mgr).
+		Named("v1apha1addlabel_controller").
+		For(&certmanagerv1alpha1.Certificate{}).
+		Complete(r)
 }

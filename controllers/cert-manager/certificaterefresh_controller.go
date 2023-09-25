@@ -36,10 +36,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmanagerv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
@@ -254,7 +251,7 @@ func (r *CertificateRefreshReconciler) getCertificateBySecret(secret *corev1.Sec
 	return cert, err
 }
 
-//setCSCACertificateDuration sets duration of cs-ca-certificate to 2 years
+// setCSCACertificateDuration sets duration of cs-ca-certificate to 2 years
 func (r *CertificateRefreshReconciler) setCSCACertificateDuration(cert *certmanagerv1.Certificate) error {
 
 	if cert.Name != res.CSCACertName || cert.Namespace != res.DeployNamespace {
@@ -486,17 +483,8 @@ func (r *CertificateRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		return err
 	}
 
-	// Create a new controller
-	c, err := controller.New("certificaterefresh-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to Certificates in the cluster
-	err = c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ctrl.NewControllerManagedBy(mgr).
+		Named("certificaterefresh_controller").
+		For(&corev1.Secret{}).
+		Complete(r)
 }
