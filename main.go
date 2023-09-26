@@ -26,11 +26,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	olmv1 "github.com/operator-framework/api/pkg/operators/v1"
 	admRegv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -73,6 +75,7 @@ func init() {
 	utilruntime.Must(metacertmanagerv1.AddToScheme(scheme))
 	utilruntime.Must(acmecertmanagerv1.AddToScheme(scheme))
 	utilruntime.Must(certmanagerv1.AddToScheme(scheme))
+	utilruntime.Must(olmv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -94,6 +97,10 @@ func main() {
 	ls := labels.Set{resources.SecretWatchLabel: ""}
 	lselector := labels.SelectorFromSet(ls)
 
+	fs := fields.Set{"metadata.name": "ibm-cpp-config"}
+
+	ns, _ := os.LookupEnv("WATCH_NAMESPACE")
+
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -105,6 +112,13 @@ func main() {
 			ByObject: map[client.Object]cache.ByObject{
 				&corev1.Secret{}: {
 					Label: lselector,
+				},
+				&corev1.ConfigMap{}: {
+					Namespaces: map[string]cache.Config{
+						ns: {
+							FieldSelector: fs.AsSelector(),
+						},
+					},
 				},
 			},
 		},
@@ -151,7 +165,6 @@ func main() {
 
 	kubeclient, _ := kubernetes.NewForConfig(mgr.GetConfig())
 	apiextclient, _ := apiextensionclientset.NewForConfig(mgr.GetConfig())
-	ns, _ := os.LookupEnv("WATCH_NAMESPACE")
 	if err = (&operatorcontrollers.CertManagerReconciler{
 		Client:       mgr.GetClient(),
 		Reader:       mgr.GetAPIReader(),
@@ -225,6 +238,13 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "V1Alpha1AddLabel")
+		os.Exit(1)
+	}
+	if err = (&operatorcontrollers.PostDelegationCheckerReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "PostDelegationChecker")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

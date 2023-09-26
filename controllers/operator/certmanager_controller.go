@@ -103,7 +103,7 @@ type CertManagerReconciler struct {
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=events,verbs=get;create;update;patch
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list
+//+kubebuilder:rbac:groups="",resources=configmaps,verbs=create;get;list;watch
 
 //+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses;httproutes,verbs=get;list;watch;create;delete;update
 //+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses/finalizers,verbs=update
@@ -142,18 +142,6 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		// Error reading the object - requeue the request.
 		return ctrl.Result{}, err
 	}
-
-	// mysecret := &corev1.SecretList{}
-	// if err := r.Client.List(context.TODO(), mysecret, &client.ListOptions{Namespace: "henry-test"}); err != nil {
-	// 	return ctrl.Result{}, err
-	// }
-	// var names string
-	// for _, i := range mysecret.Items {
-	// 	names = names + i.GetObjectMeta().GetName() + " "
-	// }
-	// logd.Info("My secret is: ", "list", names)
-
-	// return ctrl.Result{}, nil
 
 	configMapName := "ibm-cpp-config"
 	conditionalDeployCM := &corev1.ConfigMap{}

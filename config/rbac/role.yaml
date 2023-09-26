@@ -13,8 +13,10 @@ rules:
     resources:
       - configmaps
     verbs:
+      - create
       - get
       - list
+      - watch
   - apiGroups:
       - ""
     resources:
@@ -514,6 +516,14 @@ rules:
       - operator.open-cluster-management.io
     resources:
       - multiclusterhubs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - operators.coreos.com
+    resources:
+      - operatorgroups
     verbs:
       - get
       - list

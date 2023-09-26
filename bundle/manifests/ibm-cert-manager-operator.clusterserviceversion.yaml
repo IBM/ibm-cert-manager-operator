@@ -31,7 +31,7 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
-    createdAt: "2023-09-25T19:09:13Z"
+    createdAt: "2023-09-26T04:06:27Z"
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <3.25.8
     operators.openshift.io/infrastructure-features: '["disconnected"]'
@@ -96,8 +96,10 @@ spec:
               resources:
                 - configmaps
               verbs:
+                - create
                 - get
                 - list
+                - watch
             - apiGroups:
                 - ""
               resources:
@@ -597,6 +599,14 @@ spec:
                 - operator.open-cluster-management.io
               resources:
                 - multiclusterhubs
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - operators.coreos.com
+              resources:
+                - operatorgroups
               verbs:
                 - get
                 - list
