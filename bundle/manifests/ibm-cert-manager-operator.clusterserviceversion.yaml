@@ -20,7 +20,7 @@ metadata:
             "enableCertRefresh": true,
             "enableWebhook": true,
             "imageRegistry": "icr.io/cpopen/cpfs",
-            "version": "4.2.0"
+            "version": "4.2.1"
           },
           "status": {
             "certManagerConfigStatus": ""
@@ -33,7 +33,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: "2023-04-25T19:31:21Z"
     description: Operator for managing deployment of cert-manager service.
-    olm.skipRange: <4.2.0
+    olm.skipRange: <4.2.1
     operatorframework.io/suggested-namespace: ibm-cert-manager
     operators.operatorframework.io/builder: operator-sdk-v1.28.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
@@ -44,7 +44,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-cert-manager-operator.v4.2.0
+  name: ibm-cert-manager-operator.v4.2.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -622,7 +622,7 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  version: 4.2.0
+  version: 4.2.1
   relatedImages:
     - image: icr.io/cpopen/ibm-cert-manager-operator:latest
       name: IBM_CERT_MANAGER_OPERATOR_IMAGE

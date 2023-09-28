@@ -60,7 +60,7 @@ spec:
   imageRegistry: icr.io/cpopen/cpfs
   license:
     accept: false
-  version: 4.2.0
+  version: 4.2.1
 status:
   certManagerConfigStatus: ''
 `
