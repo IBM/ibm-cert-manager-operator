@@ -38,8 +38,9 @@ import (
 
 // V1AddLabelReconciler reconciles a Certificate object
 type V1AddLabelReconciler struct {
-	client.Client
-	Scheme *runtime.Scheme
+	Client       client.Client
+	ServerReader client.Reader
+	Scheme       *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch
@@ -100,8 +101,12 @@ func (r *V1AddLabelReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 func (r *V1AddLabelReconciler) getSecret(cert *certmanagerv1.Certificate) (*corev1.Secret, error) {
 	secretName := cert.Spec.SecretName
 	secret := &corev1.Secret{}
+	// attempt to read from cache first, and if not found, then read directly
+	// from API server because of catch-22
 	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: cert.Namespace}, secret)
-
+	if errors.IsNotFound(err) {
+		err = r.ServerReader.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: cert.Namespace}, secret)
+	}
 	return secret, err
 }
 
