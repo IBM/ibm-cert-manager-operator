@@ -227,15 +227,17 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&certmanagerv1controllers.V1AddLabelReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:       mgr.GetClient(),
+		ServerReader: mgr.GetAPIReader(),
+		Scheme:       mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "V1AddLabel")
 		os.Exit(1)
 	}
 	if err = (&certmanagerv1controllers.V1Alpha1AddLabelReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:       mgr.GetClient(),
+		ServerReader: mgr.GetAPIReader(),
+		Scheme:       mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "V1Alpha1AddLabel")
 		os.Exit(1)
