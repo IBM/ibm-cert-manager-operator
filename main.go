@@ -38,7 +38,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	secretshare "github.com/IBM/ibm-secretshare-operator/api/v1"
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 
 	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
@@ -111,11 +110,6 @@ func main() {
 	}
 
 	if err := admRegv1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "")
-		os.Exit(1)
-	}
-
-	if err := secretshare.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}

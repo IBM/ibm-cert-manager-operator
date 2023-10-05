@@ -3,7 +3,6 @@ module github.com/ibm/ibm-cert-manager-operator
 go 1.20
 
 require (
-	github.com/IBM/ibm-secretshare-operator v1.11.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.10
 	k8s.io/api v0.28.1
