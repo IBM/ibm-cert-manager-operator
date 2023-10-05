@@ -219,7 +219,7 @@ func (r *CertManagerReconciler) deployments(instance *operatorv1.CertManagerConf
 
 	if instance.Spec.Webhook {
 		// Check webhook prerequisites
-		if err := webhookPrereqs(instance, r.Scheme, r.Client, r.NS); err != nil {
+		if err := webhookPrereqs(instance, r.Scheme, r.Client, r.Reader, r.NS); err != nil {
 			return err
 		}
 		// Deploy webhook and cainjector

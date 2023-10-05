@@ -33,10 +33,10 @@ import (
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 )
 
-func webhookPrereqs(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client, ns string) error {
-	// if err := removeOldSecret(client, ns); err != nil {
-	// 	return err
-	// }
+func webhookPrereqs(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client, reader client.Reader, ns string) error {
+	if err := removeOldSecret(client, reader, ns); err != nil {
+		return err
+	}
 	if err := service(instance, scheme, client, ns); err != nil {
 		return err
 	}
@@ -56,16 +56,18 @@ func removeWebhookPrereqs(client client.Client, ns string) error {
 	return nil
 }
 
-func removeOldSecret(client client.Client, ns string) error {
+func removeOldSecret(client client.Client, reader client.Reader, ns string) error {
 	secret := &corev1.Secret{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.WebhookServingSecret, Namespace: ns}, secret)
+	// read from API server directly since there is probably more overhead to
+	// set up informers and cache just for one secret
+	err := reader.Get(context.Background(), types.NamespacedName{Name: res.WebhookServingSecret, Namespace: ns}, secret)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil
 		}
 		return err
 	}
-	if _, ok := secret.Annotations["certmanager.k8s.io/allow-direct-injection"]; ok {
+	if _, ok := secret.Annotations["cert-manager.io/allow-direct-injection"]; !ok {
 		if err := client.Delete(context.Background(), secret); err != nil {
 			return err
 		}
