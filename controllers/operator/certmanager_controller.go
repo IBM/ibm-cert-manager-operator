@@ -36,7 +36,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog"
-	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -365,7 +364,7 @@ func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	return ctrl.NewControllerManagedBy(mgr).
-		Named("certmanager_controller").
+		Named("certmanagerconfig_controller").
 		For(&operatorv1.CertManagerConfig{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&rbacv1.ClusterRole{}).
@@ -375,7 +374,6 @@ func (r *CertManagerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&admRegv1.MutatingWebhookConfiguration{}).
 		Owns(&admRegv1.ValidatingWebhookConfiguration{}).
-		Owns(&apiRegv1.APIService{}).
 		Owns(&corev1.Service{}).
 		Complete(r)
 }
