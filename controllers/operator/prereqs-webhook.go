@@ -35,12 +35,12 @@ import (
 )
 
 func webhookPrereqs(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client, ns string) error {
-	if err := removeAPIService(client); err != nil {
-		return err
-	}
-	if err := removeOldSecret(client, ns); err != nil {
-		return err
-	}
+	// if err := removeAPIService(client); err != nil {
+	// 	return err
+	// }
+	// if err := removeOldSecret(client, ns); err != nil {
+	// 	return err
+	// }
 	if err := service(instance, scheme, client, ns); err != nil {
 		return err
 	}
