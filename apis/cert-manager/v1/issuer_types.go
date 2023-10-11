@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// nolint // preserving original code from v1.4.0 jetstack as much as possible
 package v1
 
 import (
@@ -25,19 +24,47 @@ import (
 )
 
 // +genclient
+// +genclient:nonNamespaced
 // +k8s:openapi-gen=true
-// +kubebuilder:object:root=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:storageversion
+
+// A ClusterIssuer represents a certificate issuing authority which can be
+// referenced as part of `issuerRef` fields.
+// It is similar to an Issuer, however it is cluster-scoped and therefore can
+// be referenced by resources that exist in *any* namespace, not just the same
+// namespace as the referent.
+type ClusterIssuer struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Desired state of the ClusterIssuer resource.
+	Spec IssuerSpec `json:"spec"`
+
+	// Status of the ClusterIssuer. This is set and managed automatically.
+	// +optional
+	Status IssuerStatus `json:"status"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// ClusterIssuerList is a list of Issuers
+type ClusterIssuerList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+
+	Items []ClusterIssuer `json:"items"`
+}
+
+// +genclient
+// +k8s:openapi-gen=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:storageversion
 
 // An Issuer represents a certificate issuing authority which can be
 // referenced as part of `issuerRef` fields.
 // It is scoped to a single namespace and can therefore only be referenced by
-// resources within the same namespace. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.
-// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status"
-// +kubebuilder:printcolumn:name="Status",priority=1,type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].message"
-// +kubebuilder:printcolumn:name="Age",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:resource:categories=cert-manager,path=issuers,scope=Namespaced
-// +kubebuilder:subresource:status
+// resources within the same namespace.
 type Issuer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -50,7 +77,7 @@ type Issuer struct {
 	Status IssuerStatus `json:"status"`
 }
 
-// +kubebuilder:object:root=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // IssuerList is a list of Issuers
 type IssuerList struct {
@@ -127,12 +154,10 @@ type VenafiTPP struct {
 	// The secret must contain two keys, 'username' and 'password'.
 	CredentialsRef cmmeta.LocalObjectReference `json:"credentialsRef"`
 
-	// CABundle is a PEM encoded TLS certificate to use to verify connections to
-	// the TPP instance.
-	// If specified, system roots will not be used and the issuing CA for the
-	// TPP instance must be verifiable using the provided root.
-	// If not specified, the connection will be verified using the cert-manager
-	// system root certificates.
+	// Base64-encoded bundle of PEM CAs which will be used to validate the certificate
+	// chain presented by the TPP server. Only used if using HTTPS; ignored for HTTP.
+	// If undefined, the certificate bundle in the cert-manager controller container
+	// is used to validate the chain.
 	// +optional
 	CABundle []byte `json:"caBundle,omitempty"`
 }
@@ -176,16 +201,27 @@ type VaultIssuer struct {
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 
-	// PEM-encoded CA bundle (base64-encoded) used to validate Vault server
-	// certificate. Only used if the Server URL is using HTTPS protocol. This
-	// parameter is ignored for plain HTTP protocol connection. If not set the
-	// system root certificates are used to validate the TLS connection.
+	// Base64-encoded bundle of PEM CAs which will be used to validate the certificate
+	// chain presented by Vault. Only used if using HTTPS to connect to Vault and
+	// ignored for HTTP connections.
+	// Mutually exclusive with CABundleSecretRef.
+	// If neither CABundle nor CABundleSecretRef are defined, the certificate bundle in
+	// the cert-manager controller container is used to validate the TLS connection.
 	// +optional
 	CABundle []byte `json:"caBundle,omitempty"`
+
+	// Reference to a Secret containing a bundle of PEM-encoded CAs to use when
+	// verifying the certificate chain presented by Vault when using HTTPS.
+	// Mutually exclusive with CABundle.
+	// If neither CABundle nor CABundleSecretRef are defined, the certificate bundle in
+	// the cert-manager controller container is used to validate the TLS connection.
+	// If no key for the Secret is specified, cert-manager will default to 'ca.crt'.
+	// +optional
+	CABundleSecretRef *cmmeta.SecretKeySelector `json:"caBundleSecretRef,omitempty"`
 }
 
-// Configuration used to authenticate with a Vault server.
-// Only one of `tokenSecretRef`, `appRole` or `kubernetes` may be specified.
+// VaultAuth is configuration used to authenticate with a Vault server. The
+// order of precedence is [`tokenSecretRef`, `appRole` or `kubernetes`].
 type VaultAuth struct {
 	// TokenSecretRef authenticates with Vault by presenting a token.
 	// +optional
@@ -233,11 +269,31 @@ type VaultKubernetesAuth struct {
 	// The required Secret field containing a Kubernetes ServiceAccount JWT used
 	// for authenticating with Vault. Use of 'ambient credentials' is not
 	// supported.
-	SecretRef cmmeta.SecretKeySelector `json:"secretRef"`
+	// +optional
+	SecretRef cmmeta.SecretKeySelector `json:"secretRef,omitempty"`
+	// Note: we don't use a pointer here for backwards compatibility.
+
+	// A reference to a service account that will be used to request a bound
+	// token (also known as "projected token"). Compared to using "secretRef",
+	// using this field means that you don't rely on statically bound tokens. To
+	// use this field, you must configure an RBAC rule to let cert-manager
+	// request a token.
+	// +optional
+	ServiceAccountRef *ServiceAccountRef `json:"serviceAccountRef,omitempty"`
 
 	// A required field containing the Vault Role to assume. A Role binds a
 	// Kubernetes ServiceAccount with a set of Vault policies.
 	Role string `json:"role"`
+}
+
+// ServiceAccountRef is a service account used by cert-manager to request a
+// token. The audience cannot be configured. The audience is generated by
+// cert-manager and takes the form `vault://namespace-name/issuer-name` for an
+// Issuer and `vault://issuer-name` for a ClusterIssuer. The expiration of the
+// token is also set by cert-manager to 10 minutes.
+type ServiceAccountRef struct {
+	// Name of the ServiceAccount used to request a token.
+	Name string `json:"name"`
 }
 
 type CAIssuer struct {
@@ -264,6 +320,8 @@ type CAIssuer struct {
 type IssuerStatus struct {
 	// List of status conditions to indicate the status of a CertificateRequest.
 	// Known condition types are `Ready`.
+	// +listType=map
+	// +listMapKey=type
 	// +optional
 	Conditions []IssuerCondition `json:"conditions,omitempty"`
 
@@ -316,7 +374,3 @@ const (
 	// should prevent attempts to sign certificates.
 	IssuerConditionReady IssuerConditionType = "Ready"
 )
-
-func init() {
-	SchemeBuilder.Register(&Issuer{}, &IssuerList{})
-}
