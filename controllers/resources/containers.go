@@ -38,7 +38,7 @@ var containerSecurityGeneral = &corev1.SecurityContext{
 var containerSecurityWebhook = &corev1.SecurityContext{
 	RunAsNonRoot:             &runAsNonRoot,
 	AllowPrivilegeEscalation: &FalseVar,
-	ReadOnlyRootFilesystem:   &TrueVar,
+	ReadOnlyRootFilesystem:   &FalseVar,
 	Privileged:               &FalseVar,
 	Capabilities: &corev1.Capabilities{
 		Drop: []corev1.Capability{
