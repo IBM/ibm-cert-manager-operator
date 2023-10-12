@@ -516,6 +516,14 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 		return false
 	}
 
+	if fRes.Limits.StorageEphemeral() != nil && sRes.Limits.StorageEphemeral() != nil {
+		if fmt.Sprint(fRes.Limits.StorageEphemeral().AsDec()) != fmt.Sprint(sRes.Limits.StorageEphemeral().AsDec()) {
+			statusLog.Info("Resource limits ephemeral storage not equal",
+				"first", fmt.Sprint(fRes.Requests.StorageEphemeral().AsDec()), "second", fmt.Sprint(sRes.Requests.StorageEphemeral().AsDec()))
+			return false
+		}
+	}
+
 	fEnv := fContainer.Env
 	sEnv := sContainer.Env
 	if !reflect.DeepEqual(len(fEnv), len(sEnv)) {
