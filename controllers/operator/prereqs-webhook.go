@@ -26,7 +26,6 @@ import (
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	apiRegv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -34,11 +33,8 @@ import (
 	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
 )
 
-func webhookPrereqs(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client, ns string) error {
-	if err := removeAPIService(client); err != nil {
-		return err
-	}
-	if err := removeOldSecret(client, ns); err != nil {
+func webhookPrereqs(instance *operatorv1.CertManagerConfig, scheme *runtime.Scheme, client client.Client, reader client.Reader, ns string) error {
+	if err := removeOldSecret(client, reader, ns); err != nil {
 		return err
 	}
 	if err := service(instance, scheme, client, ns); err != nil {
@@ -60,51 +56,18 @@ func removeWebhookPrereqs(client client.Client, ns string) error {
 	return nil
 }
 
-// func apiService(instance *operatorv1.CertManager, scheme *runtime.Scheme, client client.Client, ns string) error {
-// 	apiSvc := &apiRegv1.APIService{}
-// 	err := client.Get(context.Background(), types.NamespacedName{Name: res.APISvcName, Namespace: ""}, apiSvc)
-// 	if err != nil && apiErrors.IsNotFound(err) {
-// 		// Create the apiservice spec
-// 		res.APIService.ResourceVersion = ""
-// 		var servingSecret = ns + "/" + res.WebhookServingSecret
-// 		res.APIService.Annotations = map[string]string{"certmanager.k8s.io/inject-ca-from-secret": servingSecret}
-// 		res.APIService.Spec.Service.Namespace = ns
-// 		if err := controllerutil.SetControllerReference(instance, res.APIService, scheme); err != nil {
-// 			logd.Error(err, "Error setting controller reference on api service")
-// 		}
-// 		err := client.Create(context.Background(), res.APIService)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-// 	return nil
-// }
-
-func removeAPIService(client client.Client) error {
-	apiSvc := &apiRegv1.APIService{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.APISvcName, Namespace: ""}, apiSvc)
-	if err != nil {
-		if !apiErrors.IsNotFound(err) {
-			return err
-		}
-	} else {
-		if err := client.Delete(context.Background(), apiSvc); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func removeOldSecret(client client.Client, ns string) error {
+func removeOldSecret(client client.Client, reader client.Reader, ns string) error {
 	secret := &corev1.Secret{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: res.WebhookServingSecret, Namespace: ns}, secret)
+	// read from API server directly since there is probably more overhead to
+	// set up informers and cache just for one secret
+	err := reader.Get(context.Background(), types.NamespacedName{Name: res.WebhookServingSecret, Namespace: ns}, secret)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil
 		}
 		return err
 	}
-	if _, ok := secret.Annotations["certmanager.k8s.io/allow-direct-injection"]; ok {
+	if _, ok := secret.Annotations["cert-manager.io/allow-direct-injection"]; !ok {
 		if err := client.Delete(context.Background(), secret); err != nil {
 			return err
 		}
