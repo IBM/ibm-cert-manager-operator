@@ -31,12 +31,12 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
-    createdAt: "2023-10-05T20:07:25Z"
+    createdAt: "2023-10-17T14:49:32Z"
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <4.2.1
     operatorframework.io/suggested-namespace: ibm-cert-manager
     operators.openshift.io/infrastructure-features: '["disconnected"]'
-    operators.operatorframework.io/builder: operator-sdk-v1.31.0
+    operators.operatorframework.io/builder: operator-sdk-v1.32.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: IBM
   labels:
@@ -69,7 +69,7 @@ spec:
       - kind: ClusterIssuer
         name: clusterissuers.cert-manager.io
         version: v1
-      - description: 'An Issuer represents a certificate issuing authority which can be referenced as part of `issuerRef` fields. It is scoped to a single namespace and can therefore only be referenced by resources within the same namespace. Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
+      - description: An Issuer represents a certificate issuing authority which can be referenced as part of `issuerRef` fields. It is scoped to a single namespace and can therefore only be referenced by resources within the same namespace.
         displayName: Issuer
         kind: Issuer
         name: issuers.cert-manager.io
@@ -533,13 +533,13 @@ spec:
                       - name: OPERATOR_NAME
                         value: ibm-cert-manager-operator
                       - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.0-jetstack.1.10.1
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-controller:4.3.0-jetstack.1.13.1
                       - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.0-jetstack.1.10.1
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:4.3.0-jetstack.1.13.1
                       - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.0-jetstack.1.10.1
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:4.3.0-jetstack.1.13.1
                       - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-                        value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.0-jetstack.1.10.1
+                        value: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:4.3.0-jetstack.1.13.1
                     image: icr.io/cpopen/ibm-cert-manager-operator:latest
                     imagePullPolicy: Always
                     livenessProbe:
@@ -622,15 +622,15 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  version: 4.3.0
+  version: 4.2.1
   relatedImages:
     - image: icr.io/cpopen/ibm-cert-manager-operator:latest
       name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:4.3.0-jetstack.1.13.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:1.11.0-jetstack.1.10.1
       name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:4.3.0-jetstack.1.13.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:1.11.0-jetstack.1.10.1
       name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:4.3.0-jetstack.1.13.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:1.11.0-jetstack.1.10.1
       name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-    - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:4.3.0-jetstack.1.13.1
+    - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:1.11.0-jetstack.1.10.1
       name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
