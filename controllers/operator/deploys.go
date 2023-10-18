@@ -516,7 +516,15 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 		return false
 	}
 
-	if fRes.Limits.StorageEphemeral() != nil && sRes.Limits.StorageEphemeral() != nil {
+	if fRes.Limits.StorageEphemeral() != nil || sRes.Limits.StorageEphemeral() != nil {
+		if fRes.Limits.StorageEphemeral() == nil {
+			statusLog.Info("Resource limits ephemeral storage is removed")
+			return false
+		}
+		if sRes.Limits.StorageEphemeral() == nil {
+			statusLog.Info("Resource limits ephemeral storage added")
+			return false
+		}
 		if fmt.Sprint(fRes.Limits.StorageEphemeral().AsDec()) != fmt.Sprint(sRes.Limits.StorageEphemeral().AsDec()) {
 			statusLog.Info("Resource limits ephemeral storage not equal",
 				"first", fmt.Sprint(fRes.Requests.StorageEphemeral().AsDec()), "second", fmt.Sprint(sRes.Requests.StorageEphemeral().AsDec()))
