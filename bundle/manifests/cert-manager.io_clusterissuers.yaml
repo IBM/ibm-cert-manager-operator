@@ -1,20 +1,40 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
   creationTimestamp: null
+  labels:
+    app: cert-manager
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/version: v1.13.1
   name: clusterissuers.cert-manager.io
 spec:
   group: cert-manager.io
   names:
+    categories:
+    - cert-manager
     kind: ClusterIssuer
     listKind: ClusterIssuerList
     plural: clusterissuers
     singular: clusterissuer
-  scope: Namespaced
+  scope: Cluster
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=="Ready")].status
+      name: Ready
+      type: string
+    - jsonPath: .status.conditions[?(@.type=="Ready")].message
+      name: Status
+      priority: 1
+      type: string
+    - description: CreationTimestamp is a timestamp representing the server time when
+        this object was created. It is not guaranteed to be set in happens-before
+        order across separate operations. Clients may not set this value. It is represented
+        in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
     schema:
       openAPIV3Schema:
         description: A ClusterIssuer represents a certificate issuing authority which
@@ -456,11 +476,11 @@ spec:
                                 to manage DNS01 challenge records.
                               properties:
                                 nameserver:
-                                  description: "The IP address or hostname of an authoritative\
-                                    \ DNS server supporting RFC2136 in the form host:port.\
-                                    \ If the host is an IPv6 address it must be enclosed\
-                                    \ in square brackets (e.g [2001:db8::1])\_; port\
-                                    \ is optional. This field is required."
+                                  description: The IP address or hostname of an authoritative
+                                    DNS server supporting RFC2136 in the form host:port.
+                                    If the host is an IPv6 address it must be enclosed
+                                    in square brackets (e.g [2001:db8::1]) ; port
+                                    is optional. This field is required.
                                   type: string
                                 tsigAlgorithm:
                                   description: 'The TSIG Algorithm configured in the
@@ -905,6 +925,7 @@ spec:
                                                               type: object
                                                             type: array
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       weight:
                                                         format: int32
                                                         type: integer
@@ -951,10 +972,12 @@ spec:
                                                               type: object
                                                             type: array
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       type: array
                                                   required:
                                                   - nodeSelectorTerms
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                               type: object
                                             podAffinity:
                                               properties:
@@ -986,6 +1009,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaceSelector:
                                                             properties:
                                                               matchExpressions:
@@ -1009,6 +1033,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaces:
                                                             items:
                                                               type: string
@@ -1052,6 +1077,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaceSelector:
                                                         properties:
                                                           matchExpressions:
@@ -1075,6 +1101,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaces:
                                                         items:
                                                           type: string
@@ -1116,6 +1143,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaceSelector:
                                                             properties:
                                                               matchExpressions:
@@ -1139,6 +1167,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaces:
                                                             items:
                                                               type: string
@@ -1182,6 +1211,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaceSelector:
                                                         properties:
                                                           matchExpressions:
@@ -1205,6 +1235,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaces:
                                                         items:
                                                           type: string
@@ -1223,6 +1254,7 @@ spec:
                                               name:
                                                 type: string
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           type: array
                                         nodeSelector:
                                           additionalProperties:
@@ -1660,10 +1692,12 @@ spec:
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ''
     plural: ''
-  conditions: []
-  storedVersions: []
+  conditions: null
+  storedVersions: null
 ---

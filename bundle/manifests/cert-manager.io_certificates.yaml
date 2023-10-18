@@ -262,6 +262,7 @@ spec:
                     enum:
                     - RSA
                     - ECDSA
+                    - Ed25519
                     type: string
                   encoding:
                     description: "The private key cryptography standards (PKCS) encoding\
