@@ -31,20 +31,20 @@ spec:
     resources:
       limits:
         cpu: 100m
-        memory: 520Mi
+        memory: 1000Mi
       requests:
-        cpu: 20m
-        memory: 410Mi
+        cpu: 30m
+        memory: 500Mi
         ephemeral-storage: 256Mi
   certManagerController:
     resources:
       limits:
         cpu: 80m
-        memory: 530Mi
+        memory: 1010Mi
       requests:
         cpu: 20m
         memory: 230Mi
-        ephemeral-storage: 256Mi
+        ephemeral-storage: 510Mi
   certManagerWebhook:
     resources:
       limits:
