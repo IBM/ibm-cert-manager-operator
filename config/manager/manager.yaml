@@ -79,7 +79,7 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-cert-manager-operator"
             - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-              value: icr.io/cpopen/cpfs/icp-cert-manager-controller:4.3.0-jetstack.1.13.1
+              value: icr.io/cpopen/cpfs/icp-cert-manager-controller:4.2.2-jetstack.1.13.1
             - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
               value: icr.io/cpopen/cpfs/icp-cert-manager-webhook:4.3.0-jetstack.1.13.1
             - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
