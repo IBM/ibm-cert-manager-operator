@@ -34,12 +34,9 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: 'An Issuer represents a certificate issuing authority which can
+        description: An Issuer represents a certificate issuing authority which can
           be referenced as part of `issuerRef` fields. It is scoped to a single namespace
           and can therefore only be referenced by resources within the same namespace.
-          Documentation For additional details regarding install parameters check:
-          https://ibm.biz/icpfs39install. License By installing this product you accept
-          the license terms https://ibm.biz/icpfs39license.'
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -475,11 +472,11 @@ spec:
                                 to manage DNS01 challenge records.
                               properties:
                                 nameserver:
-                                  description: The IP address or hostname of an authoritative
-                                    DNS server supporting RFC2136 in the form host:port.
-                                    If the host is an IPv6 address it must be enclosed
-                                    in square brackets (e.g [2001:db8::1]) ; port
-                                    is optional. This field is required.
+                                  description: "The IP address or hostname of an authoritative\
+                                    \ DNS server supporting RFC2136 in the form host:port.\
+                                    \ If the host is an IPv6 address it must be enclosed\
+                                    \ in square brackets (e.g [2001:db8::1])\_; port\
+                                    \ is optional. This field is required."
                                   type: string
                                 tsigAlgorithm:
                                   description: 'The TSIG Algorithm configured in the
@@ -924,6 +921,7 @@ spec:
                                                               type: object
                                                             type: array
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       weight:
                                                         format: int32
                                                         type: integer
@@ -970,10 +968,12 @@ spec:
                                                               type: object
                                                             type: array
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       type: array
                                                   required:
                                                   - nodeSelectorTerms
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                               type: object
                                             podAffinity:
                                               properties:
@@ -1005,6 +1005,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaceSelector:
                                                             properties:
                                                               matchExpressions:
@@ -1028,6 +1029,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaces:
                                                             items:
                                                               type: string
@@ -1071,6 +1073,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaceSelector:
                                                         properties:
                                                           matchExpressions:
@@ -1094,6 +1097,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaces:
                                                         items:
                                                           type: string
@@ -1135,6 +1139,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaceSelector:
                                                             properties:
                                                               matchExpressions:
@@ -1158,6 +1163,7 @@ spec:
                                                                   type: string
                                                                 type: object
                                                             type: object
+                                                            x-kubernetes-map-type: atomic
                                                           namespaces:
                                                             items:
                                                               type: string
@@ -1201,6 +1207,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaceSelector:
                                                         properties:
                                                           matchExpressions:
@@ -1224,6 +1231,7 @@ spec:
                                                               type: string
                                                             type: object
                                                         type: object
+                                                        x-kubernetes-map-type: atomic
                                                       namespaces:
                                                         items:
                                                           type: string
@@ -1242,6 +1250,7 @@ spec:
                                               name:
                                                 type: string
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           type: array
                                         nodeSelector:
                                           additionalProperties:
@@ -1685,6 +1694,6 @@ status:
   acceptedNames:
     kind: ''
     plural: ''
-  conditions: []
-  storedVersions: []
+  conditions: null
+  storedVersions: null
 ---

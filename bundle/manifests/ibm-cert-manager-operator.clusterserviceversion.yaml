@@ -31,7 +31,7 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
-    createdAt: "2023-10-24T20:24:00Z"
+    createdAt: "2024-01-04T23:13:48Z"
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <4.2.3
     operatorframework.io/suggested-namespace: ibm-cert-manager
