@@ -364,6 +364,27 @@ func (r *CertManagerReconciler) updateVersion(instance *operatorv1.CertManagerCo
 }
 
 func (r *CertManagerReconciler) updateLabels(ctx context.Context) error {
+
+	// list all the resources in the cluster
+	instanceList := &operatorv1.CertManagerConfigList{}
+	if err := r.Client.List(ctx, instanceList); err != nil {
+		return err
+	}
+	for _, instance := range instanceList.Items {
+		labels := instance.Spec.Labels
+		// update labels for certmanagerconfig cr
+		if instance.Labels == nil {
+			instance.Labels = make(map[string]string)
+		}
+		for k, v := range labels {
+			instance.Labels[k] = v
+		}
+		if err := r.Client.Update(context.TODO(), &instance); err != nil {
+			logd.Error(err, "Failed to update label in certmanagerconfig cr")
+			return err
+		}
+	}
+
 	// update LabelMaps with Original LabelMaps
 	ClearLabelMap(res.ControllerLabelMap)
 	ClearLabelMap(res.CainjectorLabelMap)
@@ -383,11 +404,6 @@ func (r *CertManagerReconciler) updateLabels(ctx context.Context) error {
 	logd.V(2).Info("Webhook LabelMap:", "label:", fmt.Sprint(res.WebhookLabelMap))
 
 	// ADD new label to the Labelmaps
-	// list all the resources in the cluster
-	instanceList := &operatorv1.CertManagerConfigList{}
-	if err := r.Client.List(ctx, instanceList); err != nil {
-		return err
-	}
 
 	for _, instance := range instanceList.Items {
 		labels := instance.Spec.Labels
