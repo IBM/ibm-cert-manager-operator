@@ -157,6 +157,13 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		logd.Error(nil, "Accept license by changing .spec.license.accept to true in the CertManagerConfig CR. This message will keep showing until then")
 	}
 
+	if err := r.updateLabels(ctx); err != nil {
+		logd.Error(err, "Error with updating cert-manager labels, requeueing")
+		r.updateStatus(instance, "Error updating cert-manager labels")
+		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "LabelsFailed")
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {
 		logd.Error(err, "One or more prerequisites not met, requeueing")
@@ -354,6 +361,61 @@ func (r *CertManagerReconciler) updateVersion(instance *operatorv1.CertManagerCo
 	}
 
 	return nil
+}
+
+func (r *CertManagerReconciler) updateLabels(ctx context.Context) error {
+
+	// list all the resources in the cluster
+	instanceList := &operatorv1.CertManagerConfigList{}
+	if err := r.Client.List(ctx, instanceList); err != nil {
+		return err
+	}
+	for _, instance := range instanceList.Items {
+		labels := instance.Spec.Labels
+		// update labels for certmanagerconfig cr
+		if instance.Labels == nil {
+			instance.Labels = make(map[string]string)
+		}
+		for k, v := range labels {
+			instance.Labels[k] = v
+		}
+		if err := r.Client.Update(context.TODO(), &instance); err != nil {
+			logd.Error(err, "Failed to update label in certmanagerconfig cr")
+			return err
+		}
+	}
+
+	// update LabelMaps with Original LabelMaps
+	ClearLabelMap(res.ControllerLabelMap)
+	ClearLabelMap(res.CainjectorLabelMap)
+	ClearLabelMap(res.WebhookLabelMap)
+
+	for key, val := range res.OriginalControllerLabelMap {
+		(res.ControllerLabelMap)[key] = val
+	}
+
+	for key, val := range res.OriginalCainjectorLabelMap {
+		(res.CainjectorLabelMap)[key] = val
+	}
+
+	for key, val := range res.OriginalWebhookLabelMap {
+		(res.WebhookLabelMap)[key] = val
+	}
+	logd.V(2).Info("Webhook LabelMap:", "label:", fmt.Sprint(res.WebhookLabelMap))
+
+	// ADD new label to the Labelmaps
+
+	for _, instance := range instanceList.Items {
+		labels := instance.Spec.Labels
+		for key, val := range labels {
+			(res.WebhookLabelMap)[key] = val
+			(res.ControllerLabelMap)[key] = val
+			(res.CainjectorLabelMap)[key] = val
+		}
+	}
+
+	return nil
+
 }
 
 // SetupWithManager sets up the controller with the Manager.

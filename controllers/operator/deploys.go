@@ -239,7 +239,7 @@ func deployFinder(client kubernetes.Interface, labels, name string) []appsv1.Dep
 // true otherwise
 func equalDeploys(first, second appsv1.Deployment) bool {
 	statusLog := logd.V(1)
-	if !isSubset(first.ObjectMeta.Labels, second.ObjectMeta.Labels) {
+	if !reflect.DeepEqual(first.ObjectMeta.Labels, second.ObjectMeta.Labels) {
 		statusLog.Info("Labels not equal",
 			"first", fmt.Sprintf("%v", first.ObjectMeta.Labels),
 			"second", fmt.Sprintf("%v", second.ObjectMeta.Labels))
@@ -253,7 +253,7 @@ func equalDeploys(first, second appsv1.Deployment) bool {
 
 	firstPodTemplate := first.Spec.Template
 	secondPodTemplate := second.Spec.Template
-	if !isSubset(firstPodTemplate.ObjectMeta.Labels, secondPodTemplate.ObjectMeta.Labels) {
+	if !reflect.DeepEqual(firstPodTemplate.ObjectMeta.Labels, secondPodTemplate.ObjectMeta.Labels) {
 		statusLog.Info("Pod labels not equal",
 			"first", fmt.Sprintf("%v", firstPodTemplate.ObjectMeta.Labels),
 			"second", fmt.Sprintf("%v", secondPodTemplate.ObjectMeta.Labels))
