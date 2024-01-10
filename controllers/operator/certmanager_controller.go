@@ -157,6 +157,13 @@ func (r *CertManagerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		logd.Error(nil, "Accept license by changing .spec.license.accept to true in the CertManagerConfig CR. This message will keep showing until then")
 	}
 
+	if err := r.updateLabels(ctx); err != nil {
+		logd.Error(err, "Error with updating cert-manager labels, requeueing")
+		r.updateStatus(instance, "Error updating cert-manager labels")
+		r.updateEvent(instance, err.Error(), corev1.EventTypeWarning, "LabelsFailed")
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	// Check Prerequisites
 	if err := r.PreReqs(instance); err != nil {
 		logd.Error(err, "One or more prerequisites not met, requeueing")
@@ -354,6 +361,48 @@ func (r *CertManagerReconciler) updateVersion(instance *operatorv1.CertManagerCo
 	}
 
 	return nil
+}
+
+func (r *CertManagerReconciler) updateLabels(ctx context.Context) error {
+	// update LabelMaps with Original LabelMaps
+	ClearLabelMap(res.ControllerLabelMap)
+	ClearLabelMap(res.CainjectorLabelMap)
+	ClearLabelMap(res.WebhookLabelMap)
+
+	for key, val := range res.OriginalControllerLabelMap {
+		(res.ControllerLabelMap)[key] = val
+		logd.Info("Controller Label Message:", fmt.Sprint(res.WebhookLabelMap))
+	}
+
+	for key, val := range res.OriginalCainjectorLabelMap {
+		(res.CainjectorLabelMap)[key] = val
+		logd.Info("CA Label Message:", fmt.Sprint(res.WebhookLabelMap))
+	}
+
+	for key, val := range res.OriginalWebhookLabelMap {
+		(res.WebhookLabelMap)[key] = val
+		logd.Info("Webhook Label Message:", fmt.Sprint(res.WebhookLabelMap))
+	}
+
+	// ADD new label to the Labelmaps
+	// list all the resources in the cluster
+	instanceList := &operatorv1.CertManagerConfigList{}
+	if err := r.Client.List(ctx, instanceList); err != nil {
+		return err
+	}
+
+	for _, instance := range instanceList.Items {
+		labels := instance.Spec.Labels
+		for key, val := range labels {
+			(res.WebhookLabelMap)[key] = val
+			(res.ControllerLabelMap)[key] = val
+			(res.CainjectorLabelMap)[key] = val
+			logd.Info("Webhook Label Message:", fmt.Sprint(res.WebhookLabelMap))
+		}
+	}
+
+	return nil
+
 }
 
 // SetupWithManager sets up the controller with the Manager.

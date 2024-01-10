@@ -103,3 +103,9 @@ func YamlToObject(yamlContent []byte) (*unstructured.Unstructured, error) {
 
 	return obj, nil
 }
+
+func ClearLabelMap(m map[string]string) {
+	for k := range m {
+		delete(m, k)
+	}
+}

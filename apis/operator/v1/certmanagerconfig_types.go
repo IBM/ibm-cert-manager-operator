@@ -60,6 +60,10 @@ type CertManagerConfigSpec struct {
 	// the CA is refreshed
 	RefreshCertsBasedOnCA []CACertificate `json:"refreshCertsBasedOnCA,omitempty"`
 
+	// Labels describes  foundational services will use this
+	// labels to labels their corresponding resources
+	Labels map[string]string `json:"labels,omitempty"`
+
 	// +optional
 	License LicenseAcceptance `json:"license,omitempty"`
 }
