@@ -371,18 +371,16 @@ func (r *CertManagerReconciler) updateLabels(ctx context.Context) error {
 
 	for key, val := range res.OriginalControllerLabelMap {
 		(res.ControllerLabelMap)[key] = val
-		logd.Info("Controller Label Message:", fmt.Sprint(res.WebhookLabelMap))
 	}
 
 	for key, val := range res.OriginalCainjectorLabelMap {
 		(res.CainjectorLabelMap)[key] = val
-		logd.Info("CA Label Message:", fmt.Sprint(res.WebhookLabelMap))
 	}
 
 	for key, val := range res.OriginalWebhookLabelMap {
 		(res.WebhookLabelMap)[key] = val
-		logd.Info("Webhook Label Message:", fmt.Sprint(res.WebhookLabelMap))
 	}
+	logd.V(2).Info("Webhook LabelMap:", "label:", fmt.Sprint(res.WebhookLabelMap))
 
 	// ADD new label to the Labelmaps
 	// list all the resources in the cluster
@@ -397,7 +395,6 @@ func (r *CertManagerReconciler) updateLabels(ctx context.Context) error {
 			(res.WebhookLabelMap)[key] = val
 			(res.ControllerLabelMap)[key] = val
 			(res.CainjectorLabelMap)[key] = val
-			logd.Info("Webhook Label Message:", fmt.Sprint(res.WebhookLabelMap))
 		}
 	}
 

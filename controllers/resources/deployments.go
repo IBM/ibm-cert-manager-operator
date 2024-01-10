@@ -32,7 +32,7 @@ var ControllerDeployment = &appsv1.Deployment{
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
 		Selector: &metav1.LabelSelector{
-			MatchLabels: ControllerLabelMap,
+			MatchLabels: OriginalControllerLabelMap,
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
@@ -49,7 +49,7 @@ var WebhookDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: CertManagerWebhookName,
 		//		Namespace:   DeployNamespace,
-		Labels:      WebhookLabelMap,
+		Labels: WebhookLabelMap,
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
@@ -78,7 +78,7 @@ var CainjectorDeployment = &appsv1.Deployment{
 	Spec: appsv1.DeploymentSpec{
 		Replicas: &replicaCount,
 		Selector: &metav1.LabelSelector{
-			MatchLabels: CainjectorLabelMap,
+			MatchLabels: OriginalCainjectorLabelMap,
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
