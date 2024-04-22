@@ -29,7 +29,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	operatorv1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1"
+	operatorv1 "github.com/ibm/ibm-cert-manager-operator/v4/apis/operator/v1"
 	//+kubebuilder:scaffold:imports
 )
 

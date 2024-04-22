@@ -1,4 +1,4 @@
-module github.com/ibm/ibm-cert-manager-operator
+module github.com/ibm/ibm-cert-manager-operator/v4
 
 go 1.20
 
