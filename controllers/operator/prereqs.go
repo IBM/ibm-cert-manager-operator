@@ -27,8 +27,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	operatorv1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1"
-	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
+	operatorv1 "github.com/ibm/ibm-cert-manager-operator/v4/apis/operator/v1"
+	res "github.com/ibm/ibm-cert-manager-operator/v4/controllers/resources"
 )
 
 // Check all RBAC is ready for cert-manager

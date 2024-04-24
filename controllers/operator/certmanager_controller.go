@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"strings"
 
-	operatorv1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1"
-	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
+	operatorv1 "github.com/ibm/ibm-cert-manager-operator/v4/apis/operator/v1"
+	res "github.com/ibm/ibm-cert-manager-operator/v4/controllers/resources"
 	admRegv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"

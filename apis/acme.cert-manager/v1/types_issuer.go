@@ -21,7 +21,7 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	gwapi "sigs.k8s.io/gateway-api/apis/v1beta1"
 
-	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/v4/apis/meta.cert-manager/v1"
 )
 
 // ACMEIssuer contains the specification for an ACME issuer.

@@ -19,7 +19,7 @@ package v1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/v4/apis/meta.cert-manager/v1"
 )
 
 // NOTE: Be mindful of adding OpenAPI validation- see https://github.com/cert-manager/cert-manager/issues/3644

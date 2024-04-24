@@ -38,13 +38,13 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	res "github.com/ibm/ibm-cert-manager-operator/controllers/resources"
+	res "github.com/ibm/ibm-cert-manager-operator/v4/controllers/resources"
 
-	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/acme.cert-manager/v1"
-	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
-	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
-	operatorv1 "github.com/ibm/ibm-cert-manager-operator/apis/operator/v1"
-	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/controllers/operator"
+	acmecertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v4/apis/acme.cert-manager/v1"
+	certmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v4/apis/cert-manager/v1"
+	metacertmanagerv1 "github.com/ibm/ibm-cert-manager-operator/v4/apis/meta.cert-manager/v1"
+	operatorv1 "github.com/ibm/ibm-cert-manager-operator/v4/apis/operator/v1"
+	operatorcontrollers "github.com/ibm/ibm-cert-manager-operator/v4/controllers/operator"
 	//+kubebuilder:scaffold:imports
 )
 
