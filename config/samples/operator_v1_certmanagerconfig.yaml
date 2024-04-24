@@ -10,7 +10,7 @@ spec:
   disableHostNetwork: true
   enableWebhook: true
   imageRegistry: icr.io/cpopen/cpfs
-  version: "4.2.3"
+  version: "4.2.4"
   enableCertRefresh: true
 status:
   certManagerConfigStatus: ''
