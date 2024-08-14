@@ -33,6 +33,9 @@ var containerSecurityGeneral = &corev1.SecurityContext{
 			"ALL",
 		},
 	},
+	SeccompProfile: &corev1.SeccompProfile{
+		Type: corev1.SeccompProfileTypeRuntimeDefault,
+	},
 }
 
 var containerSecurityWebhook = &corev1.SecurityContext{
@@ -44,6 +47,9 @@ var containerSecurityWebhook = &corev1.SecurityContext{
 		Drop: []corev1.Capability{
 			"ALL",
 		},
+	},
+	SeccompProfile: &corev1.SeccompProfile{
+		Type: corev1.SeccompProfileTypeRuntimeDefault,
 	},
 }
 

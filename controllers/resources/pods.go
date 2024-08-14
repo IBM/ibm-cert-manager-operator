@@ -42,8 +42,13 @@ var podAffinity = &corev1.Affinity{
 	},
 }
 
+var seccompProfile = &corev1.SeccompProfile{
+	Type: corev1.SeccompProfileTypeRuntimeDefault,
+}
+
 var podSecurity = &corev1.PodSecurityContext{
-	RunAsNonRoot: &runAsNonRoot,
+	RunAsNonRoot:   &runAsNonRoot,
+	SeccompProfile: seccompProfile,
 }
 
 var certManagerControllerPod = corev1.PodSpec{
