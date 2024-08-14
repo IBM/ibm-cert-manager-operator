@@ -95,6 +95,8 @@ spec:
               memory: 50Mi
               ephemeral-storage: 256Mi
           securityContext:
+            seccompProfile:
+              type: RuntimeDefault
             allowPrivilegeEscalation: false
             capabilities:
               drop:
