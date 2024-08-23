@@ -1,4 +1,4 @@
-FROM docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-edge-docker-local/build-images/ubi8-minimal:latest-amd64
+FROM docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-edge-docker-local/build-images/ubi9-minimal:latest-amd64
 ARG VCS_REF
 
 ENV OPERATOR=/usr/local/bin/ibm-cert-manager-operator \
