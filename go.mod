@@ -1,6 +1,6 @@
 module github.com/ibm/ibm-cert-manager-operator/v4
 
-go 1.20
+go 1.23
 
 require (
 	github.com/onsi/ginkgo v1.16.5
