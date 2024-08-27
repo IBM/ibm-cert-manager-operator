@@ -96,3 +96,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 ### End-to-End testing
 
 For more instructions on how to run end-to-end testing with the Operand Deployment Lifecycle Manager, see [IBM Common Services Operator guide](https://github.com/IBM/ibm-common-service-operator/blob/master/docs/install.md).
+
