@@ -31,7 +31,7 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
-    createdAt: "2024-01-04T23:13:48Z"
+    createdAt: "2024-10-15T19:26:34Z"
     description: Operator for managing deployment of cert-manager service.
     olm.skipRange: <4.2.10
     operatorframework.io/suggested-namespace: ibm-cert-manager
@@ -564,14 +564,14 @@ spec:
                         ephemeral-storage: 256Mi
                         memory: 50Mi
                     securityContext:
-                      seccompProfile:
-                        type: RuntimeDefault
                       allowPrivilegeEscalation: false
                       capabilities:
                         drop:
                           - ALL
                       privileged: false
                       readOnlyRootFilesystem: true
+                      seccompProfile:
+                        type: RuntimeDefault
                 serviceAccountName: ibm-cert-manager-operator
       permissions:
         - rules:

@@ -293,6 +293,8 @@ spec:
                   EnableCertRefresh enables the refresh of leaf certificates based on a CA
                   certificate
                 type: boolean
+              enableInstanaMetricCollection:
+                type: boolean
               enableWebhook:
                 description: Webhook enables the cert-manager-webhook operand
                 type: boolean

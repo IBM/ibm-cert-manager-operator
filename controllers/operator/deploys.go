@@ -27,6 +27,7 @@ import (
 	res "github.com/ibm/ibm-cert-manager-operator/v4/controllers/resources"
 
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -169,6 +170,27 @@ func setupDeploy(instance *operatorv1.CertManagerConfig, deploy *appsv1.Deployme
 	returningDeploy.Namespace = ns
 	logd.V(2).Info("Resulting image registry", "full name", returningDeploy.Spec.Template.Spec.Containers[0].Image)
 	logd.V(3).Info("Resulting deployment to be created", "spec", fmt.Sprintf("%v", returningDeploy))
+
+	if instance.Spec.EnableInstanaMetricCollection {
+		e := corev1.EnvVar{
+			Name: "INSTANA_AGENT_HOST",
+			ValueFrom: &corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
+					APIVersion: "v1",
+					FieldPath:  "status.hostIP",
+				},
+			},
+		}
+		isInstanaEnv := false
+		for i := range returningDeploy.Spec.Template.Spec.Containers[0].Env {
+			if returningDeploy.Spec.Template.Spec.Containers[0].Env[i].Name == "INSTANA_AGENT_HOST" {
+				isInstanaEnv = true
+			}
+		}
+		if !isInstanaEnv {
+			returningDeploy.Spec.Template.Spec.Containers[0].Env = append(returningDeploy.Spec.Template.Spec.Containers[0].Env, e)
+		}
+	}
 	return returningDeploy
 }
 

@@ -66,6 +66,9 @@ type CertManagerConfigSpec struct {
 
 	// +optional
 	License LicenseAcceptance `json:"license,omitempty"`
+
+	// +optional
+	EnableInstanaMetricCollection bool `json:"enableInstanaMetricCollection,omitempty"`
 }
 
 // LicenseAcceptance defines the license specification in CSV
