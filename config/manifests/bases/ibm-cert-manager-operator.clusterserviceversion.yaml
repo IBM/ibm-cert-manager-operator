@@ -12,6 +12,13 @@ metadata:
     olm.skipRange: <4.2.12
     operatorframework.io/suggested-namespace: ibm-cert-manager
     operators.openshift.io/infrastructure-features: '["disconnected"]'
+    features.operators.openshift.io/disconnected: "true"
+    features.operators.openshift.io/fips-compliant: "true"
+    features.operators.openshift.io/proxy-aware: "false"
+    features.operators.openshift.io/tls-profiles: "false"
+    features.operators.openshift.io/token-auth-aws: "false"
+    features.operators.openshift.io/token-auth-azure: "false"
+    features.operators.openshift.io/token-auth-gcp: "false"
     support: IBM
   labels:
     operatorframework.io/arch.amd64: supported
