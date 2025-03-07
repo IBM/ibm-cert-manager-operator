@@ -579,6 +579,7 @@ spec:
                       readOnlyRootFilesystem: true
                       seccompProfile:
                         type: RuntimeDefault
+                      runAsNonRoot: true
                 serviceAccountName: ibm-cert-manager-operator
       permissions:
         - rules:
