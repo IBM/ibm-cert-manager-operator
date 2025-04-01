@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ibm-cert-manager-operator
+description: A Helm chart for ibm-cert-manager-operator
+type: application
+version: 4.2.14
+appVersion: 4.2.14
