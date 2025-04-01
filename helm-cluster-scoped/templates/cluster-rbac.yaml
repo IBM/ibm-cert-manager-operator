@@ -408,7 +408,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata: 
-  name: ibm-cert-manager-operator-{{ .Values.global.operatorNamespace }}
+  name: ibm-cert-manager-operator
   labels:
     component-id: {{ .Chart.Name }}
     {{- with .Values.cpfs.labels }}
@@ -417,7 +417,7 @@ metadata:
 roleRef: 
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
-  name: ibm-cert-manager-operator-{{ .Values.global.operatorNamespace }}
+  name: ibm-cert-manager-operator
 subjects:   
   - kind: ServiceAccount
     name: ibm-cert-manager-operator

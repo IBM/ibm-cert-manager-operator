@@ -4,4 +4,4 @@ cpfs:
   labels:
 
 global:
-  operatorNamespace: operator-ns
+  operatorNamespace: ibm-cert-manager
