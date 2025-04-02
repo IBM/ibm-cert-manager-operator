@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-cert-manager-operator
+  labels:
+    app.kubernetes.io/instance: ibm-cert-manager-operator
+    app.kubernetes.io/managed-by: ibm-cert-manager-operator
+    app.kubernetes.io/name: cert-manager
+    component-id: {{ .Chart.Name }}
+    {{- with .Values.cpfs.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: ibm-cert-manager-operator
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        name: ibm-cert-manager-operator
+        app.kubernetes.io/instance: ibm-cert-manager-operator
+        app.kubernetes.io/managed-by: ibm-cert-manager-operator
+        app.kubernetes.io/name: cert-manager
+      annotations:
+        productName: IBM Cloud Platform Common Services
+        productID: "068a62892a1e4db39641342e592daa25"
+        productMetric: FREE
+    spec:
+      serviceAccountName: ibm-cert-manager-operator
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - ppc64le
+                - s390x
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      containers:
+        - name: manager
+          image: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperator}}/ibm-cert-manager-operator:4.2.14
+          command:
+          - ibm-cert-manager-operator
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: DEPLOYED_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "ibm-cert-manager-operator"
+            - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-controller:4.2.14-jetstack.1.13.3
+            - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-webhook:4.2.14-jetstack.1.13.3
+            - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-cainjector:4.2.14-jetstack.1.13.3
+            - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-acmesolver:4.2.14-jetstack.1.13.3
+          resources:
+            limits:
+              cpu: 100m
+              memory: 300Mi
+            requests:
+              cpu: 10m
+              memory: 50Mi
+              ephemeral-storage: 256Mi
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true

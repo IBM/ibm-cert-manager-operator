@@ -1,0 +1,9 @@
+cpfs:
+  imageRegistryNamespaceOperator: cpopen
+  imageRegistryNamespaceOperand: cpopen/cpfs
+  labels:
+
+global:
+  imagePullPrefix: icr.io
+  operatorNamespace: ibm-cert-manager
+  imagePullSecret:
