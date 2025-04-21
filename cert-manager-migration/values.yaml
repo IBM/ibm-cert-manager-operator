@@ -1,0 +1,11 @@
+#stand-in global values for testing
+global:
+  operatorNamespace: "cs-op"
+  instanceNamespace: "cs-serv"
+  certmgrNamespace: "ibm-cert-manager"
+  tetheredNamespaces: [""]
+  imagePullPrefix: icr.io
+  imagePullSecret: ibm-entitlement-key
+
+cpfs:
+  imageRegistryNamespaceOperand: cpopen/cpfs
