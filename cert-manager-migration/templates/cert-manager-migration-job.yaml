@@ -35,14 +35,11 @@ spec:
                 echo "Cleaning up IBM Cert Manager RBAC"
                 roles=$(oc get roles -n $operatorNamespace | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
                 rolebindings=$(oc get rolebindings -n $operatorNamespace | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
-                clusterroles=$(oc get clusterroles | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
-                clusterrolebindings=$(oc get clusterrolebindings | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
                 secret=$(oc get secret -n $operatorNamespace | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
+                
                 oc delete --ignore-not-found sa ibm-cert-manager-operator -n $operatorNamespace
                 oc delete --ignore-not-found roles $roles -n $operatorNamespace
                 oc delete --ignore-not-found rolebindings $rolebindings -n $operatorNamespace
-                oc delete --ignore-not-found clusterroles $clusterroles -n $operatorNamespace
-                oc delete --ignore-not-found clusterrolebindings $clusterrolebindings -n $operatorNamespace
                 oc delete --ignore-not-found secret $secret -n $operatorNamespace
 
                 echo "IBM Cert Manager OLM install cleaned up."
