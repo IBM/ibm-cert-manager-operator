@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cert-mgr-migration-job
+  namespace: {{ .Values.global.certmgrNamespace }}
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    spec:
+      containers:
+      - name: cert-mgr-migration-job
+        image: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand }}/cpfs-utils:4.6.7
+        command:
+          - bash
+          - -c
+          - |
+            echo "Starting cleanup for OLM -> No OLM migration..."
+            operatorNamespace={{ .Values.global.certmgrNamespace }}
+
+            certSub=$(oc get subscription.operators.coreos.com -n "$operatorNamespace" -o jsonpath="{.items[?(@.spec.name=='ibm-cert-manager-operator')].metadata.name}")
+            if [[ -z $certSub ]]; then
+                echo "IBM Cert Manager Subscription not present in namespace $operatorNamespace, aborting."
+            else
+                certCSV=$(oc get --ignore-not-found subscription.operators.coreos.com $certSub -n $operatorNamespace -o jsonpath='{.status.currentCSV}')
+                echo "Deleting IBM Cert Manager CSV and Subscription in namespace $operatorNamespace..."
+                oc delete --ignore-not-found csv $certCSV -n $operatorNamespace && oc delete --ignore-not-found subscription.operators.coreos.com $certSub -n $operatorNamespace
+
+                #deployments are operands right? Do they need to be deleted?
+                # echo "Cleaning up IBM Cert Manager deployments"
+                # oc delete --ignore-not-found deploy cert-manager-cainjector cert-manager-controller cert-manager-webhook -n $operatorNamespace
+
+                echo "Cleaning up IBM Cert Manager RBAC"
+                roles=$(oc get roles -n $operatorNamespace | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
+                rolebindings=$(oc get rolebindings -n $operatorNamespace | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
+                secret=$(oc get secret -n $operatorNamespace | grep ibm-cert-manager-op | awk '{print $1}' | tr "\n" " ")
+                
+                oc delete --ignore-not-found sa ibm-cert-manager-operator -n $operatorNamespace
+                oc delete --ignore-not-found roles $roles -n $operatorNamespace
+                oc delete --ignore-not-found rolebindings $rolebindings -n $operatorNamespace
+                oc delete --ignore-not-found secret $secret -n $operatorNamespace
+
+                echo "IBM Cert Manager OLM install cleaned up."
+                echo "Ready for No OLM install in namespace $operatorNamespace."
+            fi
+      restartPolicy: Never
+      serviceAccount: cert-mgr-migration-job-sa
+      imagePullSecrets:
+      - name: {{ .Values.global.imagePullSecret }}
