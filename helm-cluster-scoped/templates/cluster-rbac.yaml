@@ -421,6 +421,6 @@ roleRef:
 subjects:   
   - kind: ServiceAccount
     name: ibm-cert-manager-operator
-    namespace: {{ .Values.global.operatorNamespace }}
+    namespace: {{ .Values.global.certmgrNamespace }}
 
 ---

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata: 
   name: ibm-cert-manager-operator
-  namespace: {{ .Values.global.operatorNamespace }}
+  namespace: {{ .Values.global.certmgrNamespace }}
   labels:
     component-id: {{ .Chart.Name }}
     {{- with .Values.cpfs.labels }}
@@ -74,4 +74,4 @@ roleRef:
 subjects:   
 - kind: ServiceAccount
   name: ibm-cert-manager-operator
-  namespace: {{ .Values.global.operatorNamespace }}
+  namespace: {{ .Values.global.certmgrNamespace }}
