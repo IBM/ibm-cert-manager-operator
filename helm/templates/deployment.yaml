@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ibm-cert-manager-operator
+  namespace: {{ .Values.global.certmgrNamespace }}
   labels:
     app.kubernetes.io/instance: ibm-cert-manager-operator
     app.kubernetes.io/managed-by: ibm-cert-manager-operator
