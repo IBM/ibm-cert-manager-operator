@@ -5,5 +5,5 @@ cpfs:
 
 global:
   imagePullPrefix: icr.io
-  operatorNamespace: ibm-cert-manager
+  certmgrNamespace: ibm-cert-manager
   imagePullSecret:
