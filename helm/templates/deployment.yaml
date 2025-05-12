@@ -48,7 +48,7 @@ spec:
       hostPID: false
       containers:
         - name: manager
-          image: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperator}}/ibm-cert-manager-operator:4.2.15
+          image: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperator}}/ibm-cert-manager-operator:4.2.16
           command:
           - ibm-cert-manager-operator
           imagePullPolicy: IfNotPresent
@@ -78,13 +78,13 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-cert-manager-operator"
             - name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-controller:4.2.15-jetstack.1.13.3
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-controller:4.2.16-jetstack.1.13.3
             - name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-webhook:4.2.15-jetstack.1.13.3
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-webhook:4.2.16-jetstack.1.13.3
             - name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-cainjector:4.2.15-jetstack.1.13.3
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-cainjector:4.2.16-jetstack.1.13.3
             - name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
-              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-acmesolver:4.2.15-jetstack.1.13.3
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/icp-cert-manager-acmesolver:4.2.16-jetstack.1.13.3
           resources:
             limits:
               cpu: 100m
