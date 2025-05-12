@@ -1,0 +1,8 @@
+#stand-in global values for testing
+global:
+  certmgrNamespace: "ibm-cert-manager"
+  imagePullPrefix: icr.io
+  imagePullSecret: ibm-entitlement-key
+
+cpfs:
+  imageRegistryNamespaceOperand: cpopen/cpfs
