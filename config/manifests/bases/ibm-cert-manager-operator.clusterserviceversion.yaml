@@ -9,7 +9,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-cert-manager-operator:latest
     createdAt: 2022-02-010T21:31:00Z
     description: Operator for managing deployment of cert-manager service.
-    olm.skipRange: <4.2.16
+    olm.skipRange: <4.2.17
     operatorframework.io/suggested-namespace: ibm-cert-manager
     operators.openshift.io/infrastructure-features: '["disconnected"]'
     features.operators.openshift.io/disconnected: "true"
@@ -127,12 +127,12 @@ spec:
   relatedImages:
   - image: icr.io/cpopen/ibm-cert-manager-operator:latest
     name: IBM_CERT_MANAGER_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:4.2.16-jetstack.1.13.3
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-controller:4.2.17-jetstack.1.13.3
     name: ICP_CERT_MANAGER_CONTROLLER_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:4.2.16-jetstack.1.13.3
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-webhook:4.2.17-jetstack.1.13.3
     name: ICP_CERT_MANAGER_WEBHOOK_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:4.2.16-jetstack.1.13.3
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-cainjector:4.2.17-jetstack.1.13.3
     name: ICP_CERT_MANAGER_CAINJECTOR_IMAGE
-  - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:4.2.16-jetstack.1.13.3
+  - image: icr.io/cpopen/cpfs/icp-cert-manager-acmesolver:4.2.17-jetstack.1.13.3
     name: ICP_CERT_MANAGER_ACMESOLVER_IMAGE
   version: 0.0.0
