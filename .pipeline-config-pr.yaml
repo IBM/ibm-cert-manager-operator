@@ -129,6 +129,7 @@ tasks:
           export DOCKER_PASS="$(get_env DOCKER_PASS)"
           export GIT_COMMIT="$(get_env git-commit)"
           export BUILD_VERSION="${GIT_COMMIT:0:7}"
+          export BUILD_LOCALLY="$(get_env BUILD_LOCALLY)"
           echo "Installing Go dependencies"
           yum install -y -q golang
           make images
