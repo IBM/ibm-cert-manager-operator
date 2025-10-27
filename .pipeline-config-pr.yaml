@@ -29,7 +29,7 @@ tasks:
           fi
           cd "$WORKSPACE/$(load_repo app-repo path)"
           echo "Installing Go dependencies"
-          yum install -y golang
+          yum install -y -q golang
           make check
       - name: compliance-checks
         when: 'false'
@@ -61,12 +61,12 @@ tasks:
           fi
           cd "$WORKSPACE/$(load_repo app-repo path)"
           echo "Installing Go dependencies"
-          yum install -y golang
+          yum install -y -q golang
           make test
       - name: compliance-checks
         when: 'false'
 
-  pr-pr-code-checks-build:
+  pr-pr-code-checks-binary-build:
     from: pr-code-checks
     runtimeClassName: x86-xlarge
     include:
@@ -93,12 +93,12 @@ tasks:
           fi
           cd "$WORKSPACE/$(load_repo app-repo path)"
           echo "Installing Go dependencies"
-          yum install -y golang
+          yum install -y -q golang
           make build
       - name: compliance-checks
         when: 'false'
 
-  pr-code-checks-image:
+  pr-code-checks-image-build:
     from: pr-code-checks
     runtimeClassName: x86-xlarge
     include:
@@ -129,9 +129,8 @@ tasks:
           export DOCKER_PASS="$(get_env DOCKER_PASS)"
           export GIT_COMMIT="$(get_env git-commit)"
           export BUILD_VERSION="${GIT_COMMIT:0:7}"
-          export LOCAL_ARCH=amd64
           echo "Installing Go dependencies"
-          yum install -y golang
+          yum install -y -q golang
           make images
       - name: compliance-checks
         when: 'false'
