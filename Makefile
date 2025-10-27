@@ -126,11 +126,27 @@ shellcheck: ## Download shellcheck locally if necessary.
 		if [ "$$OS" = "Linux" ] && [ "$$ARCH" = "x86_64" ]; then \
 			echo "Downloading shellcheck $(SHELLCHECK_VERSION) ..."; \
 			mkdir -p $(PROJECT_DIR)/bin; \
-			curl -sSL https://github.com/koalaman/shellcheck/releases/download/$(SHELLCHECK_VERSION)/shellcheck-$(SHELLCHECK_VERSION).linux.x86_64.tar.xz -o /tmp/shellcheck.tar.xz; \
-			tar -xf /tmp/shellcheck.tar.xz -C /tmp; \
-			mv /tmp/shellcheck-$(SHELLCHECK_VERSION)/shellcheck $(PROJECT_DIR)/bin/shellcheck; \
+			TMP_DIR=$$(mktemp -d); \
+			ARCHIVE=$$TMP_DIR/shellcheck.tar.xz; \
+			curl -sSL https://github.com/koalaman/shellcheck/releases/download/$(SHELLCHECK_VERSION)/shellcheck-$(SHELLCHECK_VERSION).linux.x86_64.tar.xz -o $$ARCHIVE; \
+			if command -v xz >/dev/null 2>&1; then \
+				tar -xf $$ARCHIVE -C $$TMP_DIR; \
+			elif command -v python3 >/dev/null 2>&1; then \
+				ARCHIVE_PATH="$$ARCHIVE" TMP_DIR_PATH="$$TMP_DIR" python3 -c "import io, os, tarfile, lzma, pathlib; archive=pathlib.Path(os.environ['ARCHIVE_PATH']); out=pathlib.Path(os.environ['TMP_DIR_PATH']); data=lzma.open(archive, 'rb').read(); tarfile.open(fileobj=io.BytesIO(data)).extractall(path=out)" || { rm -rf $$TMP_DIR; echo "Failed to extract shellcheck archive"; exit 1; }; \
+			else \
+				echo "shellcheck install requires 'xz' or Python 3 with lzma support"; \
+				rm -rf $$TMP_DIR; \
+				exit 1; \
+			fi; \
+			SC_BIN=$$(find $$TMP_DIR -type f -name shellcheck -perm -u+x | head -n 1); \
+			if [ -z "$$SC_BIN" ]; then \
+				echo "Unable to locate shellcheck binary in archive"; \
+				rm -rf $$TMP_DIR; \
+				exit 1; \
+			fi; \
+			mv "$$SC_BIN" $(PROJECT_DIR)/bin/shellcheck; \
 			chmod +x $(PROJECT_DIR)/bin/shellcheck; \
-			rm -rf /tmp/shellcheck-$(SHELLCHECK_VERSION) /tmp/shellcheck.tar.xz; \
+			rm -rf $$TMP_DIR; \
 		else \
 			echo "shellcheck not found and automatic install unsupported for $$OS/$$ARCH"; \
 			echo "Please install shellcheck manually and re-run make."; \
