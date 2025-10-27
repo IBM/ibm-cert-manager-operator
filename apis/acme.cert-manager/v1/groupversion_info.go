@@ -15,8 +15,8 @@ limitations under the License.
 */
 
 // Package v1 contains API Schema definitions for the acme.cert-manager v1 API group
-//+kubebuilder:object:generate=true
-//+groupName=acme.cert-manager.io
+// +kubebuilder:object:generate=true
+// +groupName=acme.cert-manager.io
 package v1
 
 import (
