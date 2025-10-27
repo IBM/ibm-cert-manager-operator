@@ -85,6 +85,9 @@ ENVTEST_K8S_VERSION = 1.22
 
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 
+GOTOOLCHAIN ?= auto
+export GOTOOLCHAIN
+
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # This is a requirement for 'setup-envtest.sh' in the test target.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
@@ -277,7 +280,6 @@ cd $$TMP_DIR ;\
 go mod init tmp ;\
 echo "Downloading $(2)" ;\
 export GOSUMDB=sum.golang.org ;\
-GOTOOLCHAIN=auto ;\
 GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
