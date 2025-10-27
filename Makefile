@@ -172,7 +172,7 @@ generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and
 fmt: format-go
 
 vet: ## Run go vet against code.
-	export GOTOOLCHAIN=auto && go vet ./...
+	go vet ./...
 
 test: manifests generate fmt vet envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
@@ -277,7 +277,8 @@ cd $$TMP_DIR ;\
 go mod init tmp ;\
 echo "Downloading $(2)" ;\
 export GOSUMDB=sum.golang.org ;\
-GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
+GOTOOLCHAIN=auto ;\
+GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
