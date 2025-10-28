@@ -31,16 +31,6 @@ rules:
       - ""
     resources:
       - secrets
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - update
-      - watch
-  - apiGroups:
-      - ""
-    resources:
       - serviceaccounts
     verbs:
       - create
@@ -87,17 +77,6 @@ rules:
       - admissionregistration.k8s.io
     resources:
       - mutatingwebhookconfigurations
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - admissionregistration.k8s.io
-    resources:
       - validatingwebhookconfigurations
     verbs:
       - create
@@ -135,7 +114,6 @@ rules:
       - apps
     resources:
       - daemonsets
-      - deployments
       - statefulsets
     verbs:
       - create
@@ -175,72 +153,7 @@ rules:
       - cert-manager.io
     resources:
       - certificaterequests
-    verbs:
-      - create
-      - delete
-      - deletecollection
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - cert-manager.io
-    resources:
-      - certificaterequests/finalizers
-    verbs:
-      - update
-  - apiGroups:
-      - cert-manager.io
-    resources:
-      - certificaterequests/status
-    verbs:
-      - update
-  - apiGroups:
-      - cert-manager.io
-    resources:
       - certificates
-    verbs:
-      - create
-      - delete
-      - deletecollection
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - cert-manager.io
-    resources:
-      - certificates/finalizers
-    verbs:
-      - update
-  - apiGroups:
-      - cert-manager.io
-    resources:
-      - certificates/status
-    verbs:
-      - get
-      - patch
-      - update
-  - apiGroups:
-      - cert-manager.io
-    resources:
-      - clusterissuers
-    verbs:
-      - get
-      - list
-      - update
-      - watch
-  - apiGroups:
-      - cert-manager.io
-    resources:
-      - clusterissuers/status
-    verbs:
-      - update
-  - apiGroups:
-      - cert-manager.io
-    resources:
       - issuers
     verbs:
       - create
@@ -254,17 +167,31 @@ rules:
   - apiGroups:
       - cert-manager.io
     resources:
+      - certificaterequests/finalizers
+      - certificaterequests/status
+      - certificates/finalizers
+      - clusterissuers/status
       - issuers/finalizers
     verbs:
       - update
   - apiGroups:
       - cert-manager.io
     resources:
+      - certificates/status
       - issuers/status
     verbs:
       - get
       - patch
       - update
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - clusterissuers
+    verbs:
+      - get
+      - list
+      - update
+      - watch
   - apiGroups:
       - cert-manager.io
     resources:
