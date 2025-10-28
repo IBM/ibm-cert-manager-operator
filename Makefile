@@ -74,7 +74,7 @@ BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 # Image URL to use all building/pushing image targets
 IMG ?= ibm-cert-manager-operator
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.22
+ENVTEST_K8S_VERSION ?= 1.28
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 # ifeq (,$(shell go env GOBIN))
@@ -268,8 +268,9 @@ yq: ## Download kustomize locally if necessary.
 	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.17.2)
 
 ENVTEST = $(shell pwd)/bin/setup-envtest
+ENVTEST_VERSION ?= latest
 envtest: ## Download envtest-setup locally if necessary.
-	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
+	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION))
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 define go-get-tool
