@@ -1,0 +1,56 @@
+version: '2'
+
+# CI Pipeline: code-checks, code-build, deploy-checks, deploy-release
+tasks:
+  code-checks:
+    # code-checks includes five configurable steps: setup, detect-secrets, compliance-checks, peer-review, static-scan
+    include:
+      - dind
+    steps:
+      - name: checks-setup
+        when: 'false'
+      - name: detect-secrets
+        when: 'false'
+        include:
+          - docker-socket
+      - name: compliance-checks
+        when: 'false'
+      - name: peer-review
+        when: 'false'
+      - name: static-scan
+        when: 'false'
+
+  code-build:
+    include:
+      - dind
+    # code-build includes five configurable steps: setup, unit-test, build-artifact, sign-artifact, scan-artifact
+    steps:
+      - name: setup
+        when: 'false'
+      - name: unit-test
+        include:
+          - docker-socket
+          - dind
+        image: icr.io/continuous-delivery/base-images/base:v1.21.0
+        displayName: Build cert-manager operator image
+        script: |
+          #!/usr/bin/env bash
+          if [[ "$PIPELINE_DEBUG" == 1 ]]; then
+              trap env EXIT
+              env
+              set -x
+          fi
+          cd "$WORKSPACE/$(load_repo app-repo path)"
+          export DOCKER_REGISTRY="$(get_env DOCKER_REGISTRY)"
+          export DOCKER_USER="$(get_env DOCKER_USER)"
+          export DOCKER_PASS="$(get_env DOCKER_PASS)"
+          export BUILD_LOCALLY="$(get_env BUILD_LOCALLY)"
+          echo "Installing Go dependencies"
+          yum install -y -q golang
+          make images
+      - name: build-artifact
+        when: 'false'
+      - name: sign-artifact
+        when: 'false'
+      - name: scan-artifact
+        when: 'false'

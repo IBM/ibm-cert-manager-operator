@@ -32,7 +32,10 @@ BUILD_LOCALLY ?= 1
 
 ifeq ($(BUILD_LOCALLY),0)
     export CONFIG_DOCKER_TARGET = config-docker
-	REGISTRY ?= "docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-integration-docker-local/ibmcom"
+endif
+
+ifdef DOCKER_REGISTRY
+	REGISTRY ?= $(DOCKER_REGISTRY)
 else
 	REGISTRY ?= "docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-scratch-docker-local/ibmcom"
 endif
@@ -46,7 +49,11 @@ PREV_VERSION ?= 4.2.13
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.0.2)
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
-VERSION ?= 4.2.19
+ifdef BUILD_VERSION
+	VERSION ?= $(BUILD_VERSION)
+else
+	VERSION ?= 4.2.19
+endif
 
 # CHANNELS define the bundle channels used in the bundle.
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "candidate,fast,stable")
@@ -81,7 +88,7 @@ BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 # Image URL to use all building/pushing image targets
 IMG ?= ibm-cert-manager-operator
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.22
+ENVTEST_K8S_VERSION ?= 1.28
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 # ifeq (,$(shell go env GOBIN))
@@ -90,10 +97,21 @@ ENVTEST_K8S_VERSION = 1.22
 # GOBIN=$(shell go env GOBIN)
 # endif
 
+PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+
+GOTOOLCHAIN ?= auto
+export GOTOOLCHAIN
+
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # This is a requirement for 'setup-envtest.sh' in the test target.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
+HADOLINT_BIN ?= $(shell command -v hadolint 2>/dev/null)
+ifeq ($(HADOLINT_BIN),)
+HADOLINT_BIN := $(PROJECT_DIR)/bin/hadolint
+endif
+HADOLINT_VERSION ?= v2.12.0
+
 .SHELLFLAGS = -ec
 
 all: build
@@ -110,6 +128,48 @@ all: build
 # https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
 # More info on the awk command:
 # http://linuxcommand.org/lc3_adv_awk.php
+
+SHELLCHECK_BIN ?= $(shell command -v shellcheck 2>/dev/null)
+ifeq ($(SHELLCHECK_BIN),)
+SHELLCHECK_BIN := $(PROJECT_DIR)/bin/shellcheck
+endif
+SHELLCHECK_VERSION ?= v0.10.0
+
+.PHONY: shellcheck
+shellcheck: ## Download shellcheck locally if necessary.
+	@if [ ! -x "$(SHELLCHECK_BIN)" ]; then \
+		OS=$$(uname -s); \
+		ARCH=$$(uname -m); \
+		if [ "$$OS" = "Linux" ] && [ "$$ARCH" = "x86_64" ]; then \
+			echo "Downloading shellcheck $(SHELLCHECK_VERSION) ..."; \
+			mkdir -p $(PROJECT_DIR)/bin; \
+			TMP_DIR=$$(mktemp -d); \
+			ARCHIVE=$$TMP_DIR/shellcheck.tar.xz; \
+			curl -sSL https://github.com/koalaman/shellcheck/releases/download/$(SHELLCHECK_VERSION)/shellcheck-$(SHELLCHECK_VERSION).linux.x86_64.tar.xz -o $$ARCHIVE; \
+			if command -v xz >/dev/null 2>&1; then \
+				tar -xf $$ARCHIVE -C $$TMP_DIR; \
+			elif command -v python3 >/dev/null 2>&1; then \
+				ARCHIVE_PATH="$$ARCHIVE" TMP_DIR_PATH="$$TMP_DIR" python3 -c "import io, os, tarfile, lzma, pathlib; archive=pathlib.Path(os.environ['ARCHIVE_PATH']); out=pathlib.Path(os.environ['TMP_DIR_PATH']); data=lzma.open(archive, 'rb').read(); tarfile.open(fileobj=io.BytesIO(data)).extractall(path=out)" || { rm -rf $$TMP_DIR; echo "Failed to extract shellcheck archive"; exit 1; }; \
+			else \
+				echo "shellcheck install requires 'xz' or Python 3 with lzma support"; \
+				rm -rf $$TMP_DIR; \
+				exit 1; \
+			fi; \
+			SC_BIN=$$(find $$TMP_DIR -type f -name shellcheck -perm -u+x | head -n 1); \
+			if [ -z "$$SC_BIN" ]; then \
+				echo "Unable to locate shellcheck binary in archive"; \
+				rm -rf $$TMP_DIR; \
+				exit 1; \
+			fi; \
+			mv "$$SC_BIN" $(PROJECT_DIR)/bin/shellcheck; \
+			chmod +x $(PROJECT_DIR)/bin/shellcheck; \
+			rm -rf $$TMP_DIR; \
+		else \
+			echo "shellcheck not found and automatic install unsupported for $$OS/$$ARCH"; \
+			echo "Please install shellcheck manually and re-run make."; \
+			exit 1; \
+		fi; \
+	fi
 
 help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
@@ -211,7 +271,7 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 controller-gen: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0)
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.19.0)
 
 kustomize: ## Install kustomize
 ifeq (, $(shell which kustomize 2>/dev/null))
@@ -231,11 +291,11 @@ yq: ## Download kustomize locally if necessary.
 	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.17.2)
 
 ENVTEST = $(shell pwd)/bin/setup-envtest
+ENVTEST_VERSION ?= latest
 envtest: ## Download envtest-setup locally if necessary.
-	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
+	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION))
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
-PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
 @[ -f $(1) ] || { \
 set -e ;\
@@ -248,6 +308,36 @@ GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
+
+GOIMPORTS_VERSION ?= v0.36.0
+GOIMPORTS_BIN ?= $(PROJECT_DIR)/bin/goimports
+
+.PHONY: goimports
+goimports: ## Download goimports locally if necessary.
+	$(call go-get-tool,$(GOIMPORTS_BIN),golang.org/x/tools/cmd/goimports@$(GOIMPORTS_VERSION))
+
+HADOLINT_BIN ?= $(shell command -v hadolint 2>/dev/null)
+ifeq ($(HADOLINT_BIN),)
+HADOLINT_BIN := $(PROJECT_DIR)/bin/hadolint
+endif
+HADOLINT_VERSION ?= v2.12.0
+
+.PHONY: hadolint
+hadolint: ## Download hadolint locally if necessary.
+	@if [ ! -x "$(HADOLINT_BIN)" ]; then \
+		OS=$$(uname -s); \
+		ARCH=$$(uname -m); \
+		if [ "$$OS" = "Linux" ] && [ "$$ARCH" = "x86_64" ]; then \
+			echo "Downloading hadolint $(HADOLINT_VERSION) ..."; \
+			mkdir -p $(PROJECT_DIR)/bin; \
+			curl -sSL https://github.com/hadolint/hadolint/releases/download/$(HADOLINT_VERSION)/hadolint-$$OS-$$ARCH -o "$(PROJECT_DIR)/bin/hadolint"; \
+			chmod +x "$(PROJECT_DIR)/bin/hadolint"; \
+		else \
+			echo "hadolint not found and automatic install unsupported for $$OS/$$ARCH"; \
+			echo "Please install hadolint manually and re-run make."; \
+			exit 1; \
+		fi; \
+	fi
 
 .PHONY: bundle
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.

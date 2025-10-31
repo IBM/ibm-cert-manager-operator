@@ -31,8 +31,13 @@ ifdef GOOGLE_APPLICATION_CREDENTIALS
 	gcloud container clusters get-credentials "$(CLUSTER)" --project="$(PROJECT)" --zone="$(ZONE)" || true
 endif
 
-config-docker: get-cluster-credentials
-	@common/scripts/config_docker.sh
+config-docker:
+	@echo "Configuring docker for building images"
+	@if [ -z "$(DOCKER_USER)" ] || [ -z "$(DOCKER_PASS)" ]; then \
+			echo "Error: DOCKER_USER and DOCKER_PASS must be defined"; \
+			exit 1; \
+		fi
+	docker login -u $(DOCKER_USER) -p $(DOCKER_PASS) $(DOCKER_REGISTRY); \
 
 ############################################################
 # lint section
@@ -53,17 +58,45 @@ FINDFILES=find . \( -path ./.git -o -path ./.github \) -prune -o -type f
 XARGS = xargs -0 ${XARGS_FLAGS}
 CLEANXARGS = xargs ${XARGS_FLAGS}
 
-lint-dockerfiles:
-	@${FINDFILES} -name 'Dockerfile*' -print0 | ${XARGS} hadolint -c ./common/config/.hadolint.yml
+GOIMPORTS_BIN ?= goimports
+HADOLINT_BIN ?= hadolint
+SHELLCHECK_BIN ?= shellcheck
+YAMLLINT_BIN ?= $(shell command -v yamllint 2>/dev/null)
+HELM_BIN ?= $(shell command -v helm 2>/dev/null)
+MDL_BIN ?= $(shell command -v mdl 2>/dev/null)
+AWESOME_BOT_BIN ?= $(shell command -v awesome_bot 2>/dev/null)
+SASS_LINT_BIN ?= $(shell command -v sass-lint 2>/dev/null)
+TSLINT_BIN ?= $(shell command -v tslint 2>/dev/null)
+PROTOTOOL_BIN ?= $(shell command -v prototool 2>/dev/null)
+
+lint-dockerfiles: | hadolint
+	@if [ -z "$(HADOLINT_BIN)" ]; then \
+		echo "Skipping lint-dockerfiles: hadolint not available."; \
+	else \
+		${FINDFILES} -name 'Dockerfile*' -print0 | ${XARGS} $(HADOLINT_BIN) --config ./common/config/.hadolint.yml --failure-threshold error; \
+	fi
 
 lint-scripts:
-	@${FINDFILES} -name '*.sh' -print0 | ${XARGS} shellcheck
+lint-scripts: | shellcheck
+	@if [ -z "$(SHELLCHECK_BIN)" ]; then \
+		echo "Skipping lint-scripts: shellcheck not available."; \
+	else \
+		${FINDFILES} -name '*.sh' -print0 | ${XARGS} $(SHELLCHECK_BIN); \
+	fi
 
 lint-yaml:
-	@${FINDFILES} \( -name '*.yml' -o -name '*.yaml' \) -print0 | { ${XARGS} grep -L -e "{{" || true; } | ${CLEANXARGS} yamllint -c ./common/config/.yamllint.yml
+	@if [ -z "$(YAMLLINT_BIN)" ]; then \
+		echo "Skipping lint-yaml: yamllint not available."; \
+	else \
+		${FINDFILES} \( -name '*.yml' -o -name '*.yaml' \) -print0 | { ${XARGS} grep -L -e "{{" || true; } | ${CLEANXARGS} $(YAMLLINT_BIN) -c ./common/config/.yamllint.yml; \
+	fi
 
 lint-helm:
-	@${FINDFILES} -name 'Chart.yaml' -print0 | ${XARGS} -L 1 dirname | ${CLEANXARGS} helm lint
+	@if [ -z "$(HELM_BIN)" ]; then \
+		echo "Skipping lint-helm: helm not available."; \
+	else \
+		${FINDFILES} -name 'Chart.yaml' -print0 | ${XARGS} -L 1 dirname | ${CLEANXARGS} $(HELM_BIN) lint; \
+	fi
 
 lint-copyright-banner:
 	@${FINDFILES} \( -name '*.go' -o -name '*.cc' -o -name '*.h' -o -name '*.proto' -o -name '*.py' -o -name '*.sh' \) \( ! \( -name '*.gen.go' -o -name '*.pb.go' -o -name '*_pb2.py' \) \) -print0 |\
@@ -76,26 +109,50 @@ lint-python:
 	# @${FINDFILES} -name '*.py' \( ! \( -name '*_pb2.py' \) \) -print0 | ${XARGS} autopep8 --max-line-length 160 --exit-code -d
 
 lint-markdown:
-	@${FINDFILES} -name '*.md' -print0 | ${XARGS} mdl --ignore-front-matter --style common/config/mdl.rb
+	@if [ -z "$(MDL_BIN)" ]; then \
+		echo "Skipping lint-markdown: mdl not available."; \
+	else \
+		${FINDFILES} -name '*.md' -print0 | ${XARGS} $(MDL_BIN) --ignore-front-matter --style common/config/mdl.rb; \
+	fi
 ifdef MARKDOWN_LINT_WHITELIST
-	@${FINDFILES} -name '*.md' -print0 | ${XARGS} awesome_bot --skip-save-results --allow_ssl --allow-timeout --allow-dupe --allow-redirect --white-list ${MARKDOWN_LINT_WHITELIST}
+	@if [ -z "$(AWESOME_BOT_BIN)" ]; then \
+		echo "Skipping awesome_bot markdown lint: awesome_bot not available."; \
+	else \
+		${FINDFILES} -name '*.md' -print0 | ${XARGS} $(AWESOME_BOT_BIN) --skip-save-results --allow_ssl --allow-timeout --allow-dupe --allow-redirect --white-list ${MARKDOWN_LINT_WHITELIST}; \
+	fi
 else
-	@${FINDFILES} -name '*.md' -print0 | ${XARGS} awesome_bot --skip-save-results --allow_ssl --allow-timeout --allow-dupe --allow-redirect
+	@if [ -z "$(AWESOME_BOT_BIN)" ]; then \
+		echo "Skipping awesome_bot markdown lint: awesome_bot not available."; \
+	else \
+		${FINDFILES} -name '*.md' -print0 | ${XARGS} $(AWESOME_BOT_BIN) --skip-save-results --allow_ssl --allow-timeout --allow-dupe --allow-redirect; \
+	fi
 endif
 
 lint-sass:
-	@${FINDFILES} -name '*.scss' -print0 | ${XARGS} sass-lint -c common/config/sass-lint.yml --verbose
+	@if [ -z "$(SASS_LINT_BIN)" ]; then \
+		echo "Skipping lint-sass: sass-lint not available."; \
+	else \
+		${FINDFILES} -name '*.scss' -print0 | ${XARGS} $(SASS_LINT_BIN) -c common/config/sass-lint.yml --verbose; \
+	fi
 
 lint-typescript:
-	@${FINDFILES} -name '*.ts' -print0 | ${XARGS} tslint -c common/config/tslint.json
+	@if [ -z "$(TSLINT_BIN)" ]; then \
+		echo "Skipping lint-typescript: tslint not available."; \
+	else \
+		${FINDFILES} -name '*.ts' -print0 | ${XARGS} $(TSLINT_BIN) -c common/config/tslint.json; \
+	fi
 
 lint-protos:
-	@$(FINDFILES) -name '*.proto' -print0 | $(XARGS) -L 1 prototool lint --protoc-bin-path=/usr/bin/protoc
+	@if [ -z "$(PROTOTOOL_BIN)" ]; then \
+		echo "Skipping lint-protos: prototool not available."; \
+	else \
+		$(FINDFILES) -name '*.proto' -print0 | $(XARGS) -L 1 $(PROTOTOOL_BIN) lint --protoc-bin-path=/usr/bin/protoc; \
+	fi
 
 lint-all: lint-dockerfiles lint-scripts lint-yaml lint-helm lint-copyright-banner lint-go lint-python lint-markdown lint-sass lint-typescript lint-protos
 
-format-go:
-	@${FINDFILES} -name '*.go' \( ! \( -name '*.gen.go' -o -name '*.pb.go' \) \) -print0 | ${XARGS} goimports -w -local "github.com/IBM"
+format-go: | goimports
+	@${FINDFILES} -name '*.go' \( ! \( -name '*.gen.go' -o -name '*.pb.go' \) \) -print0 | ${XARGS} $(GOIMPORTS_BIN) -w -local "github.com/IBM"
 
 format-python:
 	@${FINDFILES} -name '*.py' -print0 | ${XARGS} autopep8 --max-line-length 160 --aggressive --aggressive -i
