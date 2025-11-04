@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha1 contains API Schema definitions for the operator v1alpha1 API group
-//+kubebuilder:object:generate=true
-//+groupName=operator.ibm.com
-package v1alpha1
+// Package v1 contains API Schema definitions for the operator v1 API group
+// +kubebuilder:object:generate=true
+// +groupName=operator.ibm.com
+package v1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"

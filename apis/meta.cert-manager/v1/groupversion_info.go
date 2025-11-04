@@ -15,8 +15,8 @@ limitations under the License.
 */
 
 // Package v1 contains API Schema definitions for the meta.cert-manager v1 API group
-//+kubebuilder:object:generate=true
-//+groupName=meta.cert-manager.io
+// +kubebuilder:object:generate=true
+// +groupName=meta.cert-manager.io
 package v1
 
 import (
