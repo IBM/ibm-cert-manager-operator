@@ -52,7 +52,7 @@ PREV_VERSION ?= 4.2.13
 ifdef BUILD_VERSION
 	VERSION ?= $(BUILD_VERSION)
 else
-	VERSION ?= 4.2.19
+	VERSION ?= 4.2.20
 endif
 
 # CHANNELS define the bundle channels used in the bundle.
