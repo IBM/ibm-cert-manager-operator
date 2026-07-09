@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cert-mgr-migration-job
+  name: ibm-cert-manager-migration-job
   namespace: {{ .Values.global.certmgrNamespace }}
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
@@ -11,7 +11,7 @@ spec:
   template:
     spec:
       containers:
-      - name: cert-mgr-migration-job
+      - name: ibm-cert-manager-migration-job
         image: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand }}/cpfs-utils:4.6.7
         command:
           - bash
@@ -46,6 +46,6 @@ spec:
                 echo "Ready for No OLM install in namespace $operatorNamespace."
             fi
       restartPolicy: Never
-      serviceAccount: cert-mgr-migration-job-sa
+      serviceAccount: ibm-cert-manager-migration-job-sa
       imagePullSecrets:
       - name: {{ .Values.global.imagePullSecret }}
